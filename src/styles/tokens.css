@@ -1,0 +1,60 @@
+/* Design tokens. Names mirror Figma variables: color/*, type/*, space/*, layout/*. */
+
+:root {
+  color-scheme: light dark;
+
+  /* color: light */
+  --color-paper: #f3f5f7;
+  --color-ink: #17202a;
+  --color-ink-muted: #4a5663;
+  --color-rule: #d3dae1;
+  --color-accent: #75560f;
+  --color-accent-strong: #5c430a;
+  --color-on-accent: #ffffff;
+
+  /* type */
+  --type-family: var(--font-sans), system-ui, sans-serif;
+  --type-size-sm: 0.875rem;
+  --type-size-base: 1.125rem;
+  --type-size-lg: 1.3125rem;
+  --type-size-xl: 1.5rem;
+  --type-size-display: clamp(2.5rem, 1.4rem + 4.6vw, 4.5rem);
+  --type-leading-tight: 1.04;
+  --type-leading-snug: 1.3;
+  --type-leading-body: 1.65;
+  --type-weight-regular: 400;
+  --type-weight-medium: 560;
+  --type-weight-bold: 700;
+  --type-weight-display: 800;
+
+  /* space (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* layout */
+  --layout-max: 72rem;
+  --layout-prose: 40rem;
+  --layout-figure: 52rem;
+  --layout-gutter: clamp(1.25rem, 4vw, 3rem);
+  --radius-control: 0.375rem;
+  --focus-ring: 3px solid var(--color-accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #131a21;
+    --color-ink: #e7ecf0;
+    --color-ink-muted: #a6b3bf;
+    --color-rule: #2c3843;
+    --color-accent: #e3b85c;
+    --color-accent-strong: #f0cd7f;
+    --color-on-accent: #131a21;
+  }
+}

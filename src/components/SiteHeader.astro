@@ -1,0 +1,59 @@
+---
+import { site } from '../site.config.mjs';
+---
+
+<header class="site-header">
+  <div class="container site-header-inner">
+    <a class="site-name" href="/">{site.name}</a>
+    <nav aria-label="Main">
+      <ul class="site-nav">
+        <li><a href="#contact" data-umami-event="nav-contact">Contact</a></li>
+        <li>
+          <a class="button" href={site.cvPath} download data-umami-event="cv-download" data-umami-event-location="header">Download CV</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .site-header-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-4);
+    min-height: 4.5rem;
+    padding-block: var(--space-3);
+  }
+
+  .site-name {
+    color: var(--color-ink);
+    font-weight: var(--type-weight-bold);
+    text-decoration: none;
+  }
+
+  .site-name:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+  }
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4) var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--type-size-sm);
+  }
+
+  .site-nav a:not(.button) {
+    color: var(--color-ink);
+    font-weight: var(--type-weight-medium);
+  }
+</style>

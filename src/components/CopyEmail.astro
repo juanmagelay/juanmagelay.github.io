@@ -1,0 +1,54 @@
+---
+interface Props {
+  email: string;
+}
+const { email } = Astro.props;
+---
+
+<div class="copy-email">
+  <a class="copy-email-address" href={`mailto:${email}`} data-umami-event="email-click">{email}</a>
+  <button type="button" class="button button-quiet" data-copy-email={email}>Copy email</button>
+  <span class="copy-email-status" role="status" aria-live="polite"></span>
+</div>
+
+<script>
+  type Umami = { track: (event: string) => void };
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-copy-email]')) {
+    const status = button.parentElement?.querySelector<HTMLElement>('.copy-email-status');
+
+    button.addEventListener('click', async () => {
+      const email = button.dataset.copyEmail ?? '';
+      try {
+        await navigator.clipboard.writeText(email);
+        if (status) status.textContent = 'Copied';
+        (window as Window & { umami?: Umami }).umami?.track('email-copy');
+      } catch {
+        if (status) status.textContent = "Couldn't copy. Select the address instead.";
+      }
+      window.setTimeout(() => {
+        if (status) status.textContent = '';
+      }, 3000);
+    });
+  }
+</script>
+
+<style>
+  .copy-email {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+  }
+
+  .copy-email-address {
+    font-size: var(--type-size-lg);
+    font-weight: var(--type-weight-bold);
+    overflow-wrap: anywhere;
+  }
+
+  .copy-email-status {
+    color: var(--color-ink-muted);
+    font-size: var(--type-size-sm);
+  }
+</style>

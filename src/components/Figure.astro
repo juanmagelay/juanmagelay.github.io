@@ -1,0 +1,74 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  credit?: string;
+  /** Display width in CSS pixels. Use it for images exported at 2x. */
+  maxWidth?: number;
+  /** Use "eager" only for an image at the top of the page. */
+  loading?: 'lazy' | 'eager';
+}
+
+const { src, alt, caption, credit, maxWidth, loading = 'lazy' } = Astro.props;
+
+// Never upscale: small screenshots stay at their real size.
+const maxDisplay = 832; // matches --layout-figure (52rem)
+const displayWidth = Math.min(maxWidth ?? src.width, src.width, maxDisplay);
+const widths = [...new Set([480, displayWidth, Math.min(src.width, displayWidth * 2)])]
+  .filter((width) => width <= src.width)
+  .sort((a, b) => a - b);
+---
+
+<figure class="figure" style={`--figure-width: ${displayWidth}px`}>
+  <Image src={src} alt={alt} loading={loading} quality={80} widths={widths} sizes={`(min-width: 56rem) ${displayWidth}px, 100vw`} />
+  {
+    (caption || credit) && (
+      <figcaption>
+        {caption && <span class="figure-caption">{caption}</span>}
+        {credit && <span class="figure-credit">Source: {credit}</span>}
+      </figcaption>
+    )
+  }
+</figure>
+
+<style>
+  .figure {
+    width: min(100%, var(--figure-width));
+    max-width: var(--layout-figure);
+    margin-inline: 0;
+    margin-block: var(--space-12);
+  }
+
+  /* Wide screenshots may extend past the text column, never past their real size. */
+  :global(.prose) > .figure {
+    width: min(var(--figure-width), 100cqi);
+    max-width: var(--layout-figure);
+  }
+
+  .figure :global(img) {
+    width: 100%;
+    border-radius: 2px;
+    outline: 1px solid var(--color-rule);
+  }
+
+  figcaption {
+    margin-block-start: var(--space-3);
+    max-width: var(--layout-prose);
+    font-size: var(--type-size-sm);
+    line-height: 1.5;
+    color: var(--color-ink-muted);
+  }
+
+  .figure-caption,
+  .figure-credit {
+    display: block;
+  }
+
+  .figure-caption + .figure-credit {
+    margin-block-start: var(--space-1);
+  }
+</style>

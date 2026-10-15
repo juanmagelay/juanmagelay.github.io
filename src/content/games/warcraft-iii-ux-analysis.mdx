@@ -1,0 +1,96 @@
+---
+# The file name sets the URL: /games/warcraft-iii-ux-analysis/
+# Do not rename it after publishing: Medium's canonical and every external link point here.
+
+title: 'When strategy met RPG heroes: a UX look at Warcraft III'
+description: "A game UX analysis: usability, engageability and frustration by design in Blizzard's 2002 RTS."
+type: analysis
+status: academic
+context: 'IxDF Game UX course, lesson 1'
+pubDate: 2026-10-15
+game:
+  name: 'Warcraft III: Reign of Chaos'
+  developer: 'Blizzard Entertainment'
+  released: 2002
+  genre: 'Real-time strategy with RPG elements'
+  platform: 'PC (Windows and Mac)'
+cover: ../../assets/games/warcraft-iii/cover.jpg
+coverAlt: "Warcraft III: Reign of Chaos box art: a close-up of an orc's face with tusks and a nose ring, above the game logo."
+ogImage: ../../assets/games/warcraft-iii/main-image.jpg
+credits: 'Warcraft III screenshots and art © Blizzard Entertainment, shown here for analysis.'
+---
+
+import Figure from '../../components/Figure.astro';
+import mainImage from '../../assets/games/warcraft-iii/main-image.jpg';
+import hud from '../../assets/games/warcraft-iii/hud-annotated.jpg';
+import altar from '../../assets/games/warcraft-iii/altar.jpg';
+import army from '../../assets/games/warcraft-iii/army.jpg';
+
+<Figure
+  src={mainImage}
+  loading="eager"
+  alt="Warcraft III screenshot of a Human army attacking a Night Elf base in a forest: two steam tanks, two gryphon riders and a mounted Archmage hero. The bottom HUD shows the selected hero, a level 2 Archmage, and the hero's inventory."
+/>
+
+I'm a product and UX designer, mostly working on messaging products, and I'm also studying a degree in Game Development and Simulation. To connect both paths, I'm taking a Game UX course at the Interaction Design Foundation (IxDF).
+
+The first assignment asks you to pick a game moment that stuck with you and analyze it as a UX designer: what made it work, what didn't, and what it teaches about player experience. This post is my answer.
+
+I chose Warcraft III because it's the game where everything I liked as a player came together for the first time. Comparing it with Age of Empires, the strategy game I had played the most before, helped me see what Blizzard changed and why it worked.
+
+## The moment
+
+Before Warcraft III, I had spent a lot of hours on Age of Empires I and II and StarCraft, where what I enjoyed most was planning the moves I needed to win. I also played RPGs like Pokémon Red, Blue, Gold and Silver, Mario Tennis for Game Boy Color and Diablo II, and loved making my characters stronger with new abilities and items. And I was a fan of 3D adventures like Super Mario 64, Sonic 3D Blast and Crash Bandicoot.
+
+The first time I played Warcraft III, I realized it brought those three worlds together in a single game. The core loop was the one I knew from AOE: gather resources, build a base, train an army and fight. But my army had a hero, who gained experience, leveled up to 10, learned new abilities and carried items. And the world was in 3D: a top-down isometric view by default, with the option to zoom in with the mouse wheel and see it much closer. I didn't have to choose between the games I liked anymore. Nostalgia probably plays a part here, but I'll try to keep this analysis objective.
+
+## UX analysis
+
+### Usability vs. engageability
+
+Warcraft III was easy to pick up because it didn't reinvent the controls. It followed the conventions AOE had already set: the HUD sat at the bottom of the screen with the minimap, unit info and commands, so I could control everything without covering the main scene. Sound did a lot of the feedback work. Unit voices and alerts told me when a building was finished or my base was under attack, even when I was looking somewhere else. That's usability: I always knew what was happening and how to act.
+
+<Figure
+  src={hud}
+  maxWidth={755}
+  alt="Warcraft III screenshot with the game scene darkened and only the HUD visible. Three areas of the bottom HUD are outlined and labeled: minimap, unit info and command panel. The top bar shows gold, lumber, food and upkeep."
+  caption="Familiar conventions: the HUD keeps the controls at the bottom and the action clear."
+/>
+
+But usability alone doesn't explain why I kept playing. Matches were about half as long as in AOE (mine took around an hour, while in AOE they could last two), so each session felt complete. Flying units meant the action wasn't limited to the ground anymore. And the hero gave me something AOE never did: a character to care about. Losing regular units was part of the plan. Losing my hero felt personal.
+
+### Frustration by design or usability problem?
+
+Two moments made me think about this difference. The first was losing my hero. It hurt: I had to fight without him for a while and pay to revive him at the altar. But he came back with his level and items, so the game punished my mistake without wiping out my progress. That's frustration by design: a cost placed on purpose so I'd take care of him.
+
+<Figure
+  src={altar}
+  alt="Warcraft III screenshot of an Undead base with health bars over every building, a hero in the center and a green footprint where a new building will be placed. A replay overlay shows actions per minute and elapsed time."
+  caption="A fair penalty: the hero comes back with his level and items, but it costs time and resources."
+/>
+
+The second was the 12-unit selection limit. Coming from AOE, where I could select much larger groups, it felt like a usability problem: dragging a box over a big army only selected part of it. Later I understood it was intentional. It pushed me to manage smaller groups and make better use of my hero's abilities. The challenge was by design, but the way I discovered it wasn't. Nothing on screen explained the limit, so for a while it felt like the game was failing me.
+
+<Figure
+  src={army}
+  alt="Warcraft III screenshot of a selected Undead army attacking a burning stone fortress. The selection panel at the bottom shows 12 unit portraits."
+  caption="The selection limit: an intentional rule that nothing on screen explained."
+/>
+
+### Genre and platform considerations
+
+RTS players expect fast, readable control, and RPG players expect a sense of progression. Mixing both is risky: too much RPG and the strategy slows down, too little and the hero is just another unit. Warcraft III balanced it. The hero gave you a character to care about without slowing down the strategy.
+
+On platform, Warcraft III was PC only. In the early 2000s the alternative was consoles like Nintendo 64, GameCube, Dreamcast or PlayStation, but Blizzard never released a console version. It makes sense: an RTS needs the precision of a mouse and keyboard to select units and give orders quickly, something a gamepad makes much harder.
+
+## My take as a UX Designer
+
+**Keep:** The hero system and its death penalty. Reviving at the altar with level and items intact is a fair cost: strong enough to make you protect your hero, light enough that one mistake doesn't end the match. I'd also keep the sound feedback, which lets players manage a whole base without checking every corner of the map.
+
+**Change:** Without knowing the team's constraints, which in 2002 may have included technical or screen space limits, the gap I'd flag is how the selection limit is communicated, not the limit itself. The first time a box selection goes over 12 units, a short hint could point the player to control groups (Ctrl + number). One message, one time, and the limit stops feeling like a bug and starts reading as a rule. Interestingly, Blizzard recently raised the maximum selection from 12 to 24 units in Warcraft III: Reforged Patch 3.0, which shows the friction was real for many players. But raising the limit changes how the game plays, while a hint only fixes the communication.
+
+## What this taught me
+
+Looking at Warcraft III as a designer, the clearest lesson is that usability and engageability do different jobs. Familiar controls and good feedback made the game easy to learn, but the hero, the shorter matches and the flying units are what made me want to keep playing. And not every frustration is a problem to fix: the hero's death was a cost worth keeping, while the selection limit only needed better communication.
+
+If you played Warcraft III back then, I'd like to know: did the 12-unit limit bother you too?

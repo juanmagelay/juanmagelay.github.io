@@ -1,0 +1,17 @@
+# dependencies and build output
+node_modules/
+dist/
+.astro/
+
+# secrets: never commit these
+.env
+.env.*
+
+# system files
+.DS_Store
+Thumbs.db
+
+# private notes and settings for Claude Code
+CLAUDE.md
+CLAUDE.local.md
+.claude/
