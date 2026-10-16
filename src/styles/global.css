@@ -170,6 +170,15 @@ a:hover {
   font-weight: var(--type-weight-bold);
 }
 
+/* Keyboard keys, e.g. <kbd>Ctrl</kbd>. Same font as the text, so it doesn't shrink. */
+.prose kbd {
+  padding: 0 var(--space-1);
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
 .prose hr {
   border: 0;
   border-top: 1px solid var(--color-rule);

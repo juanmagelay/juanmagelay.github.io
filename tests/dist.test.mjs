@@ -82,7 +82,10 @@ for (const file of pages) {
     assert.deepEqual(tracked(`mailto:${site.email}`), [['email-click', undefined]]);
     assert.deepEqual(tracked(site.cvPath), [['cv-download', 'header'], ['cv-download', 'footer']]);
     assert.deepEqual(tracked(site.linkedin), [['linkedin', undefined]]);
-    assert.deepEqual(tracked('#contact'), [['nav-contact', undefined]]);
+    // Only the menu link: articles may also link to #contact.
+    const header = html.slice(html.indexOf('<header'), html.indexOf('</header>'));
+    const menuContact = findLinks(header).filter((link) => link.href === '#contact');
+    assert.deepEqual(menuContact.map((link) => [link.event, link.location]), [['nav-contact', undefined]]);
   });
 
   test(`${name}: copying the email sends email-copy`, () => {
