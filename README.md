@@ -35,6 +35,8 @@ npm run dev
 
 `npm run build` fails while any placeholder remains or the CV file is missing, so unfinished content never goes live. For a local test build only: `SKIP_PUBLISH_GUARD=1 npm run build`.
 
+`npm test` checks the built site in `dist/`: alt text on every image, no em or en dashes in the copy, canonical URLs and the CV link. Run it after `npm run build`. The deploy workflow runs it too and stops the deploy if a check fails.
+
 ## Structure
 
 ```
@@ -44,6 +46,7 @@ src/assets/games/          images, optimized at build time
 src/components/            header, footer, figure, game sheet, copy email
 src/styles/tokens.css      design tokens
 integrations/              build guard
+tests/                     checks for the built site (npm test)
 .github/workflows/         deploy to GitHub Pages
 ```
 
