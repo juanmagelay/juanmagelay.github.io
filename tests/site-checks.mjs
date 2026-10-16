@@ -56,11 +56,39 @@ export function checkCanonical(html, expectedUrl) {
   return href === expectedUrl ? [] : [`Canonical is ${href}, expected ${expectedUrl}`];
 }
 
+// Every link with its decoded href and the Umami event it sends, if any.
+export function findLinks(html) {
+  return [...html.matchAll(/<a\b[^>]*>/gi)].map(([tag]) => ({
+    href: decodeURI(decodeEntities(attribute(tag, 'href') ?? '')),
+    event: attribute(tag, 'data-umami-event'),
+    location: attribute(tag, 'data-umami-event-location'),
+  }));
+}
+
 export function findCvLinks(html) {
-  return [...html.matchAll(/<a\b[^>]*>/gi)]
-    .map(([tag]) => attribute(tag, 'href'))
-    .filter((href) => href?.startsWith('/cv/'))
-    .map((href) => decodeURI(decodeEntities(href)));
+  return findLinks(html)
+    .map((link) => link.href)
+    .filter((href) => href.startsWith('/cv/'));
+}
+
+// With a website ID: exactly one Umami script, with that ID, limited to the site's domain.
+// Without one: no Umami script at all.
+export function checkAnalytics(html, { websiteId, domain }) {
+  const scripts = [...html.matchAll(/<script\b[^>]*>/gi)]
+    .map(([tag]) => tag)
+    .filter((tag) => (attribute(tag, 'src') ?? '').includes('cloud.umami.is/script.js'));
+
+  if (!websiteId) {
+    return scripts.length > 0 ? ['Umami script loads without a website ID'] : [];
+  }
+  if (scripts.length !== 1) return [`Expected 1 Umami script, found ${scripts.length}`];
+
+  const problems = [];
+  const id = attribute(scripts[0], 'data-website-id');
+  const domains = attribute(scripts[0], 'data-domains');
+  if (id !== websiteId) problems.push(`Umami website ID is ${id}, expected ${websiteId}`);
+  if (domains !== domain) problems.push(`Umami data-domains is ${domains}, expected ${domain}`);
+  return problems;
 }
 
 // fileExists receives a site path such as /cv/file.pdf and says if the build has it.

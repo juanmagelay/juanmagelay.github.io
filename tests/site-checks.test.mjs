@@ -10,6 +10,8 @@ import {
   checkCanonical,
   findCvLinks,
   findBrokenCvLinks,
+  findLinks,
+  checkAnalytics,
 } from './site-checks.mjs';
 
 const SITE = 'https://juanmagelay.github.io';
@@ -92,4 +94,50 @@ test('a CV link to an existing file passes', () => {
 
 test('a missing build asks to run npm run build', () => {
   assert.throws(() => assertBuilt('/no/such/dist/'), /Run npm run build first/);
+});
+
+// Analytics. Issue #2.
+const ID = 'f32a0c5f-6eb5-47bd-b237-bba30a666281';
+const DOMAIN = 'juanmagelay.github.io';
+const umami = (attributes) => `<script defer src="https://cloud.umami.is/script.js" ${attributes}></script>`;
+
+test('with a website ID, the Umami script with that ID and domain passes', () => {
+  const html = umami(`data-website-id="${ID}" data-domains="${DOMAIN}"`);
+  assert.deepEqual(checkAnalytics(html, { websiteId: ID, domain: DOMAIN }), []);
+});
+
+test('with a website ID, a page without the Umami script is reported', () => {
+  assert.deepEqual(checkAnalytics('<p>No analytics</p>', { websiteId: ID, domain: DOMAIN }), ['Expected 1 Umami script, found 0']);
+});
+
+test('a duplicated Umami script is reported', () => {
+  const tag = umami(`data-website-id="${ID}" data-domains="${DOMAIN}"`);
+  assert.equal(checkAnalytics(tag + tag, { websiteId: ID, domain: DOMAIN }).length, 1);
+});
+
+test('an Umami script with another website ID is reported', () => {
+  const problems = checkAnalytics(umami(`data-website-id="other-id" data-domains="${DOMAIN}"`), { websiteId: ID, domain: DOMAIN });
+  assert.equal(problems.length, 1);
+  assert.match(problems[0], /other-id/);
+});
+
+test('an Umami script that also counts local visits is reported', () => {
+  assert.equal(checkAnalytics(umami(`data-website-id="${ID}"`), { websiteId: ID, domain: DOMAIN }).length, 1);
+  assert.equal(checkAnalytics(umami(`data-website-id="${ID}" data-domains="localhost"`), { websiteId: ID, domain: DOMAIN }).length, 1);
+});
+
+test('without a website ID, no Umami script passes', () => {
+  assert.deepEqual(checkAnalytics('<p>No analytics</p>', { websiteId: '', domain: DOMAIN }), []);
+});
+
+test('without a website ID, an Umami script is reported', () => {
+  assert.deepEqual(checkAnalytics(umami('data-website-id=""'), { websiteId: '', domain: DOMAIN }), ['Umami script loads without a website ID']);
+});
+
+test('links are read with their event and location', () => {
+  const html = '<a href="/cv/A &amp; B.pdf" download data-umami-event="cv-download" data-umami-event-location="header">CV</a><a href="#contact">Contact</a>';
+  assert.deepEqual(findLinks(html), [
+    { href: '/cv/A & B.pdf', event: 'cv-download', location: 'header' },
+    { href: '#contact', event: undefined, location: undefined },
+  ]);
 });

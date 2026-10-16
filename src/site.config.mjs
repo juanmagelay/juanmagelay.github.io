@@ -13,5 +13,5 @@ export const site = {
   // Put the PDF in public/cv/ with this exact file name.
   cvPath: '/cv/Juan Manuel Gelay - UX & Product Design Manager (English).pdf',
   // Optional. Umami Cloud website ID. Leave empty and no analytics script loads.
-  umamiWebsiteId: '',
+  umamiWebsiteId: 'f32a0c5f-6eb5-47bd-b237-bba30a666281',
 };

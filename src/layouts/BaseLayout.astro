@@ -45,7 +45,13 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
 
     {
       site.umamiWebsiteId && (
-        <script is:inline defer src="https://cloud.umami.is/script.js" data-website-id={site.umamiWebsiteId}></script>
+        <script
+          is:inline
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id={site.umamiWebsiteId}
+          data-domains={Astro.site?.hostname}
+        ></script>
       )
     }
   </head>

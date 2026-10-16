@@ -6,6 +6,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import config from '../astro.config.mjs';
+import { site } from '../src/site.config.mjs';
 import {
   assertBuilt,
   pathForFile,
@@ -14,6 +15,8 @@ import {
   findDashes,
   checkCanonical,
   findBrokenCvLinks,
+  findLinks,
+  checkAnalytics,
 } from './site-checks.mjs';
 
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
@@ -65,5 +68,25 @@ for (const file of pages) {
 
   test(`${name}: CV links point to a file in the build`, () => {
     assert.deepEqual(findBrokenCvLinks(html, builtFileExists), []);
+  });
+
+  // Issue #2
+  test(`${name}: analytics match the website ID and only count the live domain`, () => {
+    const domain = new URL(config.site).hostname;
+    assert.deepEqual(checkAnalytics(html, { websiteId: site.umamiWebsiteId, domain }), []);
+  });
+
+  test(`${name}: contact actions send their analytics events`, () => {
+    const links = findLinks(html);
+    const tracked = (href) => links.filter((link) => link.href === href).map((link) => [link.event, link.location]);
+    assert.deepEqual(tracked(`mailto:${site.email}`), [['email-click', undefined]]);
+    assert.deepEqual(tracked(site.cvPath), [['cv-download', 'header'], ['cv-download', 'footer']]);
+    assert.deepEqual(tracked(site.linkedin), [['linkedin', undefined]]);
+    assert.deepEqual(tracked('#contact'), [['nav-contact', undefined]]);
+  });
+
+  test(`${name}: copying the email sends email-copy`, () => {
+    // The minifier may quote the event name with ", ' or a backtick.
+    assert.match(html, /track\(\s*["'`]email-copy["'`]\s*\)/);
   });
 }
