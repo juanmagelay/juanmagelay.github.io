@@ -16,7 +16,8 @@ const year = new Date().getFullYear();
     <CopyEmail email={site.email} />
 
     <ul class="contact-links">
-      <li><a class="button" href={site.cvPath} download data-umami-event="cv-download" data-umami-event-location="footer">Download CV</a></li>
+      <li><a class="button" href={site.cvPath} download={site.cvDownloadName} data-umami-event="cv-download" data-umami-event-location="footer" data-umami-event-language="en">Download CV</a></li>
+      <li><a class="button button-quiet" href={site.cvSpanishPath} download={site.cvSpanishDownloadName} hreflang="es" data-umami-event="cv-download" data-umami-event-location="footer" data-umami-event-language="es">Download CV in Spanish</a></li>
       <li><a class="button button-quiet" href={site.linkedin} rel="me" data-umami-event="linkedin">LinkedIn</a></li>
     </ul>
 

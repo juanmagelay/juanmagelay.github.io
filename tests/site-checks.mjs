@@ -56,13 +56,19 @@ export function checkCanonical(html, expectedUrl) {
   return href === expectedUrl ? [] : [`Canonical is ${href}, expected ${expectedUrl}`];
 }
 
-// Every link with its decoded href and the Umami event it sends, if any.
+// Every link with its decoded href, download name, language and the Umami event it sends, if any.
 export function findLinks(html) {
-  return [...html.matchAll(/<a\b[^>]*>/gi)].map(([tag]) => ({
-    href: decodeURI(decodeEntities(attribute(tag, 'href') ?? '')),
-    event: attribute(tag, 'data-umami-event'),
-    location: attribute(tag, 'data-umami-event-location'),
-  }));
+  return [...html.matchAll(/<a\b[^>]*>/gi)].map(([tag]) => {
+    const download = attribute(tag, 'download');
+    return {
+      href: decodeURI(decodeEntities(attribute(tag, 'href') ?? '')),
+      download: download === undefined ? undefined : decodeEntities(download),
+      hreflang: attribute(tag, 'hreflang'),
+      event: attribute(tag, 'data-umami-event'),
+      location: attribute(tag, 'data-umami-event-location'),
+      language: attribute(tag, 'data-umami-event-language'),
+    };
+  });
 }
 
 export function findCvLinks(html) {

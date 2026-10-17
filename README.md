@@ -33,14 +33,14 @@ npm ci
 npm run dev
 ```
 
-`npm run build` fails while any placeholder remains or the CV file is missing, so unfinished content never goes live. For a local test build only: `SKIP_PUBLISH_GUARD=1 npm run build`.
+`npm run build` fails while any placeholder remains or a CV file is missing, so unfinished content never goes live. For a local test build only: `SKIP_PUBLISH_GUARD=1 npm run build`.
 
-`npm test` checks the built site in `dist/`: alt text on every image, no em or en dashes in the copy, canonical URLs and the CV link. Run it after `npm run build`. The deploy workflow runs it too and stops the deploy if a check fails.
+`npm test` checks the built site in `dist/`: alt text on every image, no em or en dashes in the copy, canonical URLs and the CV links. Run it after `npm run build`. The deploy workflow runs it too and stops the deploy if a check fails.
 
 ## Structure
 
 ```
-src/site.config.mjs        personal data: name, email, links, CV path
+src/site.config.mjs        personal data: name, email, links, CV paths
 src/content/games/         /games pages, one MDX file each
 src/assets/games/          images, optimized at build time
 src/components/            header, footer, figure, game sheet, copy email

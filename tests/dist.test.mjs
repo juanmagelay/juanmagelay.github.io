@@ -40,6 +40,12 @@ test('the site is built', () => {
 const pages = existsSync(dist) ? await htmlFiles(dist) : [];
 const builtFileExists = (sitePath) => existsSync(join(dist, sitePath));
 
+// Issue #7. This URL is already shared: renaming the file would break those links.
+test('the English CV keeps its published URL', () => {
+  assert.equal(site.cvPath, '/cv/Juan Manuel Gelay - UX & Product Design Manager (English).pdf');
+  assert.ok(builtFileExists(site.cvPath), `No CV in the build at ${site.cvPath}`);
+});
+
 for (const file of pages) {
   const name = relative(dist, file);
   const path = pathForFile(name);
@@ -80,12 +86,37 @@ for (const file of pages) {
     const links = findLinks(html);
     const tracked = (href) => links.filter((link) => link.href === href).map((link) => [link.event, link.location]);
     assert.deepEqual(tracked(`mailto:${site.email}`), [['email-click', undefined]]);
-    assert.deepEqual(tracked(site.cvPath), [['cv-download', 'header'], ['cv-download', 'footer']]);
+    // Issue #7: each CV download also sends its language.
+    const trackedCv = (href) => links.filter((link) => link.href === href).map((link) => [link.event, link.location, link.language]);
+    assert.deepEqual(trackedCv(site.cvPath), [['cv-download', 'header', 'en'], ['cv-download', 'footer', 'en']]);
+    assert.deepEqual(trackedCv(site.cvSpanishPath), [['cv-download', 'footer', 'es']]);
     assert.deepEqual(tracked(site.linkedin), [['linkedin', undefined]]);
     // Only the menu link: articles may also link to #contact.
     const header = html.slice(html.indexOf('<header'), html.indexOf('</header>'));
     const menuContact = findLinks(header).filter((link) => link.href === '#contact');
     assert.deepEqual(menuContact.map((link) => [link.event, link.location]), [['nav-contact', undefined]]);
+  });
+
+  // Issue #7
+  test(`${name}: each CV downloads with its new file name`, () => {
+    const links = findLinks(html);
+    const downloads = (href) => links.filter((link) => link.href === href).map((link) => link.download);
+    const english = 'CV Juan Manuel Gelay · Product Design Manager.pdf';
+    assert.deepEqual(downloads(site.cvPath), [english, english]);
+    assert.deepEqual(downloads(site.cvSpanishPath), ['CV Juan Manuel Gelay · Product Design Manager (ES).pdf']);
+  });
+
+  test(`${name}: the Spanish CV link says the file is in Spanish`, () => {
+    const spanish = findLinks(html).filter((link) => link.href === site.cvSpanishPath);
+    assert.deepEqual(spanish.map((link) => link.hreflang), ['es']);
+  });
+
+  test(`${name}: the contact section shows the current role, location and languages`, () => {
+    const who = html.match(/<p\b[^>]*class="[^"]*\bcontact-who\b[^"]*"[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? '';
+    assert.equal(
+      who.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim(),
+      'Juan Manuel Gelay, Product Design Manager at Auronix. Based in Buenos Aires, Argentina (UTC-3). Languages: Spanish (native), English (B2+), Portuguese (B2).'
+    );
   });
 
   test(`${name}: copying the email sends email-copy`, () => {

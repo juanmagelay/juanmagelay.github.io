@@ -52,10 +52,12 @@ export default function publishGuard() {
         }
 
         const { site } = await import(pathToFileURL(join(root, 'src/site.config.mjs')).href);
-        try {
-          await access(join(root, 'public', site.cvPath));
-        } catch {
-          problems.push(`CV not found at public${site.cvPath}`);
+        for (const cvPath of [site.cvPath, site.cvSpanishPath]) {
+          try {
+            await access(join(root, 'public', cvPath));
+          } catch {
+            problems.push(`CV not found at public${cvPath}`);
+          }
         }
 
         if (problems.length > 0) {

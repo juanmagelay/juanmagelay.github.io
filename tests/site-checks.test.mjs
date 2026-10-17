@@ -137,7 +137,15 @@ test('without a website ID, an Umami script is reported', () => {
 test('links are read with their event and location', () => {
   const html = '<a href="/cv/A &amp; B.pdf" download data-umami-event="cv-download" data-umami-event-location="header">CV</a><a href="#contact">Contact</a>';
   assert.deepEqual(findLinks(html), [
-    { href: '/cv/A & B.pdf', event: 'cv-download', location: 'header' },
-    { href: '#contact', event: undefined, location: undefined },
+    { href: '/cv/A & B.pdf', download: undefined, hreflang: undefined, event: 'cv-download', location: 'header', language: undefined },
+    { href: '#contact', download: undefined, hreflang: undefined, event: undefined, location: undefined, language: undefined },
+  ]);
+});
+
+// Issue #7
+test('links are read with their download name, language and event language', () => {
+  const html = '<a href="/cv/es.pdf" download="CV A &amp; B (ES).pdf" hreflang="es" data-umami-event="cv-download" data-umami-event-language="es">CV</a>';
+  assert.deepEqual(findLinks(html), [
+    { href: '/cv/es.pdf', download: 'CV A & B (ES).pdf', hreflang: 'es', event: 'cv-download', location: undefined, language: 'es' },
   ]);
 });

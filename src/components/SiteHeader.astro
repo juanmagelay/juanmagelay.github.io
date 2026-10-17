@@ -9,7 +9,7 @@ import { site } from '../site.config.mjs';
       <ul class="site-nav">
         <li><a href="#contact" data-umami-event="nav-contact">Contact</a></li>
         <li>
-          <a class="button" href={site.cvPath} download data-umami-event="cv-download" data-umami-event-location="header">Download CV</a>
+          <a class="button" href={site.cvPath} download={site.cvDownloadName} data-umami-event="cv-download" data-umami-event-location="header" data-umami-event-language="en">Download CV</a>
         </li>
       </ul>
     </nav>
