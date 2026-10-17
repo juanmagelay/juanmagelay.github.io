@@ -89,7 +89,6 @@ for (const file of pages) {
     // Issue #7: each CV download also sends its language.
     const trackedCv = (href) => links.filter((link) => link.href === href).map((link) => [link.event, link.location, link.language]);
     assert.deepEqual(trackedCv(site.cvPath), [['cv-download', 'header', 'en'], ['cv-download', 'footer', 'en']]);
-    assert.deepEqual(trackedCv(site.cvSpanishPath), [['cv-download', 'footer', 'es']]);
     assert.deepEqual(tracked(site.linkedin), [['linkedin', undefined]]);
     // Only the menu link: articles may also link to #contact.
     const header = html.slice(html.indexOf('<header'), html.indexOf('</header>'));
@@ -98,17 +97,23 @@ for (const file of pages) {
   });
 
   // Issue #7
-  test(`${name}: each CV downloads with its new file name`, () => {
-    const links = findLinks(html);
-    const downloads = (href) => links.filter((link) => link.href === href).map((link) => link.download);
+  test(`${name}: the English CV downloads with its new file name`, () => {
+    const downloads = findLinks(html)
+      .filter((link) => link.href === site.cvPath)
+      .map((link) => link.download);
     const english = 'CV Juan Manuel Gelay · Product Design Manager.pdf';
-    assert.deepEqual(downloads(site.cvPath), [english, english]);
-    assert.deepEqual(downloads(site.cvSpanishPath), ['CV Juan Manuel Gelay · Product Design Manager (ES).pdf']);
+    assert.deepEqual(downloads, [english, english]);
   });
 
-  test(`${name}: the Spanish CV link says the file is in Spanish`, () => {
-    const spanish = findLinks(html).filter((link) => link.href === site.cvSpanishPath);
-    assert.deepEqual(spanish.map((link) => link.hreflang), ['es']);
+  // Issue #6: the Spanish CV comes back with the Spanish version of the site, in its own story.
+  test(`${name}: the Spanish CV is not linked yet`, () => {
+    assert.deepEqual(findLinks(html).filter((link) => link.href === site.cvSpanishPath), []);
+  });
+
+  // Issue #6
+  test(`${name}: the contact note only says case studies are on the way`, () => {
+    const note = html.match(/<p\b[^>]*class="[^"]*\bcontact-next\b[^"]*"[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? '';
+    assert.equal(note.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim(), 'Case studies from my product work are on the way.');
   });
 
   test(`${name}: the contact section shows the current role, location and languages`, () => {

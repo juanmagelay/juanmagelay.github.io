@@ -1,59 +1,100 @@
 ---
 import { site } from '../site.config.mjs';
+import Button from './Button.astro';
+
+// Menu items. Add Work, Games and About here once those pages exist.
+const nav = [{ label: 'Contact', href: '#contact', event: 'nav-contact' }];
 ---
 
 <header class="site-header">
   <div class="container site-header-inner">
     <a class="site-name" href="/">{site.name}</a>
-    <nav aria-label="Main">
+    <nav class="site-nav-wrap" aria-label="Main">
       <ul class="site-nav">
-        <li><a href="#contact" data-umami-event="nav-contact">Contact</a></li>
-        <li>
-          <a class="button" href={site.cvPath} download={site.cvDownloadName} data-umami-event="cv-download" data-umami-event-location="header" data-umami-event-language="en">Download CV</a>
-        </li>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} data-umami-event={item.event}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </nav>
+    <Button class="site-cv" href={site.cvPath} download={site.cvDownloadName} data-umami-event="cv-download" data-umami-event-location="header" data-umami-event-language="en">Download CV</Button>
   </div>
 </header>
 
 <style>
   .site-header {
-    border-bottom: 1px solid var(--color-rule);
+    border-bottom: 1px solid var(--color-border);
   }
 
   .site-header-inner {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3) var(--space-4);
+    gap: var(--space-8);
     min-height: 4.5rem;
     padding-block: var(--space-3);
   }
 
   .site-name {
-    color: var(--color-ink);
-    font-weight: var(--type-weight-bold);
+    font-family: var(--font-voice);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-name);
     text-decoration: none;
+    white-space: nowrap;
   }
 
-  .site-name:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+  .site-nav-wrap {
+    margin-left: auto;
   }
 
   .site-nav {
     display: flex;
-    align-items: center;
-    gap: var(--space-4) var(--space-6);
+    gap: var(--space-6);
     margin: 0;
     padding: 0;
     list-style: none;
-    font-size: var(--type-size-sm);
   }
 
-  .site-nav a:not(.button) {
-    color: var(--color-ink);
-    font-weight: var(--type-weight-medium);
+  .site-nav a {
+    font-size: var(--type-size-sm);
+    text-decoration: none;
+  }
+
+  /* Below 640px: name and CV on top, menu underneath. */
+  @media (width < 40rem) {
+    .site-header-inner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-areas: 'name cv' 'nav nav';
+      gap: var(--space-2) var(--space-4);
+      padding-block: var(--space-3) var(--space-2);
+    }
+
+    .site-name {
+      grid-area: name;
+    }
+
+    .site-header-inner > :global(.site-cv) {
+      grid-area: cv;
+    }
+
+    .site-nav-wrap {
+      grid-area: nav;
+      margin-left: 0;
+    }
+
+    .site-nav {
+      gap: var(--space-5);
+    }
+
+    .site-nav a {
+      display: inline-block;
+      padding-block: var(--space-2);
+    }
   }
 </style>

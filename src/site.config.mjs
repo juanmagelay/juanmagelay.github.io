@@ -13,6 +13,7 @@ export const site = {
   // Put each PDF in public/cv/ with this exact file name.
   // The English URL is already shared: replace the file, never rename it.
   cvPath: '/cv/Juan Manuel Gelay - UX & Product Design Manager (English).pdf',
+  // Not linked yet: it comes back with the Spanish version of the site.
   cvSpanishPath: '/cv/Juan Manuel Gelay - Product Design Manager (Spanish).pdf',
   // The file names visitors get when they download each CV.
   cvDownloadName: 'CV Juan Manuel Gelay · Product Design Manager.pdf',

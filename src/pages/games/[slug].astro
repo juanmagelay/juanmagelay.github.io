@@ -2,7 +2,8 @@
 import { getCollection, render } from 'astro:content';
 import { getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import GameSheet from '../../components/GameSheet.astro';
+import PageHead from '../../components/PageHead.astro';
+import FactSheet from '../../components/FactSheet.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('games');
@@ -30,41 +31,30 @@ const readingMinutes = Math.max(1, Math.round(words / 230));
 const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' });
 
 const og = data.ogImage ? await getImage({ src: data.ogImage, width: 1200, format: 'jpeg' }) : undefined;
+
+const meta = [
+  { label: 'Type', value: typeLabels[data.type] },
+  { label: 'Context', value: data.context },
+  { label: 'Published', value: dateFormat.format(data.pubDate), datetime: data.pubDate.toISOString() },
+  { label: 'Reading time', value: `${readingMinutes} min` },
+];
+
+const gameFacts = data.game && [
+  { label: 'Game', value: data.game.name },
+  { label: 'Developer', value: data.game.developer },
+  { label: 'Released', value: data.game.released },
+  { label: 'Genre', value: data.game.genre },
+  { label: 'Platform', value: data.game.platform },
+];
 ---
 
 <BaseLayout title={data.title} description={data.description} ogImage={og?.src} ogType="article" publishedTime={data.pubDate}>
   <article>
-    <header class="container article-head">
-      <div class="article-head-text">
-        <h1>{data.title}</h1>
-        <p class="dek">{data.description}</p>
-        <dl class="article-meta">
-          <div>
-            <dt>Type</dt>
-            <dd>{typeLabels[data.type]}</dd>
-          </div>
-          {
-            data.context && (
-              <div>
-                <dt>Context</dt>
-                <dd>{data.context}</dd>
-              </div>
-            )
-          }
-          <div>
-            <dt>Published</dt>
-            <dd><time datetime={data.pubDate.toISOString()}>{dateFormat.format(data.pubDate)}</time></dd>
-          </div>
-          <div>
-            <dt>Reading time</dt>
-            <dd>{readingMinutes} min</dd>
-          </div>
-        </dl>
-      </div>
-      {data.game && <GameSheet game={data.game} cover={data.cover} coverAlt={data.coverAlt} />}
-    </header>
+    <PageHead title={data.title} dek={data.description} meta={meta}>
+      {gameFacts && <FactSheet slot="aside" label="About the game" items={gameFacts} image={data.cover} imageAlt={data.coverAlt} />}
+    </PageHead>
 
-    <div class="container article-body">
+    <div class="container container-reading article-body">
       <div class="prose">
         <Content />
       </div>
@@ -74,69 +64,16 @@ const og = data.ogImage ? await getImage({ src: data.ogImage, width: 1200, forma
 </BaseLayout>
 
 <style>
-  .article-head {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-12);
-    padding-block: var(--space-16) var(--space-8);
-  }
-
-  h1 {
-    margin: 0;
-    max-width: 18ch;
-    font-size: var(--type-size-display);
-    font-weight: var(--type-weight-display);
-    line-height: var(--type-leading-tight);
-    letter-spacing: -0.025em;
-  }
-
-  .dek {
-    margin: var(--space-6) 0 0;
-    max-width: var(--layout-prose);
-    font-size: var(--type-size-lg);
-    line-height: 1.5;
-    color: var(--color-ink-muted);
-  }
-
-  .article-meta {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4) var(--space-8);
-    max-width: var(--layout-prose);
-    margin: var(--space-8) 0 0;
-    padding-block-start: var(--space-6);
-    border-top: 1px solid var(--color-rule);
-    font-size: var(--type-size-sm);
-    line-height: 1.45;
-  }
-
-  .article-meta dt {
-    color: var(--color-ink-muted);
-  }
-
-  .article-meta dd {
-    margin: 0;
-    font-weight: var(--type-weight-medium);
-  }
-
   .article-body {
-    container-type: inline-size;
+    padding-bottom: var(--space-16);
   }
 
   .article-credits {
     max-width: var(--layout-prose);
-    margin: var(--space-16) 0 0;
-    padding-block-start: var(--space-4);
-    border-top: 1px solid var(--color-rule);
-    color: var(--color-ink-muted);
+    margin: var(--space-16) auto 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
     font-size: var(--type-size-sm);
-  }
-
-  @media (min-width: 56rem) {
-    .article-head {
-      grid-template-columns: minmax(0, 1fr) 14rem;
-      gap: var(--space-16);
-      align-items: start;
-    }
   }
 </style>

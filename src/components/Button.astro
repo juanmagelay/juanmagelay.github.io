@@ -1,0 +1,73 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+// A link when it has an href, a button when it doesn't. Other attributes (download,
+// hreflang, rel, data-umami-*) pass through untouched.
+type Props = HTMLAttributes<'a'> &
+  HTMLAttributes<'button'> & {
+    variant?: 'primary' | 'quiet';
+  };
+
+const { variant = 'primary', href, class: className, ...attributes } = Astro.props;
+const classes = ['button', variant === 'quiet' && 'button-quiet', className];
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} {...attributes}>
+      <slot />
+    </a>
+  ) : (
+    <button type="button" class:list={classes} {...attributes}>
+      <slot />
+    </button>
+  )
+}
+
+<style>
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem; /* 44px touch target */
+    padding: 0 var(--space-5);
+    border: 1px solid var(--color-ink);
+    border-radius: var(--radius-control);
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-text);
+    font-size: var(--type-size-sm);
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .button:hover {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  .button-quiet {
+    border-color: var(--color-border);
+    background: transparent;
+    color: var(--color-ink);
+  }
+
+  .button-quiet:hover {
+    border-color: var(--color-accent);
+    background: transparent;
+    color: var(--color-accent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .button {
+      transition:
+        color 120ms ease,
+        border-color 120ms ease,
+        background-color 120ms ease;
+    }
+  }
+</style>

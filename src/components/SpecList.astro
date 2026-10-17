@@ -1,0 +1,62 @@
+---
+// Label and value pairs: label in mono, value in text. Items without a value are left out.
+interface Item {
+  label: string;
+  value?: string | number;
+  /** Machine-readable date. The value is then shown inside a <time> element. */
+  datetime?: string;
+}
+
+interface Props {
+  items: Item[];
+  /** grid: columns with a top rule. stacked: one column, smaller values. */
+  variant?: 'grid' | 'stacked';
+  class?: string;
+}
+
+const { items, variant = 'grid', class: className } = Astro.props;
+const shown = items.filter((item) => item.value !== undefined && item.value !== '');
+---
+
+<dl class:list={['spec-list', variant === 'stacked' && 'spec-list-stacked', className]}>
+  {
+    shown.map((item) => (
+      <div>
+        <dt>{item.label}</dt>
+        <dd>{item.datetime ? <time datetime={item.datetime}>{item.value}</time> : item.value}</dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .spec-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+    gap: var(--space-5) var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border);
+  }
+
+  dt {
+    color: var(--color-text-secondary);
+    font-family: var(--font-data);
+    font-size: var(--type-size-meta);
+  }
+
+  dd {
+    margin-top: var(--space-1);
+    line-height: 1.45;
+  }
+
+  .spec-list-stacked {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .spec-list-stacked dd {
+    font-size: var(--type-size-sm);
+  }
+</style>

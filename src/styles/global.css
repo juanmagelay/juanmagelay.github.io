@@ -1,5 +1,8 @@
+/* Global styles: base, layout, text styles and long-form reading.
+   Each component keeps its own styles in its .astro file. Values come from tokens.css only. */
 @import './tokens.css';
 
+/* Base */
 *,
 *::before,
 *::after {
@@ -7,6 +10,7 @@
 }
 
 html {
+  color-scheme: light dark;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-padding-top: var(--space-8);
@@ -16,25 +20,26 @@ body {
   margin: 0;
   background: var(--color-paper);
   color: var(--color-ink);
-  font-family: var(--type-family);
+  font-family: var(--font-text);
   font-size: var(--type-size-base);
   line-height: var(--type-leading-body);
-  font-weight: var(--type-weight-regular);
-  font-kerning: normal;
-  text-rendering: optimizeLegibility;
-}
-
-img {
-  display: block;
-  max-width: 100%;
-  height: auto;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
 h2,
 h3 {
-  line-height: var(--type-leading-snug);
+  margin: 0;
+  font-family: var(--font-voice);
+  font-weight: 700;
   text-wrap: balance;
+}
+
+p,
+dl,
+dd,
+figure {
+  margin: 0;
 }
 
 p,
@@ -42,155 +47,150 @@ li {
   text-wrap: pretty;
 }
 
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
 a {
-  color: var(--color-accent);
+  color: inherit;
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.18em;
+  text-underline-offset: 0.2em;
 }
 
 a:hover {
-  color: var(--color-accent-strong);
-  text-decoration-thickness: 2px;
+  color: var(--color-accent);
 }
 
 :focus-visible {
   outline: var(--focus-ring);
   outline-offset: 3px;
-  border-radius: 2px;
 }
 
-.container {
-  width: 100%;
-  max-width: var(--layout-max);
-  margin-inline: auto;
-  padding-inline: var(--layout-gutter);
+strong {
+  font-weight: 600;
 }
 
 .skip-link {
   position: absolute;
-  left: var(--space-4);
-  top: -100%;
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  border-radius: var(--radius-control);
+  top: var(--space-3);
+  left: var(--space-3);
   z-index: 10;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  transform: translateY(-200%);
 }
 
 .skip-link:focus {
-  top: var(--space-4);
+  transform: none;
 }
 
-/* Buttons: one style for the primary action (CV), one quiet style. */
-.button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 2.75rem;
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-control);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  font: inherit;
-  font-size: var(--type-size-sm);
-  font-weight: var(--type-weight-bold);
-  text-decoration: none;
-  cursor: pointer;
+@media (prefers-reduced-motion: no-preference) {
+  a {
+    transition: color 120ms ease;
+  }
 }
 
-.button:hover {
-  background: var(--color-accent-strong);
-  border-color: var(--color-accent-strong);
-  color: var(--color-on-accent);
+/* Layout */
+.container {
+  width: 100%;
+  max-width: calc(var(--layout-container) + 2 * var(--layout-gutter));
+  margin-inline: auto;
+  padding-inline: var(--layout-gutter);
 }
 
-.button-quiet {
-  background: transparent;
-  color: var(--color-ink);
-  border-color: var(--color-rule);
+/* Centered reading column for articles: figures up to --layout-figure, text at --layout-prose.
+   Each block is centered, so it has the same space on both sides. */
+.container-reading {
+  max-width: calc(var(--layout-figure) + 2 * var(--layout-gutter));
 }
 
-.button-quiet:hover {
-  background: transparent;
-  color: var(--color-ink);
-  border-color: var(--color-ink-muted);
+.container-reading .prose > * {
+  margin-inline: auto;
 }
 
-/* Long-form reading */
+/* Text styles. Figma: Section title and Lead. */
+.section-title {
+  font-family: var(--font-data);
+  font-size: var(--type-size-meta);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: var(--color-accent);
+}
+
+.dek {
+  max-width: var(--layout-prose);
+  margin-top: var(--space-6);
+  color: var(--color-accent);
+  font-size: var(--type-size-lead);
+  line-height: var(--type-leading-body);
+}
+
+/* Long-form reading (articles, case studies) */
 .prose {
+  font-size: var(--type-size-lead);
+  line-height: var(--type-leading-body);
+}
+
+.prose > * {
   max-width: var(--layout-prose);
 }
 
 .prose > * + * {
-  margin-block-start: var(--space-6);
+  margin-top: 1.1em;
 }
 
-.prose p,
-.prose ul,
-.prose ol {
-  margin-block-end: 0;
+.prose > :first-child {
+  margin-top: 0;
 }
 
 .prose h2 {
-  font-size: var(--type-size-xl);
-  font-weight: var(--type-weight-bold);
-  margin-block: var(--space-16) 0;
+  margin-top: 2.4em;
+  font-size: var(--type-size-h2);
+  line-height: var(--type-leading-heading);
+  letter-spacing: var(--tracking-display);
 }
 
 .prose h3 {
-  font-size: var(--type-size-lg);
-  font-weight: var(--type-weight-bold);
-  margin-block: var(--space-12) 0;
+  margin-top: 1.9em;
+  font-size: var(--type-size-h3);
+  line-height: 1.25;
+  letter-spacing: var(--tracking-card);
 }
 
 .prose h2 + *,
 .prose h3 + * {
-  margin-block-start: var(--space-4);
+  margin-top: 0.6em;
 }
 
 .prose ul,
 .prose ol {
-  padding-inline-start: 1.25em;
+  margin-bottom: 0;
+  padding-left: 1.2em;
 }
 
 .prose li + li {
-  margin-block-start: var(--space-2);
+  margin-top: 0.4em;
 }
 
-.prose blockquote {
-  margin-inline: 0;
-  padding-inline-start: var(--space-6);
-  border-inline-start: 3px solid var(--color-accent);
-  font-size: var(--type-size-lg);
-  line-height: var(--type-leading-snug);
+.prose li::marker {
+  color: var(--color-accent);
 }
 
-.prose strong {
-  font-weight: var(--type-weight-bold);
-}
-
-/* Keyboard keys, e.g. <kbd>Ctrl</kbd>. Same font as the text, so it doesn't shrink. */
+/* Keyboard keys, e.g. <kbd>Ctrl</kbd> */
 .prose kbd {
-  padding: 0 var(--space-1);
-  border: 1px solid var(--color-rule);
-  border-radius: 2px;
-  font-family: inherit;
-  font-size: 0.9em;
-}
-
-.prose hr {
-  border: 0;
-  border-top: 1px solid var(--color-rule);
-  margin-block: var(--space-12);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
+  padding: 0.05em 0.4em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-media);
+  font-family: var(--font-data);
+  font-size: 0.82em;
+  white-space: nowrap;
 }

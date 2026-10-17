@@ -1,0 +1,60 @@
+---
+import type { ComponentProps } from 'astro/types';
+import SpecList from './SpecList.astro';
+
+interface Props {
+  title: string;
+  dek?: string;
+  meta?: ComponentProps<typeof SpecList>['items'];
+}
+
+const { title, dek, meta } = Astro.props;
+// From 56rem, content in the "aside" slot (e.g. a FactSheet) sits in a column at the container's right edge.
+const hasAside = Astro.slots.has('aside');
+---
+
+<header class:list={['container', 'page-head', hasAside && 'page-head-with-aside']}>
+  <div class="page-head-text">
+    <h1>{title}</h1>
+    {dek && <p class="dek">{dek}</p>}
+    {meta && <SpecList class="page-head-meta" items={meta} />}
+    <slot />
+  </div>
+  <slot name="aside" />
+</header>
+
+<style>
+  .page-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-12);
+    padding-block: var(--space-16) var(--space-12);
+  }
+
+  h1 {
+    max-width: 18ch;
+    font-size: var(--type-size-title);
+    line-height: var(--type-leading-display);
+    letter-spacing: var(--tracking-display);
+  }
+
+  .page-head-text > :global(.page-head-meta) {
+    max-width: var(--layout-prose);
+    margin-top: var(--space-8);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (width >= 56rem) {
+    .page-head-with-aside {
+      grid-template-columns: minmax(0, 1fr) 14rem;
+      align-items: start;
+      gap: var(--space-16);
+    }
+  }
+
+  @media (width < 40rem) {
+    .page-head {
+      padding-block: var(--space-12) var(--space-8);
+    }
+  }
+</style>

@@ -1,4 +1,6 @@
 ---
+import Button from './Button.astro';
+
 interface Props {
   email: string;
 }
@@ -7,7 +9,7 @@ const { email } = Astro.props;
 
 <div class="copy-email">
   <a class="copy-email-address" href={`mailto:${email}`} data-umami-event="email-click">{email}</a>
-  <button type="button" class="button button-quiet" data-copy-email={email}>Copy email</button>
+  <Button variant="quiet" data-copy-email={email}>Copy email</Button>
   <span class="copy-email-status" role="status" aria-live="polite"></span>
 </div>
 
@@ -38,17 +40,23 @@ const { email } = Astro.props;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-3) var(--space-4);
+    gap: var(--space-2) var(--space-3);
   }
 
   .copy-email-address {
-    font-size: var(--type-size-lg);
-    font-weight: var(--type-weight-bold);
+    font-family: var(--font-data);
+    font-size: var(--type-size-sm);
+    text-decoration: none;
     overflow-wrap: anywhere;
   }
 
+  .copy-email-address:hover {
+    text-decoration: underline;
+  }
+
   .copy-email-status {
-    color: var(--color-ink-muted);
-    font-size: var(--type-size-sm);
+    color: var(--color-text-secondary);
+    font-family: var(--font-data);
+    font-size: var(--type-size-meta);
   }
 </style>
