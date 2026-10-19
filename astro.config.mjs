@@ -77,8 +77,9 @@ export default defineConfig({
 
   redirects: {
     // Temporary: remove when the home page exists (#8).
-    '/': '/games/warcraft-iii-ux-analysis/',
-    // /games/ was published as a redirect, so it stays. The list of posts lives at /writing/.
+    '/': '/writing/warcraft-iii-ux-analysis/',
+    // Published under /games/ before posts moved to /writing/. Keep them so old links still work.
     '/games/': '/writing/',
+    '/games/warcraft-iii-ux-analysis/': '/writing/warcraft-iii-ux-analysis/',
   },
 });

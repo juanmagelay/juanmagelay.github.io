@@ -2,10 +2,10 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
-// /games holds three kinds of work, each with a visible status.
+// Posts in /writing/: three kinds of work, each with a visible status.
 // Every post needs at least one <Figure>: the first one is its thumbnail in /writing/ (src/lib/first-figure.mjs).
-const games = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/games' }),
+const writing = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/writing' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -31,4 +31,4 @@ const games = defineCollection({
     }),
 });
 
-export const collections = { games };
+export const collections = { writing };

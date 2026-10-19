@@ -41,9 +41,8 @@ npm run dev
 
 ```
 src/site.config.mjs        personal data: name, email, links, CV paths
-src/content/games/         /games pages, one MDX file each
-src/pages/games/           the page for each post (/games/ redirects to /writing/)
-src/pages/writing/         every post, newest first, with its first image as thumbnail
+src/content/writing/       posts, one MDX file each, published at /writing/<file name>/
+src/pages/writing/         the /writing list (newest first, first image as thumbnail) and each post page
 src/lib/                   first-figure.mjs: finds each post's first image for its thumbnail
 src/assets/games/          images, optimized at build time
 src/components/            header, footer, button, page head, spec list, fact sheet, figure, copy email, row list

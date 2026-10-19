@@ -22,7 +22,7 @@ const images = import.meta.glob<ImageMetadata>('/src/assets/**/*.{jpg,jpeg,png,w
 });
 
 // Newest first. Posts from the same day go by title, so the order is the same on every build.
-const posts = (await getCollection('games')).sort(
+const posts = (await getCollection('writing')).sort(
   (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime() || a.data.title.localeCompare(b.data.title)
 );
 
@@ -31,7 +31,7 @@ const rows = posts.map((post) => {
   const figure = firstFigure(post.body ?? '');
   return {
     title: post.data.title,
-    href: `/games/${post.id}/`,
+    href: `/writing/${post.id}/`,
     text: post.data.description,
     meta: typeLabels[post.data.type],
     image: figure && post.filePath ? images[importPath(post.filePath, figure.source)] : undefined,

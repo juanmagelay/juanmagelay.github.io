@@ -6,7 +6,7 @@ import PageHead from '../../components/PageHead.astro';
 import FactSheet from '../../components/FactSheet.astro';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('games');
+  const entries = await getCollection('writing');
   return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
 }
 

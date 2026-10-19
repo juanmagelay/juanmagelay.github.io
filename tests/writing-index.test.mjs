@@ -37,7 +37,7 @@ test('a post without a <Figure>, alt text or import has no thumbnail', () => {
 
 test('an import path resolves from the post file', () => {
   assert.equal(
-    importPath('src/content/games/post.mdx', '../../assets/games/x/hero.jpg'),
+    importPath('src/content/writing/post.mdx', '../../assets/games/x/hero.jpg'),
     '/src/assets/games/x/hero.jpg'
   );
 });
@@ -106,10 +106,10 @@ test('posts go from newest to oldest, and posts from the same day by title', { s
 });
 
 // Scenario: cada fila lleva a su post, con la primera imagen del post como miniatura.
-const postPaths = existsSync(join(dist, 'games'))
-  ? readdirSync(join(dist, 'games'), { withFileTypes: true })
-      .filter((entry) => entry.isDirectory() && existsSync(join(dist, 'games', entry.name, 'index.html')))
-      .map((entry) => `/games/${entry.name}/`)
+const postPaths = existsSync(join(dist, 'writing'))
+  ? readdirSync(join(dist, 'writing'), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && existsSync(join(dist, 'writing', entry.name, 'index.html')))
+      .map((entry) => `/writing/${entry.name}/`)
       .filter((sitePath) => !isRedirect(read(sitePath)))
   : [];
 
@@ -136,14 +136,21 @@ for (const sitePath of postPaths) {
   });
 }
 
-// Scenario: /games/ sigue funcionando y lleva a la lista.
-test('/games/ redirects to /writing/', () => {
-  const games = join(dist, 'games/index.html');
-  assertBuilt(games);
-  const redirect = readFileSync(games, 'utf8');
-  assert.ok(isRedirect(redirect), '/games/ is not a redirect');
-  assert.match(redirect, /url=\/writing\/"/);
-});
+// Scenario: los links viejos a /games/ siguen funcionando.
+const OLD_URLS = [
+  ['/games/', '/writing/'],
+  ['/games/warcraft-iii-ux-analysis/', '/writing/warcraft-iii-ux-analysis/'],
+];
+
+for (const [from, to] of OLD_URLS) {
+  test(`${from} redirects to ${to}`, () => {
+    const file = join(dist, from, 'index.html');
+    assertBuilt(file);
+    const redirect = readFileSync(file, 'utf8');
+    assert.ok(isRedirect(redirect), `${from} is not a redirect`);
+    assert.ok(redirect.includes(`url=${to}"`), `${from} does not redirect to ${to}`);
+  });
+}
 
 // Scenario: el menú lleva a Writing desde cualquier página. Also: Writing se marca en su página y en los posts.
 function htmlFiles(dir) {
@@ -172,7 +179,7 @@ for (const file of pages) {
 
   // The current page on /writing/, the current section on a post, and nothing elsewhere.
   test(`${path}: Writing is marked as the current page or section where it applies`, () => {
-    const expected = path === '/writing/' ? 'page' : path.startsWith('/games/') ? 'true' : undefined;
+    const expected = path === '/writing/' ? 'page' : path.startsWith('/writing/') ? 'true' : undefined;
     const marked = links[0]?.[1].match(/\saria-current="([^"]*)"/)?.[1];
     assert.equal(marked, expected);
   });

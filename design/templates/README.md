@@ -15,7 +15,7 @@ Se pueden guardar en `design/templates/` dentro del repo: no tienen contenido se
 2. Cada clase de componente corresponde a un componente de Astro (tabla abajo).
 3. El texto entre corchetes `[así]` se completa con datos reales. No se inventa. Una métrica solo aparece si es real y está autorizada.
 4. `.placeholder` existe solo en el template: se reemplaza por `<Image />` de `astro:assets` con el alt real (los alt del artículo ya están en el `aria-label`).
-5. Se mantienen los atributos `data-umami-event` del sitio actual. Los `href` son paths de producción (`/`, `/work/...`, `/writing/`, `/games/...`), por eso no navegan entre archivos locales.
+5. Se mantienen los atributos `data-umami-event` del sitio actual. Los `href` son paths de producción (`/`, `/work/...`, `/writing/...`), por eso no navegan entre archivos locales.
 6. Fuentes: el sitio las sirve desde su propio dominio, con los archivos oficiales de Google Fonts (subset latin, variables) en `src/assets/fonts/`, configurados en `astro.config.mjs`. Incluye la itálica 400 de Schibsted Grotesk, porque los artículos usan `<em>`. Las páginas de este template usan el link de Google Fonts solo para poder abrirse sueltas.
 
 ## Del sitio actual a este sistema
@@ -58,7 +58,7 @@ Se mantienen sin cambios de nombre: `--space-N`, `--type-size-display`, `--type-
 
 Hechos en la #6: Site header, Button, Section title, Spec list, Copy email, Page head, Fact sheet, Figure y Contact footer. En la #10: Row. El resto se crea cuando una página lo necesite.
 
-Writing (decidido en la #10): la sección reúne todos los posts, de juegos y de otros temas, del más nuevo al más antiguo. Cada fila lleva una miniatura 3:2 a la izquierda, al ancho del rail (12rem), y arriba a todo el ancho por debajo de 40rem. La miniatura es siempre la primera imagen del post, con su mismo alt: no se elige a mano (`src/lib/first-figure.mjs`). Los posts conservan su URL en `/games/...` y `/games/` redirige a `/writing/`.
+Writing (decidido en la #10): la sección reúne todos los posts, de juegos y de otros temas, del más nuevo al más antiguo. Cada fila lleva una miniatura 3:2 a la izquierda, al ancho del rail (12rem), y arriba a todo el ancho por debajo de 40rem. La miniatura es siempre la primera imagen del post, con su mismo alt: no se elige a mano (`src/lib/first-figure.mjs`). Los posts viven en `/writing/<slug>/`. Las URLs viejas en `/games/` redirigen ahí.
 
 Artículos (decidido en la #6): cada bloque tiene el mismo espacio a ambos lados. El encabezado va al ancho del contenedor, igual que el header del sitio: el título en el borde izquierdo y, desde 56rem, la ficha del juego en el borde derecho. El cuerpo va en una columna central (`.container-reading`) donde cada bloque se centra: el texto a 42rem y las figuras hasta 52rem.
 

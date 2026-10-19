@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { assertBuilt } from './site-checks.mjs';
 
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
-const page = join(dist, 'games/warcraft-iii-ux-analysis/index.html');
+const page = join(dist, 'writing/warcraft-iii-ux-analysis/index.html');
 
 test('the article is built', () => {
   assertBuilt(page);
