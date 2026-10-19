@@ -42,8 +42,11 @@ npm run dev
 ```
 src/site.config.mjs        personal data: name, email, links, CV paths
 src/content/games/         /games pages, one MDX file each
+src/pages/games/           the page for each post (/games/ redirects to /writing/)
+src/pages/writing/         every post, newest first, with its first image as thumbnail
+src/lib/                   first-figure.mjs: finds each post's first image for its thumbnail
 src/assets/games/          images, optimized at build time
-src/components/            header, footer, button, page head, spec list, fact sheet, figure, copy email
+src/components/            header, footer, button, page head, spec list, fact sheet, figure, copy email, row list
 src/styles/                design tokens (tokens.css) and global styles
 src/assets/fonts/          font files and their licenses
 design/templates/          design system reference: tokens, components and page templates

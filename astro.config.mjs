@@ -75,9 +75,10 @@ export default defineConfig({
     },
   ],
 
-  // Temporary: the article is the only page. Remove each line when the real page exists.
   redirects: {
+    // Temporary: remove when the home page exists (#8).
     '/': '/games/warcraft-iii-ux-analysis/',
-    '/games/': '/games/warcraft-iii-ux-analysis/',
+    // /games/ was published as a redirect, so it stays. The list of posts lives at /writing/.
+    '/games/': '/writing/',
   },
 });

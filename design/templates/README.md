@@ -15,7 +15,7 @@ Se pueden guardar en `design/templates/` dentro del repo: no tienen contenido se
 2. Cada clase de componente corresponde a un componente de Astro (tabla abajo).
 3. El texto entre corchetes `[así]` se completa con datos reales. No se inventa. Una métrica solo aparece si es real y está autorizada.
 4. `.placeholder` existe solo en el template: se reemplaza por `<Image />` de `astro:assets` con el alt real (los alt del artículo ya están en el `aria-label`).
-5. Se mantienen los atributos `data-umami-event` del sitio actual. Los `href` son paths de producción (`/`, `/work/...`, `/games/...`), por eso no navegan entre archivos locales.
+5. Se mantienen los atributos `data-umami-event` del sitio actual. Los `href` son paths de producción (`/`, `/work/...`, `/writing/`, `/games/...`), por eso no navegan entre archivos locales.
 6. Fuentes: el sitio las sirve desde su propio dominio, con los archivos oficiales de Google Fonts (subset latin, variables) en `src/assets/fonts/`, configurados en `astro.config.mjs`. Incluye la itálica 400 de Schibsted Grotesk, porque los artículos usan `<em>`. Las páginas de este template usan el link de Google Fonts solo para poder abrirse sueltas.
 
 ## Del sitio actual a este sistema
@@ -30,7 +30,7 @@ Se pueden guardar en `design/templates/` dentro del repo: no tienen contenido se
 | `.article-meta` | `.spec-list` dentro de `.page-head-text` |
 | `.game-sheet` | `.fact-sheet` con `.spec-list-stacked` |
 | `figcaption > .figure-caption` | `figcaption` |
-| Nav con Contact y CV | Work, Games, About, Contact y botón de CV separado (`.site-cv`) |
+| Nav con Contact y CV | Work, Writing, About, Contact y botón de CV separado (`.site-cv`) |
 
 Se mantienen sin cambios de nombre: `--space-N`, `--type-size-display`, `--type-size-sm`, `--layout-prose`, `--layout-figure`, `.skip-link`, `.container`, `.site-header`, `.site-name`, `.site-nav`, `.button`, `.button-quiet`, `.prose`, `.figure`, `.article-credits`, `.contact`, `.copy-email`, `.contact-links`, `.site-footer`, `.site-footer-base`.
 
@@ -45,7 +45,7 @@ Se mantienen sin cambios de nombre: `--space-N`, `--type-size-display`, `--type-
 | Tag | `.tag` | | `Tag.astro` | tarjetas, encabezado de caso |
 | Copy email | `.copy-email` | | `CopyEmail.astro` | hero, footer |
 | Case card | `.case-card` | default, featured | `CaseCard.astro` | home, siguiente caso |
-| Row | `.row` | con link, sin link, con descripción | `RowList.astro` | home |
+| Row | `.row` | con link, sin link, con descripción, con miniatura (`.row-with-image`) | `RowList.astro` | home, writing |
 | Page head | `.page-head` | con aside, sin aside | `PageHead.astro` | caso, artículo |
 | Fact sheet | `.fact-sheet` | | `FactSheet.astro` | artículos de juegos |
 | Case summary | `.case-summary` | con o sin link al repo | `CaseSummary.astro` | caso |
@@ -56,7 +56,9 @@ Se mantienen sin cambios de nombre: `--space-N`, `--type-size-display`, `--type-
 | Figure | `.figure` | ancho con `--figure-width` | `Figure.astro` (ya existe) | caso, artículo |
 | Contact footer | `.site-footer` | | `SiteFooter.astro` | todas |
 
-Hechos en la #6: Site header, Button, Section title, Spec list, Copy email, Page head, Fact sheet, Figure y Contact footer. El resto se crea cuando una página lo necesite.
+Hechos en la #6: Site header, Button, Section title, Spec list, Copy email, Page head, Fact sheet, Figure y Contact footer. En la #10: Row. El resto se crea cuando una página lo necesite.
+
+Writing (decidido en la #10): la sección reúne todos los posts, de juegos y de otros temas, del más nuevo al más antiguo. Cada fila lleva una miniatura 3:2 a la izquierda, al ancho del rail (12rem), y arriba a todo el ancho por debajo de 40rem. La miniatura es siempre la primera imagen del post, con su mismo alt: no se elige a mano (`src/lib/first-figure.mjs`). Los posts conservan su URL en `/games/...` y `/games/` redirige a `/writing/`.
 
 Artículos (decidido en la #6): cada bloque tiene el mismo espacio a ambos lados. El encabezado va al ancho del contenedor, igual que el header del sitio: el título en el borde izquierdo y, desde 56rem, la ficha del juego en el borde derecho. El cuerpo va en una columna central (`.container-reading`) donde cada bloque se centra: el texto a 42rem y las figuras hasta 52rem.
 

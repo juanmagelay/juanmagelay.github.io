@@ -380,7 +380,7 @@ kbd {
   color: var(--color-accent);
 }
 
-/* Link de sección (ej. "All games") */
+/* Link de sección (ej. "All writing") */
 .section-link {
   font-family: var(--font-data);
   font-size: var(--type-size-meta);
@@ -598,7 +598,7 @@ kbd {
   }
 }
 
-/* Lista de filas (juegos, liderazgo, piezas menores) */
+/* Lista de filas (writing, liderazgo, piezas menores) */
 .row-list {
   margin: 0;
   padding: 0;
@@ -659,6 +659,39 @@ kbd {
   white-space: nowrap;
 }
 
+/* Fila con miniatura: 3:2 a la izquierda, al ancho del rail, junto al título y el texto.
+   En Writing la miniatura es siempre la primera imagen del post (src/lib/first-figure.mjs). */
+.row-with-image {
+  grid-template-columns: var(--layout-rail) minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    'image title meta'
+    'image text .';
+  column-gap: var(--space-6);
+}
+
+.row-with-image .row-image {
+  grid-area: image;
+  align-self: start;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-media);
+}
+
+.row-with-image .row-title {
+  grid-area: title;
+}
+
+.row-with-image .row-text {
+  grid-area: text;
+}
+
+.row-with-image .row-meta {
+  grid-area: meta;
+}
+
 @media (width < 40rem) {
   .row {
     grid-template-columns: minmax(0, 1fr);
@@ -668,6 +701,15 @@ kbd {
     grid-column: 1;
     grid-row: auto;
     text-align: left;
+  }
+
+  .row-with-image {
+    grid-template-rows: none;
+    grid-template-areas: 'image' 'title' 'text' 'meta';
+  }
+
+  .row-with-image .row-image {
+    margin-bottom: var(--space-2);
   }
 }
 
@@ -1125,7 +1167,7 @@ kbd {
     <nav class="site-nav-wrap" aria-label="Main">
       <ul class="site-nav">
         <li><a href="/#work">Work</a></li>
-        <li><a href="/games/">Games</a></li>
+        <li><a href="/writing/">Writing</a></li>
         <li><a href="/about/">About</a></li>
         <li><a href="#contact" data-umami-event="nav-contact">Contact</a></li>
       </ul>
@@ -1205,19 +1247,21 @@ kbd {
     </ul>
   </section>
 
-  <section class="container section" id="games" aria-labelledby="games-title">
+  <section class="container section" id="writing" aria-labelledby="writing-title">
     <div class="section-head">
-      <h2 class="section-title" id="games-title">Games</h2>
-      <a class="section-link" href="/games/">All games</a>
-      <p class="section-intro">I'm studying Video Game and Simulation Development at UNAHUR. This is where I analyze games as a UX designer and post what I build.</p>
+      <h2 class="section-title" id="writing-title">Writing</h2>
+      <a class="section-link" href="/writing/">All writing</a>
+      <p class="section-intro">Where I write about UX: the products I design and the games I study.</p>
     </div>
     <ul class="row-list">
-      <li class="row">
+      <li class="row row-with-image">
+        <div class="placeholder row-image" style="--ratio: 3 / 2" role="img" aria-label="First image of the post, 3:2"><svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="0" x2="100" y2="100"/><line x1="100" y1="0" x2="0" y2="100"/></svg><span class="placeholder-label">First image, 3:2</span></div>
         <h3 class="row-title"><a href="/games/warcraft-iii-ux-analysis/">When strategy met RPG heroes: a UX look at Warcraft III</a></h3>
-        <p class="row-text">Usability, engageability and frustration by design in Blizzard's 2002 RTS.</p>
+        <p class="row-text">A game UX analysis: usability, engageability and frustration by design in Blizzard's 2002 RTS.</p>
         <p class="row-meta">Game UX analysis</p>
       </li>
-      <li class="row">
+      <li class="row row-with-image">
+        <div class="placeholder row-image" style="--ratio: 3 / 2" role="img" aria-label="First image of the post, 3:2"><svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="0" x2="100" y2="100"/><line x1="100" y1="0" x2="0" y2="100"/></svg><span class="placeholder-label">First image, 3:2</span></div>
         <h3 class="row-title"><a href="/games/raycasting-pixijs/">Pseudo 3D raycasting in PixiJS</a></h3>
         <p class="row-text">[One line on what you built and what it taught you.]</p>
         <p class="row-meta">Academic, UNAHUR</p>

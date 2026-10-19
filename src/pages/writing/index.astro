@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import type { ImageMetadata } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import RowList from '../../components/RowList.astro';
+import { firstFigure, importPath } from '../../lib/first-figure.mjs';
+
+// Same labels as the post pages. Move them to a shared module when a third page needs them.
+const typeLabels = {
+  playable: 'Playable game',
+  analysis: 'Game UX analysis',
+  academic: 'Academic project',
+};
+
+const intro = 'Where I write about UX: the products I design and the games I study.';
+
+// Every image a post can import, by project path, to turn its first <Figure> into the thumbnail.
+const images = import.meta.glob<ImageMetadata>('/src/assets/**/*.{jpg,jpeg,png,webp,avif,gif}', {
+  eager: true,
+  import: 'default',
+});
+
+// Newest first. Posts from the same day go by title, so the order is the same on every build.
+const posts = (await getCollection('games')).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime() || a.data.title.localeCompare(b.data.title)
+);
+
+const rows = posts.map((post) => {
+  // The thumbnail is always the post's first <Figure> (src/lib/first-figure.mjs). Tests fail if a post has none.
+  const figure = firstFigure(post.body ?? '');
+  return {
+    title: post.data.title,
+    href: `/games/${post.id}/`,
+    text: post.data.description,
+    meta: typeLabels[post.data.type],
+    image: figure && post.filePath ? images[importPath(post.filePath, figure.source)] : undefined,
+    imageAlt: figure?.alt,
+  };
+});
+---
+
+<BaseLayout title="Writing" description={intro}>
+  <PageHead title="Writing" dek={intro} />
+  <div class="container writing-list">
+    <RowList items={rows} headingLevel={2} />
+  </div>
+</BaseLayout>
+
+<style>
+  .writing-list {
+    padding-bottom: var(--space-16);
+  }
+</style>
