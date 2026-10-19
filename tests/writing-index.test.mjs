@@ -145,7 +145,7 @@ test('/games/ redirects to /writing/', () => {
   assert.match(redirect, /url=\/writing\/"/);
 });
 
-// Scenario: el menú lleva a Writing desde cualquier página. Also: Writing se marca como página actual.
+// Scenario: el menú lleva a Writing desde cualquier página. Also: Writing se marca en su página y en los posts.
 function htmlFiles(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
@@ -170,8 +170,10 @@ for (const file of pages) {
     assert.match(attributes, /\sdata-umami-event="nav-writing"/);
   });
 
-  test(`${path}: Writing is marked as the current page only on /writing/`, () => {
-    const marked = /\saria-current="page"/.test(links[0]?.[1] ?? '');
-    assert.equal(marked, path === '/writing/');
+  // The current page on /writing/, the current section on a post, and nothing elsewhere.
+  test(`${path}: Writing is marked as the current page or section where it applies`, () => {
+    const expected = path === '/writing/' ? 'page' : path.startsWith('/games/') ? 'true' : undefined;
+    const marked = links[0]?.[1].match(/\saria-current="([^"]*)"/)?.[1];
+    assert.equal(marked, expected);
   });
 }

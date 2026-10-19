@@ -38,7 +38,7 @@ Se mantienen sin cambios de nombre: `--space-N`, `--type-size-display`, `--type-
 
 | Componente (Figma) | Clase | Variantes | Astro sugerido | Dónde |
 | --- | --- | --- | --- | --- |
-| Site header | `.site-header` | página actual (`aria-current`) | `SiteHeader.astro` | todas |
+| Site header | `.site-header` | página actual (`aria-current="page"`), sección actual en sus páginas internas, como un post en Writing (`aria-current="true"`); las dos van subrayadas | `SiteHeader.astro` | todas |
 | Button | `.button` | primary, quiet | `Button.astro` | todas |
 | Section title | `.section-title` | | estilo de texto | todas |
 | Spec list | `.spec-list` | grid, stacked | `SpecList.astro` | hero, encabezados, resumen, fact sheet |

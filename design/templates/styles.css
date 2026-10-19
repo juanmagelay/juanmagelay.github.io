@@ -291,7 +291,7 @@ kbd {
   text-decoration: none;
 }
 
-.site-nav a[aria-current='page'] {
+.site-nav a[aria-current] {
   text-decoration: underline;
 }
 
