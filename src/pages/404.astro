@@ -1,11 +1,28 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
+import { LANGS, DEFAULT_LANG, langFromPath, localizePath, ui } from '../i18n.mjs';
+
+// The English 404, and the one GitHub Pages serves for every missing URL.
+// src/pages/[lang]/404.astro renders this same page at /es/404/ and /pt/404/.
+const path = Astro.url.pathname;
+const lang = langFromPath(path);
+const t = ui[lang].notFound;
+// A missing URL under /es/ or /pt/ gets the 404 in that language.
+const translated = LANGS.filter((other) => other !== DEFAULT_LANG);
 ---
 
-<BaseLayout title="Page not found" description="This page doesn't exist.">
-  <PageHead title="This page doesn't exist" dek="The address may be mistyped, or the page moved.">
-    <p class="not-found-next"><a href="/writing/warcraft-iii-ux-analysis/">Read the Warcraft III analysis</a> or use the contact details below.</p>
+<BaseLayout title={t.title} description={t.description} noindex>
+  {
+    lang === DEFAULT_LANG && (
+      <script is:inline slot="head" define:vars={{ translated }}>
+        const lang = location.pathname.split('/')[1];
+        if (translated.includes(lang)) location.replace(`/${lang}/404/`);
+      </script>
+    )
+  }
+  <PageHead title={t.heading} dek={t.dek}>
+    <p class="not-found-next"><a href={localizePath('/writing/warcraft-iii-ux-analysis/', lang)}>{t.link}</a>{t.rest}</p>
   </PageHead>
 </BaseLayout>
 

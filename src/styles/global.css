@@ -92,6 +92,16 @@ strong {
   transform: none;
 }
 
+/* Text for screen readers only, such as the language names in the language switch. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   a {
     transition: color 120ms ease;

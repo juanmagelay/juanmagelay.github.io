@@ -6,6 +6,7 @@ import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertBuilt, isRedirect, pathForFile } from './site-checks.mjs';
 import { firstFigure, importPath } from '../src/lib/first-figure.mjs';
+import { langFromPath, localizePath } from '../src/i18n.mjs';
 
 // The thumbnail rule: each case must fail on an example that breaks it.
 
@@ -42,16 +43,29 @@ test('an import path resolves from the post file', () => {
   );
 });
 
-// Checks on the built site.
+// Checks on the built site, for the list in each language. Issue #11.
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
-const page = join(dist, 'writing/index.html');
-const html = existsSync(page) ? readFileSync(page, 'utf8') : '';
 
-test('the writing page is built', () => {
-  assertBuilt(page);
-});
-
-const skip = !html;
+const LISTS = [
+  {
+    lang: 'en',
+    title: 'Writing',
+    intro: 'Where I write about UX: the products I design and the games I study.',
+    typeLabel: 'Type',
+  },
+  {
+    lang: 'es',
+    title: 'Artículos',
+    intro: 'Donde escribo sobre UX: los productos que diseño y los juegos que estudio.',
+    typeLabel: 'Tipo',
+  },
+  {
+    lang: 'pt',
+    title: 'Artigos',
+    intro: 'Onde escrevo sobre UX: os produtos que projeto e os jogos que estudo.',
+    typeLabel: 'Tipo',
+  },
+];
 
 const decode = (text) =>
   text
@@ -66,74 +80,85 @@ const attribute = (tag, name) => decode(tag?.match(new RegExp(`\\s${name}="([^"]
 // /_astro/main-image.BFPWiNA9_1O08HH.webp -> main-image: the source file, whatever the size or format.
 const stem = (src) => src.split('/').pop().split('.')[0];
 
-const rows = [...html.matchAll(/<li\b[^>]*class="row[^"]*"[^>]*>([\s\S]*?)<\/li>/g)].map(([, row]) => ({
-  href: row.match(/<a\b[^>]*href="([^"]*)"/)?.[1],
-  title: stripTags(row.match(/<h2\b[^>]*class="row-title"[^>]*>([\s\S]*?)<\/h2>/)?.[1] ?? ''),
-  text: stripTags(row.match(/<p\b[^>]*class="row-text"[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? ''),
-  meta: stripTags(row.match(/<p\b[^>]*class="row-meta"[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? ''),
-  image: row.match(/<img\b[^>]*>/)?.[0],
-}));
+for (const list of LISTS) {
+  const listPath = localizePath('/writing/', list.lang);
+  const page = join(dist, listPath, 'index.html');
+  const html = existsSync(page) ? readFileSync(page, 'utf8') : '';
+  const skip = !html;
 
-// What each post page says about itself, to compare with its row.
-function post(sitePath) {
-  const postHtml = read(sitePath);
-  const body = postHtml.slice(postHtml.indexOf('class="prose"'));
-  return {
-    title: stripTags(postHtml.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? ''),
-    description: decode(postHtml.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? ''),
-    type: stripTags(postHtml.match(/<dt\b[^>]*>Type<\/dt>\s*<dd\b[^>]*>([\s\S]*?)<\/dd>/)?.[1] ?? ''),
-    published: postHtml.match(/<meta property="article:published_time" content="([^"]*)"/)?.[1],
-    firstImage: body.match(/<img\b[^>]*>/)?.[0],
+  test(`${listPath} is built`, () => {
+    assertBuilt(page);
+  });
+
+  const rows = [...html.matchAll(/<li\b[^>]*class="row[^"]*"[^>]*>([\s\S]*?)<\/li>/g)].map(([, row]) => ({
+    href: row.match(/<a\b[^>]*href="([^"]*)"/)?.[1],
+    title: stripTags(row.match(/<h2\b[^>]*class="row-title"[^>]*>([\s\S]*?)<\/h2>/)?.[1] ?? ''),
+    text: stripTags(row.match(/<p\b[^>]*class="row-text"[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? ''),
+    meta: stripTags(row.match(/<p\b[^>]*class="row-meta"[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? ''),
+    image: row.match(/<img\b[^>]*>/)?.[0],
+  }));
+
+  // What each post page says about itself, to compare with its row.
+  const post = (sitePath) => {
+    const postHtml = read(sitePath);
+    const body = postHtml.slice(postHtml.indexOf('class="prose"'));
+    return {
+      title: stripTags(postHtml.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? ''),
+      description: decode(postHtml.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? ''),
+      type: stripTags(
+        postHtml.match(new RegExp(`<dt\\b[^>]*>${list.typeLabel}</dt>\\s*<dd\\b[^>]*>([\\s\\S]*?)</dd>`))?.[1] ?? ''
+      ),
+      published: postHtml.match(/<meta property="article:published_time" content="([^"]*)"/)?.[1],
+      firstImage: body.match(/<img\b[^>]*>/)?.[0],
+    };
   };
-}
 
-// Scenario: la página lista los posts del más nuevo al más antiguo.
-test('the page shows the Writing title and the intro', { skip }, () => {
-  assert.equal(stripTags(html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? ''), 'Writing');
-  assert.equal(
-    stripTags(html.match(/<p\b[^>]*class="dek"[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? ''),
-    'Where I write about UX: the products I design and the games I study.'
-  );
-});
-
-test('posts go from newest to oldest, and posts from the same day by title', { skip }, () => {
-  const listed = rows.map((row) => ({ ...post(row.href), href: row.href }));
-  const sorted = [...listed].sort(
-    (a, b) => Date.parse(b.published) - Date.parse(a.published) || a.title.localeCompare(b.title)
-  );
-  assert.ok(listed.every((item) => item.published), 'Every post page has a publication date');
-  assert.deepEqual(listed.map((item) => item.href), sorted.map((item) => item.href));
-});
-
-// Scenario: cada fila lleva a su post, con la primera imagen del post como miniatura.
-const postPaths = existsSync(join(dist, 'writing'))
-  ? readdirSync(join(dist, 'writing'), { withFileTypes: true })
-      .filter((entry) => entry.isDirectory() && existsSync(join(dist, 'writing', entry.name, 'index.html')))
-      .map((entry) => `/writing/${entry.name}/`)
-      .filter((sitePath) => !isRedirect(read(sitePath)))
-  : [];
-
-test('every published post appears once', { skip }, () => {
-  assert.ok(postPaths.length > 0, 'No posts in the build');
-  assert.deepEqual(rows.map((row) => row.href).sort(), [...postPaths].sort());
-});
-
-for (const sitePath of postPaths) {
-  test(`the row for ${sitePath} shows its title, description and type`, { skip }, () => {
-    const row = rows.find((item) => item.href === sitePath);
-    assert.ok(row, `No row links to ${sitePath}`);
-    const { title, description, type } = post(sitePath);
-    assert.deepEqual([row.title, row.text, row.meta], [title, description, type]);
+  // Scenario: la página lista los posts del más nuevo al más antiguo.
+  test(`${listPath} shows its title and the intro`, { skip }, () => {
+    assert.equal(stripTags(html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? ''), list.title);
+    assert.equal(stripTags(html.match(/<p\b[^>]*class="dek"[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? ''), list.intro);
   });
 
-  test(`the thumbnail for ${sitePath} is the post's first image, with its alt text`, { skip }, () => {
-    const row = rows.find((item) => item.href === sitePath);
-    const { firstImage } = post(sitePath);
-    assert.ok(firstImage, `${sitePath} has no image: every post needs a <Figure> for its thumbnail`);
-    assert.ok(row?.image, `The row for ${sitePath} has no thumbnail`);
-    assert.equal(stem(attribute(row.image, 'src')), stem(attribute(firstImage, 'src')));
-    assert.equal(attribute(row.image, 'alt'), attribute(firstImage, 'alt'));
+  test(`${listPath}: posts go from newest to oldest, and posts from the same day by title`, { skip }, () => {
+    const listed = rows.map((row) => ({ ...post(row.href), href: row.href }));
+    const sorted = [...listed].sort(
+      (a, b) => Date.parse(b.published) - Date.parse(a.published) || a.title.localeCompare(b.title, list.lang)
+    );
+    assert.ok(listed.every((item) => item.published), 'Every post page has a publication date');
+    assert.deepEqual(listed.map((item) => item.href), sorted.map((item) => item.href));
   });
+
+  // Scenario: cada fila lleva a su post, con la primera imagen del post como miniatura.
+  const postsDir = join(dist, listPath);
+  const postPaths = existsSync(postsDir)
+    ? readdirSync(postsDir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && existsSync(join(postsDir, entry.name, 'index.html')))
+        .map((entry) => `${listPath}${entry.name}/`)
+        .filter((sitePath) => !isRedirect(read(sitePath)))
+    : [];
+
+  test(`${listPath}: every published post appears once`, { skip }, () => {
+    assert.ok(postPaths.length > 0, 'No posts in the build');
+    assert.deepEqual(rows.map((row) => row.href).sort(), [...postPaths].sort());
+  });
+
+  for (const sitePath of postPaths) {
+    test(`the row for ${sitePath} shows its title, description and type`, { skip }, () => {
+      const row = rows.find((item) => item.href === sitePath);
+      assert.ok(row, `No row links to ${sitePath}`);
+      const { title, description, type } = post(sitePath);
+      assert.deepEqual([row.title, row.text, row.meta], [title, description, type]);
+    });
+
+    test(`the thumbnail for ${sitePath} is the post's first image, with its alt text`, { skip }, () => {
+      const row = rows.find((item) => item.href === sitePath);
+      const { firstImage } = post(sitePath);
+      assert.ok(firstImage, `${sitePath} has no image: every post needs a <Figure> for its thumbnail`);
+      assert.ok(row?.image, `The row for ${sitePath} has no thumbnail`);
+      assert.equal(stem(attribute(row.image, 'src')), stem(attribute(firstImage, 'src')));
+      assert.equal(attribute(row.image, 'alt'), attribute(firstImage, 'alt'));
+    });
+  }
 }
 
 // Scenario: los links viejos a /games/ siguen funcionando.
@@ -153,6 +178,9 @@ for (const [from, to] of OLD_URLS) {
 }
 
 // Scenario: el menú lleva a Writing desde cualquier página. Also: Writing se marca en su página y en los posts.
+// Issue #11: in each language, with its label and its own list.
+const MENU_LABEL = Object.fromEntries(LISTS.map((list) => [list.lang, list.title]));
+
 function htmlFiles(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
@@ -167,19 +195,21 @@ for (const file of pages) {
   const pageHtml = readFileSync(file, 'utf8');
   if (isRedirect(pageHtml)) continue;
   const path = pathForFile(relative(dist, file));
+  const lang = langFromPath(path);
+  const writing = localizePath('/writing/', lang);
   const header = pageHtml.slice(pageHtml.indexOf('<header'), pageHtml.indexOf('</header>'));
-  const links = [...header.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/g)].filter(([, , label]) => stripTags(label) === 'Writing');
+  const links = [...header.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/g)].filter(([, , label]) => stripTags(label) === MENU_LABEL[lang]);
 
-  test(`${path}: the menu links to Writing with the nav-writing event`, () => {
-    assert.equal(links.length, 1, 'Exactly one Writing link in the header');
+  test(`${path}: the menu links to ${MENU_LABEL[lang]} with the nav-writing event`, () => {
+    assert.equal(links.length, 1, `Exactly one ${MENU_LABEL[lang]} link in the header`);
     const [, attributes] = links[0];
-    assert.match(attributes, /\shref="\/writing\/"/);
+    assert.match(attributes, new RegExp(`\\shref="${writing}"`));
     assert.match(attributes, /\sdata-umami-event="nav-writing"/);
   });
 
-  // The current page on /writing/, the current section on a post, and nothing elsewhere.
-  test(`${path}: Writing is marked as the current page or section where it applies`, () => {
-    const expected = path === '/writing/' ? 'page' : path.startsWith('/writing/') ? 'true' : undefined;
+  // The current page on the list, the current section on a post, and nothing elsewhere.
+  test(`${path}: ${MENU_LABEL[lang]} is marked as the current page or section where it applies`, () => {
+    const expected = path === writing ? 'page' : path.startsWith(writing) ? 'true' : undefined;
     const marked = links[0]?.[1].match(/\saria-current="([^"]*)"/)?.[1];
     assert.equal(marked, expected);
   });

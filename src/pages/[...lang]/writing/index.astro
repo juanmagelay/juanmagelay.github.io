@@ -1,0 +1,54 @@
+---
+import type { ImageMetadata } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHead from '../../../components/PageHead.astro';
+import RowList from '../../../components/RowList.astro';
+import { firstFigure, importPath } from '../../../lib/first-figure.mjs';
+import { getPosts } from '../../../lib/posts';
+import { LANGS, langParam, langFromPath, localizePath, ui } from '../../../i18n.mjs';
+
+// /writing/, /es/writing/ and /pt/writing/.
+export function getStaticPaths() {
+  return LANGS.map((lang) => ({ params: { lang: langParam(lang) } }));
+}
+
+const lang = langFromPath(Astro.url.pathname);
+const t = ui[lang];
+
+// Every image a post can import, by project path, to turn its first <Figure> into the thumbnail.
+const images = import.meta.glob<ImageMetadata>('/src/assets/**/*.{jpg,jpeg,png,webp,avif,gif}', {
+  eager: true,
+  import: 'default',
+});
+
+// Newest first. Posts from the same day go by title, so the order is the same on every build.
+const posts = (await getPosts(lang)).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime() || a.data.title.localeCompare(b.data.title, lang)
+);
+
+const rows = posts.map((post) => {
+  // The thumbnail is always the post's first <Figure> (src/lib/first-figure.mjs). Tests fail if a post has none.
+  const figure = firstFigure(post.entry.body ?? '');
+  return {
+    title: post.data.title,
+    href: localizePath(`/writing/${post.slug}/`, lang),
+    text: post.data.description,
+    meta: t.types[post.data.type],
+    image: figure && post.entry.filePath ? images[importPath(post.entry.filePath, figure.source)] : undefined,
+    imageAlt: figure?.alt,
+  };
+});
+---
+
+<BaseLayout title={t.writingTitle} description={t.writingIntro}>
+  <PageHead title={t.writingTitle} dek={t.writingIntro} />
+  <div class="container writing-list">
+    <RowList items={rows} headingLevel={2} />
+  </div>
+</BaseLayout>
+
+<style>
+  .writing-list {
+    padding-bottom: var(--space-16);
+  }
+</style>

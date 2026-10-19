@@ -1,8 +1,13 @@
 ---
 import { site } from '../site.config.mjs';
+import { cvFor, langFromPath, ui } from '../i18n.mjs';
 import Button from './Button.astro';
 import CopyEmail from './CopyEmail.astro';
 
+const lang = langFromPath(Astro.url.pathname);
+const t = ui[lang];
+const cv = cvFor(lang);
+const who = t.contactWho({ name: site.name, role: site.role[lang], location: site.location[lang], languages: site.languages[lang] });
 const year = new Date().getFullYear();
 // The base row's rule sits on an inner block so it spans the content, not the gutters.
 ---
@@ -10,23 +15,21 @@ const year = new Date().getFullYear();
 <footer class="site-footer">
   <section class="container contact" id="contact" aria-labelledby="contact-title">
     <div>
-      <h2 class="section-title" id="contact-title">Contact</h2>
-      <p class="contact-lead">Email is the fastest way to reach me.</p>
+      <h2 class="section-title" id="contact-title">{t.contactTitle}</h2>
+      <p class="contact-lead">{t.contactLead}</p>
     </div>
 
     <div class="contact-actions">
-      <p class="contact-who">
-        {site.name}, {site.role}. Based in {site.location}.{site.languages && ` Languages: ${site.languages}.`}
-      </p>
+      <p class="contact-who">{who}</p>
 
       <CopyEmail email={site.email} />
 
       <ul class="contact-links">
-        <li><Button href={site.cvPath} download={site.cvDownloadName} data-umami-event="cv-download" data-umami-event-location="footer" data-umami-event-language="en">Download CV</Button></li>
+        <li><Button href={cv.href} download={cv.download} hreflang={cv.language} data-umami-event="cv-download" data-umami-event-location="footer" data-umami-event-language={cv.language}>{t.downloadCv}</Button></li>
         <li><Button variant="quiet" href={site.linkedin} rel="me" data-umami-event="linkedin">LinkedIn</Button></li>
       </ul>
 
-      <p class="contact-next">Case studies from my product work are on the way.</p>
+      <p class="contact-next">{t.contactNext}</p>
     </div>
   </section>
 

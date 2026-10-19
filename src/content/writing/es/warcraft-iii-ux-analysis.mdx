@@ -1,0 +1,92 @@
+---
+# Spanish (Argentina) translation of ../warcraft-iii-ux-analysis.mdx, published at /es/writing/warcraft-iii-ux-analysis/.
+# Only the text goes here: dates, type, game facts and images come from the original. Keep the file name.
+
+title: 'Cuando la estrategia se cruzó con los héroes de RPG: una mirada de UX a Warcraft III (parte 1)'
+description: 'Un análisis de UX de juegos: usabilidad, enganche y frustración por diseño en el RTS de Blizzard de 2002.'
+context: 'Curso de Game UX de IxDF'
+game:
+  genre: 'Estrategia en tiempo real con elementos de RPG'
+  platform: 'PC (Windows y Mac)'
+coverAlt: 'Arte de la caja de Warcraft III: Reign of Chaos: un primer plano de la cara de un orco, con colmillos y un aro en la nariz, sobre el logo del juego.'
+credits: 'Capturas y arte de Warcraft III © Blizzard Entertainment, mostrados aquí con fines de análisis.'
+---
+
+import Figure from '../../../components/Figure.astro';
+import mainImage from '../../../assets/games/warcraft-iii/main-image.jpg';
+import hud from '../../../assets/games/warcraft-iii/hud-annotated.jpg';
+import altar from '../../../assets/games/warcraft-iii/altar-reviving-reforged.jpg';
+import army from '../../../assets/games/warcraft-iii/army.jpg';
+
+<Figure
+  src={mainImage}
+  loading="eager"
+  alt="Captura de Warcraft III de un ejército humano que ataca una base de elfos de la noche en un bosque: dos tanques de vapor, dos jinetes de grifo y un héroe archimago a caballo. El HUD inferior muestra al héroe seleccionado, un archimago de nivel 2, y su inventario."
+/>
+
+Lidero un equipo de UX que diseña productos de mensajería. También estudio la [Licenciatura en Desarrollo de Videojuegos y Simulaciones](https://unahur.edu.ar/licenciatura-en-desarrollo-de-videojuegos-y-simulaciones/) en la Universidad Nacional de Hurlingham, en Buenos Aires, Argentina. Para unir los dos caminos, estoy haciendo el [curso de Game UX de Celia Hodent](https://ixdf.org/courses/game-ux-design-ultimate-guide) en la Interaction Design Foundation (IxDF).
+
+La primera consigna pide elegir un momento de un juego que te haya quedado grabado y analizarlo como diseñador de UX: qué hizo que funcionara, qué no, y qué enseña sobre la experiencia del jugador. Este post es mi respuesta.
+
+Elegí Warcraft III porque es el juego en el que, por primera vez, se juntó todo lo que me gustaba como jugador. Compararlo con Age of Empires (AoE), el juego de estrategia que más había jugado hasta entonces, me ayudó a ver qué cambió Blizzard y por qué funcionó.
+
+## El momento
+
+Antes de Warcraft III, había pasado muchas horas con Age of Empires I y II y con StarCraft, donde lo que más disfrutaba era planificar las jugadas que necesitaba para ganar. También jugaba juegos con progresión de RPG, como los Pokémon (Rojo, Azul, Oro y Plata), Diablo II y hasta Mario Tennis en la Game Boy Color, y me encantaba hacer más fuertes a mis personajes con habilidades e ítems nuevos. Y era fan de las aventuras en 3D como Super Mario 64, Sonic 3D Blast y Crash Bandicoot.
+
+La primera vez que jugué Warcraft III, me di cuenta de que unía esos tres mundos en un solo juego. El ciclo de juego principal era el que ya conocía de AoE: recolectar recursos, construir una base, entrenar un ejército y pelear. Pero mi ejército tenía un héroe, que ganaba experiencia, subía hasta el nivel 10, aprendía habilidades nuevas y llevaba ítems. Y el mundo era en 3D: por defecto, una cámara cenital en ángulo, y con la rueda del mouse podía acercar la vista mucho más. Ya no tenía que elegir entre los juegos que me gustaban. Probablemente la nostalgia influya acá, pero voy a intentar que este análisis sea objetivo.
+
+## Análisis de UX
+
+### Usabilidad vs. enganche
+
+Warcraft III era fácil de empezar a jugar porque no reinventaba los controles. Seguía las convenciones de los RTS que ya conocía de AoE y StarCraft: el HUD estaba en la parte de abajo de la pantalla, con el minimapa, la información de la unidad y los comandos, así que podía controlar todo sin tapar la escena principal. El sonido hacía gran parte del trabajo de feedback. Las voces de las unidades y las alertas me avisaban cuando se terminaba un edificio o cuando atacaban mi base, incluso si estaba mirando otra parte. Eso es *usabilidad*: siempre sabía qué estaba pasando y cómo actuar.
+
+<Figure
+  src={hud}
+  maxWidth={755}
+  alt="Captura de Warcraft III con la escena del juego oscurecida y solo el HUD visible. Tres áreas del HUD inferior están recuadradas y rotuladas en inglés: Minimap, Unit info y Command panel (minimapa, información de la unidad y panel de comandos). La barra superior muestra oro, madera, comida y mantenimiento."
+  caption="Convenciones conocidas: el HUD deja los controles abajo y la acción a la vista."
+/>
+
+Pero la usabilidad por sí sola no explica por qué seguí jugando. Las partidas duraban más o menos la mitad que en AoE (las mías llevaban cerca de una hora, mientras que en AoE podían durar dos), así que cada sesión se sentía completa. Las unidades voladoras, que AoE nunca tuvo, llevaron la acción al aire. Y el héroe me dio algo que AoE nunca me había dado: un personaje que me importaba. Perder unidades comunes era parte del plan. Perder a mi héroe se sentía personal.
+
+### ¿Frustración por diseño o problema de usabilidad?
+
+Dos momentos me hicieron pensar en esta diferencia. El primero fue perder a mi héroe. Dolía: tenía que pelear un rato sin él y pagar para revivirlo en el altar. Pero volvía con su nivel y sus ítems, así que el juego castigaba mi error sin borrar mi progreso. Eso es *frustración por diseño*: un costo puesto a propósito para que lo cuidara.
+
+<Figure
+  src={altar}
+  alt="Captura de Warcraft III: Reforged de una base de los no muertos durante una misión de campaña. El Altar of Darkness seleccionado muestra el retrato de un héroe junto a una barra de progreso que dice Reviving, y en la esquina superior izquierda hay tres retratos de héroes."
+  caption="Una penalización justa: el héroe vuelve con su nivel y sus ítems, pero cuesta tiempo y recursos (Warcraft III: Reforged)."
+/>
+
+El segundo fue el límite de selección de 12 unidades. Viniendo de AoE, donde podía seleccionar grupos mucho más grandes, parecía un problema de usabilidad: arrastrar un recuadro sobre un ejército grande seleccionaba solo una parte. Después entendí que era intencional. Me empujaba a manejar grupos más chicos y a aprovechar mejor las habilidades de mi héroe. **El desafío era por diseño, pero la forma en que lo descubrí no.** Nada en pantalla explicaba el límite, así que por un tiempo sentí que el juego me estaba fallando.
+
+<Figure
+  src={army}
+  alt="Captura de Warcraft III de un ejército de no muertos seleccionado que ataca una fortaleza de piedra en llamas. El panel de selección de abajo muestra 12 retratos de unidades."
+  caption="El límite de selección: una regla intencional que nada en pantalla explicaba."
+/>
+
+### Consideraciones de género y plataforma
+
+Quienes juegan RTS esperan un control rápido y claro, y quienes juegan RPG esperan una sensación de progreso. Mezclar los dos es arriesgado: con demasiado RPG, la estrategia se vuelve lenta; con muy poco, el héroe es solo una unidad más. Warcraft III lo equilibró manteniendo la progresión dentro de la partida: el héroe subía de nivel peleando, así que hacerse más fuerte pasaba mientras jugaba la estrategia, no en lugar de ella. Y el tope de nivel 10 evitaba que el héroe reemplazara al ejército.
+
+En cuanto a la plataforma, Warcraft III salió solo para PC, y Blizzard nunca lanzó una versión para consolas. Tiene sentido: un RTS necesita la precisión del mouse y el teclado para seleccionar unidades y dar órdenes rápido, algo que con un joystick es mucho más difícil.
+
+Argentina le sumó su propia capa. 2002 fue el año de la crisis económica, y las consolas que había en la mayoría de las casas eran más viejas y baratas: la PlayStation original, el Family Game (un clon de la NES), la Sega Genesis o la Nintendo 64. La PlayStation 2, la GameCube y la Xbox eran lujos. Los juegos de PC vivían en los cibercafés, los cibers, como les decíamos, y ahí fue donde Warcraft III despegó. Para mí y para muchos jugadores, la plataforma no era una PC en casa sino una sala llena de ellas, conectadas por LAN.
+
+## Mi mirada como UX Designer
+
+**Mantener:** el sistema de héroes y su penalización por muerte. Revivir en el altar con el nivel y los ítems intactos es un costo justo: lo bastante alto para que protejas a tu héroe y lo bastante leve para que un error no termine la partida. También mantendría el feedback sonoro, que permite manejar toda una base sin revisar cada rincón del mapa.
+
+**Cambiar:** no conozco las restricciones del equipo, que en 2002 quizás incluían límites técnicos o de espacio en pantalla, así que no tocaría el límite. **El problema que señalaría es cómo se comunica el límite.** La primera vez que una selección con recuadro supera las 12 unidades, una pista breve podría mostrarle al jugador los grupos de control (<kbd>Ctrl</kbd> + una tecla numérica). Un mensaje, una sola vez, y el límite deja de sentirse como un bug y pasa a leerse como una regla. En septiembre de 2026, Blizzard subió la selección máxima de 12 a 24 unidades con el [parche 3.0 de Warcraft III: Reforged](https://liquipedia.net/warcraft/Patch_3.0.0), lo que sugiere que la fricción era real para muchos jugadores. Pero subir el límite cambia cómo se juega, mientras que una pista arregla la comunicación y deja el diseño intacto.
+
+## Lo que me enseñó
+
+La lección más clara de mirar Warcraft III como diseñador: **la usabilidad y el enganche cumplen funciones distintas**. Los controles conocidos y el buen feedback hicieron que el juego fuera fácil de aprender, pero el héroe, las partidas más cortas y las unidades voladoras son lo que me dio ganas de seguir jugando. Y no toda frustración es un problema para resolver: la muerte del héroe era un costo que valía la pena mantener, mientras que el límite de selección solo necesitaba comunicarse mejor.
+
+Si jugaste Warcraft III en esa época, ¿también te molestó el límite de 12 unidades? [Me gustaría saberlo](#contact).
+
+Seguí este análisis en la [parte 2](/es/writing/warcraft-iii-cognitive-science-analysis/), desde la mirada de la ciencia cognitiva.

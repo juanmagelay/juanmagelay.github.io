@@ -316,11 +316,47 @@ kbd {
   text-decoration: underline;
 }
 
-@media (width < 40rem) {
+/* Selector de idioma: arriba a la derecha, después del CV. Cada código es un objetivo de 44px;
+   la lista se corre a la derecha lo que sobra alrededor del código, así el último queda al borde. */
+.site-lang-wrap {
+  margin-left: calc(var(--space-3) - var(--space-8));
+}
+
+.site-lang {
+  display: flex;
+  margin: 0;
+  margin-inline-end: calc((2.75rem - 2ch) / -2);
+  padding: 0;
+  font-family: var(--font-data);
+  font-size: var(--type-size-meta);
+  list-style: none;
+}
+
+.site-lang a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.site-lang a:hover {
+  color: var(--color-accent);
+}
+
+.site-lang a[aria-current] {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+
+/* Debajo de 768px: nombre y CV arriba; menú e idiomas abajo. */
+@media (width < 48rem) {
   .site-header-inner {
     display: grid;
     grid-template-columns: 1fr auto;
-    grid-template-areas: 'name cv' 'nav nav';
+    grid-template-areas: 'name cv' 'nav lang';
     gap: var(--space-2) var(--space-4);
     padding-block: var(--space-3) var(--space-2);
   }
@@ -328,6 +364,7 @@ kbd {
   .site-name { grid-area: name; }
   .site-cv { grid-area: cv; }
   .site-nav-wrap { grid-area: nav; margin-left: 0; }
+  .site-lang-wrap { grid-area: lang; margin-left: 0; }
   .site-nav { gap: var(--space-5); }
   .site-nav a { display: inline-block; padding-block: var(--space-2); }
 }
@@ -1156,7 +1193,6 @@ kbd {
 .next-case .section-title {
   margin-bottom: var(--space-6);
 }
-
 </style>
 </head>
 <body>
@@ -1173,6 +1209,13 @@ kbd {
       </ul>
     </nav>
     <a class="button site-cv" href="/cv/Juan%20Manuel%20Gelay%20-%20UX%20&amp;%20Product%20Design%20Manager%20(English).pdf" download data-umami-event="cv-download" data-umami-event-location="header">Download CV</a>
+    <nav class="site-lang-wrap" aria-label="Language">
+      <ul class="site-lang">
+        <li><a href="/" hreflang="en" lang="en" aria-current="true" data-umami-event="language-switch" data-umami-event-language="en">EN <span class="visually-hidden">English</span></a></li>
+        <li><a href="/es/" hreflang="es" lang="es-AR" data-umami-event="language-switch" data-umami-event-language="es">ES <span class="visually-hidden">Español</span></a></li>
+        <li><a href="/pt/" hreflang="pt" lang="pt-BR" data-umami-event="language-switch" data-umami-event-language="pt">PT <span class="visually-hidden">Português</span></a></li>
+      </ul>
+    </nav>
   </div>
 </header>
 <main id="main">

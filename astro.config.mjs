@@ -76,8 +76,10 @@ export default defineConfig({
   ],
 
   redirects: {
-    // Temporary: remove when the home page exists (#8).
+    // Temporary: remove when the home page exists (#8). One per language (#11).
     '/': '/writing/warcraft-iii-ux-analysis/',
+    '/es/': '/es/writing/warcraft-iii-ux-analysis/',
+    '/pt/': '/pt/writing/warcraft-iii-ux-analysis/',
     // Published under /games/ before posts moved to /writing/. Keep them so old links still work.
     '/games/': '/writing/',
     '/games/warcraft-iii-ux-analysis/': '/writing/warcraft-iii-ux-analysis/',

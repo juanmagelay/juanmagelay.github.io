@@ -39,6 +39,7 @@ Se mantienen sin cambios de nombre: `--space-N`, `--type-size-display`, `--type-
 | Componente (Figma) | Clase | Variantes | Astro sugerido | Dónde |
 | --- | --- | --- | --- | --- |
 | Site header | `.site-header` | página actual (`aria-current="page"`), sección actual en sus páginas internas, como un post en Writing (`aria-current="true"`); las dos van subrayadas | `SiteHeader.astro` | todas |
+| Language switch | `.site-lang` | idioma actual (`aria-current="true"`), subrayado | `LanguageSwitch.astro` | todas, dentro del header |
 | Button | `.button` | primary, quiet | `Button.astro` | todas |
 | Section title | `.section-title` | | estilo de texto | todas |
 | Spec list | `.spec-list` | grid, stacked | `SpecList.astro` | hero, encabezados, resumen, fact sheet |
@@ -56,9 +57,11 @@ Se mantienen sin cambios de nombre: `--space-N`, `--type-size-display`, `--type-
 | Figure | `.figure` | ancho con `--figure-width` | `Figure.astro` (ya existe) | caso, artículo |
 | Contact footer | `.site-footer` | | `SiteFooter.astro` | todas |
 
-Hechos en la #6: Site header, Button, Section title, Spec list, Copy email, Page head, Fact sheet, Figure y Contact footer. En la #10: Row. El resto se crea cuando una página lo necesite.
+Hechos en la #6: Site header, Button, Section title, Spec list, Copy email, Page head, Fact sheet, Figure y Contact footer. En la #10: Row. En la #11: Language switch. El resto se crea cuando una página lo necesite.
 
 Writing (decidido en la #10): la sección reúne todos los posts, de juegos y de otros temas, del más nuevo al más antiguo. Cada fila lleva una miniatura 3:2 a la izquierda, al ancho del rail (12rem), y arriba a todo el ancho por debajo de 40rem. La miniatura es siempre la primera imagen del post, con su mismo alt: no se elige a mano (`src/lib/first-figure.mjs`). Los posts viven en `/writing/<slug>/`. Las URLs viejas en `/games/` redirigen ahí.
+
+Idiomas (decidido en la #11): el sitio está en inglés (original, sin prefijo), español de Argentina, con voseo (`/es/`) y portugués de Brasil (`/pt/`), con los mismos paths en los tres. El selector va arriba a la derecha, después del CV: los códigos EN, ES y PT en JetBrains Mono, el actual en ink y subrayado, los otros en texto secundario. Cada código es un link de 44px con `hreflang`, `lang` y el nombre del idioma en ese idioma para lectores de pantalla (`.visually-hidden`). Debajo de 768px el header pasa a dos filas: nombre y CV arriba; menú e idiomas abajo, con los idiomas a la derecha. En español el botón de CV baja el CV en español; en portugués, el CV en inglés.
 
 Artículos (decidido en la #6): cada bloque tiene el mismo espacio a ambos lados. El encabezado va al ancho del contenedor, igual que el header del sitio: el título en el borde izquierdo y, desde 56rem, la ficha del juego en el borde derecho. El cuerpo va en una columna central (`.container-reading`) donde cada bloque se centra: el texto a 42rem y las figuras hasta 52rem.
 

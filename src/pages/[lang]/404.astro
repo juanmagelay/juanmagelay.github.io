@@ -1,0 +1,11 @@
+---
+import NotFound from '../404.astro';
+import { LANGS, DEFAULT_LANG } from '../../i18n.mjs';
+
+// /es/404/ and /pt/404/: the same page as src/pages/404.astro, which takes its language from the URL.
+export function getStaticPaths() {
+  return LANGS.filter((lang) => lang !== DEFAULT_LANG).map((lang) => ({ params: { lang } }));
+}
+---
+
+<NotFound />

@@ -4,7 +4,7 @@ Source code of my portfolio site: https://juanmagelay.github.io
 
 ## Status
 
-Pre-launch. One page is live: a game UX analysis of Warcraft III: Reign of Chaos. Product case studies are in progress.
+Pre-launch. A game UX analysis of Warcraft III: Reign of Chaos, in two parts, is live in English, Spanish and Portuguese. Product case studies are in progress.
 
 ## My role
 
@@ -35,15 +35,17 @@ npm run dev
 
 `npm run build` fails while any placeholder remains or a CV file is missing, so unfinished content never goes live. For a local test build only: `SKIP_PUBLISH_GUARD=1 npm run build`.
 
-`npm test` checks the built site in `dist/`: alt text on every image, no em or en dashes in the copy, canonical URLs and the CV links. It also checks the design system: fonts served from the site, the palette, AA contrast in both themes, colors written only in the tokens, no shadows or gradients, a visible focus ring and 44px buttons. Run it after `npm run build`. The deploy workflow runs it too and stops the deploy if a check fails.
+`npm test` checks the built site in `dist/`: alt text on every image, no em or en dashes in the copy, canonical URLs and the CV links. It also checks that every page exists in English, Spanish and Portuguese, with the language switch, `hreflang` links and internal links that work. It also checks the design system: fonts served from the site, the palette, AA contrast in both themes, colors written only in the tokens, no shadows or gradients, a visible focus ring and 44px buttons. Run it after `npm run build`. The deploy workflow runs it too and stops the deploy if a check fails.
 
 ## Structure
 
 ```
 src/site.config.mjs        personal data: name, email, links, CV paths
+src/i18n.mjs               languages (en, es, pt), interface copy and path helpers
 src/content/writing/       posts, one MDX file each, published at /writing/<file name>/
-src/pages/writing/         the /writing list (newest first, first image as thumbnail) and each post page
-src/lib/                   first-figure.mjs: finds each post's first image for its thumbnail
+src/content/writing/es/    Spanish translations, published at /es/writing/<file name>/ (pt/ for Portuguese)
+src/pages/[...lang]/       the /writing list (newest first, first image as thumbnail) and each post page, per language
+src/lib/                   first-figure.mjs: each post's first image for its thumbnail; posts.ts: posts per language
 src/assets/games/          images, optimized at build time
 src/components/            header, footer, button, page head, spec list, fact sheet, figure, copy email, row list
 src/styles/                design tokens (tokens.css) and global styles

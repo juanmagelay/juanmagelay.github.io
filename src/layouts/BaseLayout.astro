@@ -2,6 +2,7 @@
 import { Font } from 'astro:assets';
 import '../styles/global.css';
 import { site } from '../site.config.mjs';
+import { LANGS, DEFAULT_LANG, languages, langFromPath, localizePath, ui } from '../i18n.mjs';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
@@ -11,16 +12,23 @@ interface Props {
   ogImage?: string;
   ogType?: 'website' | 'article';
   publishedTime?: Date;
+  /** For pages search engines should not list, such as the 404 pages. */
+  noindex?: boolean;
 }
 
-const { title, description, ogImage, ogType = 'website', publishedTime } = Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const { title, description, ogImage, ogType = 'website', publishedTime, noindex = false } = Astro.props;
+const path = Astro.url.pathname;
+const lang = langFromPath(path);
+const canonical = new URL(path, Astro.site).href;
 const fullTitle = `${title} | ${site.name}`;
 const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
+// The same page in each language, so search engines show each reader their own.
+const alternates = LANGS.map((other) => ({ hreflang: other, href: new URL(localizePath(path, other), Astro.site).href }));
+const defaultHref = new URL(localizePath(path, DEFAULT_LANG), Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={languages[lang].htmlLang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -28,6 +36,9 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
     <meta name="description" content={description} />
     <meta name="author" content={site.name} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {!noindex && alternates.map((alternate) => <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />)}
+    {!noindex && <link rel="alternate" hreflang="x-default" href={defaultHref} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="color-scheme" content="light dark" />
     {/* Same as --color-paper in each theme (src/styles/tokens.css). */}
@@ -39,6 +50,8 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={languages[lang].ogLocale} />
+    {LANGS.filter((other) => other !== lang).map((other) => <meta property="og:locale:alternate" content={languages[other].ogLocale} />)}
     {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
     {publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
     <meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
@@ -59,9 +72,10 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
         ></script>
       )
     }
+    <slot name="head" />
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">{ui[lang].skipLink}</a>
     <SiteHeader />
     <main id="main">
       <slot />

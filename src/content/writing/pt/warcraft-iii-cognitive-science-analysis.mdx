@@ -1,0 +1,146 @@
+---
+# Portuguese (Brazil) translation of ../warcraft-iii-cognitive-science-analysis.mdx,
+# published at /pt/writing/warcraft-iii-cognitive-science-analysis/.
+# Only the text goes here: dates, type, game facts and images come from the original. Keep the file name.
+
+title: 'Rápido e devagar em Warcraft III (parte 2)'
+description: 'Um olhar da ciência cognitiva sobre como os jogadores aprendiam Warcraft III: o que rodava no piloto automático, o que exigia esforço e o que eu redesenharia.'
+context: 'Curso de Game UX da IxDF'
+game:
+  genre: 'Estratégia em tempo real com elementos de RPG'
+  platform: 'PC (Windows e Mac)'
+coverAlt: 'Arte da caixa de Warcraft III: Reign of Chaos: um close do rosto de um orc, com presas e uma argola no nariz, acima do logo do jogo.'
+credits: 'Capturas de tela e arte de Warcraft III e Diablo II © Blizzard Entertainment, exibidas aqui para fins de análise.'
+---
+
+import Figure from '../../../components/Figure.astro';
+import arthas from '../../../assets/games/warcraft-iii/arthas-level-1.jpg';
+import prologueBase from '../../../assets/games/warcraft-iii/prologue-base-objectives.jpg';
+import hintAttackMove from '../../../assets/games/warcraft-iii/prologue-hint-attack-move.jpg';
+import hintSpacebar from '../../../assets/games/warcraft-iii/prologue-hint-spacebar.jpg';
+import tooltip from '../../../assets/games/warcraft-iii/tooltip-hotkey.jpg';
+import altar from '../../../assets/games/warcraft-iii/altar-reviving-reforged.jpg';
+import newSkill from '../../../assets/games/diablo-ii/new-skill.jpg';
+
+Esta é a segunda parte do meu estudo de Warcraft III para o [curso de Game UX da Celia Hodent](https://ixdf.org/courses/game-ux-design-ultimate-guide) na IxDF. [A primeira parte](/pt/writing/warcraft-iii-ux-analysis/) olhou para o que fazia o jogo funcionar para os jogadores. Esta olha para o que acontecia na cabeça deles e para como o design poderia se ajustar melhor ao jeito como as pessoas pensam e aprendem.
+
+## Dois jeitos de pensar
+
+Em [*Thinking, Fast and Slow*](https://www.amazon.com/Thinking-Fast-Slow-Daniel-Kahneman/dp/0374533555) (no Brasil, *Rápido e devagar: duas formas de pensar*), Daniel Kahneman descreve dois modos de pensamento. O Sistema 1 "opera de forma automática e rápida, com pouco ou nenhum esforço e nenhuma sensação de controle voluntário". O Sistema 2 "aloca atenção às atividades mentais trabalhosas que a exigem". Num jogo, o Sistema 1 é a mão que move o mouse sem perguntar. O Sistema 2 é o jogador que para para ler um tooltip.
+
+O esforço tem um custo. Pelo que Kahneman chama de "lei do menor esforço", as pessoas "gravitam para o curso de ação menos exigente", então tendem a abandonar tarefas que as fazem pensar muito, a menos que tenham um motivo que importe para elas. A prática muda o equilíbrio: "À medida que você se torna habilidoso numa tarefa, a demanda de energia dela diminui". Esta análise acompanha essa passagem do Sistema 2 para o Sistema 1.
+
+<Figure
+  src={arthas}
+  alt="Captura de tela de Warcraft III com Arthas, um paladino de nível 1, numa vila ao lado de uma fila de soldados. O HUD inferior mostra o retrato dele, 650 de 650 pontos de vida e 255 de 255 de mana, o dano, a armadura e os atributos (força 22, agilidade 13, inteligência 17), e um pergaminho no inventário."
+  caption="Arthas no nível 1: no começo, jogar com um herói exige o esforço do Sistema 2."
+/>
+
+## Gerenciar a carga cognitiva
+
+Como eu vinha de Age of Empires (AoE) e StarCraft, joguei boa parte de Warcraft III no Sistema 1 desde a primeira partida. Arrastar uma caixa para selecionar um grupo e clicar com o botão direito para mover ou atacar funcionava como em todos os RTS que eu conhecia. O HUD mantinha o layout do gênero, e as vozes das unidades e os alertas não exigiam pensar.
+
+Três coisas precisavam do Sistema 2. A primeira foi o limite de seleção de 12 unidades, quando AoE II me deixava selecionar 40: na primeira vez que uma caixa deixou parte do meu exército de fora, tive que parar e entender por quê. Falei disso na [primeira parte](/pt/writing/warcraft-iii-ux-analysis/#frustração-por-design-ou-problema-de-usabilidade). A segunda foi o herói, uma unidade com vida, mana, nível, habilidades e itens, algo que AoE nunca teve. A terceira foram os atalhos novos. Usar os que eu sabia de cor era Sistema 1; aprender os novos era Sistema 2.
+
+Aprender atalhos é um problema conhecido fora dos jogos. [Lane e colaboradores (2005)](https://www.ruf.rice.edu/~lane/papers/hidden_costs.pdf) descobriram que a maioria de 251 usuários experientes do Microsoft Word preferia os ícones da barra de ferramentas aos atalhos de teclado, mesmo com os atalhos sendo mais rápidos. [Cockburn e colaboradores (2014)](https://dl.acm.org/doi/10.1145/2659796) explicam por quê: passar para um método mais rápido causa uma "queda de desempenho" temporária que pode impedir as pessoas de fazer a troca. Num RTS, o investimento compensa. Num estudo com 3.360 jogadores de StarCraft II, [Thompson e colaboradores (2013)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0075129) descobriram que o uso de atalhos estava entre os preditores mais fortes para separar profissionais de jogadores da liga Diamante, e interpretaram isso como um sinal de automaticidade. Quando os controles rodam no Sistema 1, a atenção fica livre para a estratégia.
+
+### Praticar antes da pressão
+
+Warcraft III dava aos jogadores tempo para construir essas respostas automáticas. O prólogo opcional, Exodus of the Horde, "guia você por todos os aspectos básicos da jogabilidade no contexto de algumas missões conduzidas pela história", como disse o [GameSpot](https://www.gamespot.com/reviews/warcraft-iii-reign-of-chaos-review/1900-2873347/) em 2002. Na primeira missão, você controla só Thrall e alguns grunts, sem base nem recursos. Construir e coletar chegam na segunda. No Normal, a dificuldade mais baixa que dava para escolher no início, havia espaço para tentar, errar e tentar de novo, e perder uma missão desbloqueava a dificuldade Fácil. A carga crescia uma camada de cada vez, o que combinava com o que o cérebro de um jogador novo estava pronto para receber.
+
+O descompasso aparece quando os jogadores pulam o prólogo. Numa partida 1v1 fácil, o herói, o limite de seleção, os atalhos e a base chegam todos de uma vez. Ganhar provavelmente vai ser estressante, e você provavelmente não vai aproveitar bem o seu herói.
+
+<Figure
+  src={prologueBase}
+  alt="Captura de tela da segunda missão do prólogo de Warcraft III, na versão em espanhol do jogo. A missão principal na tela lista os passos para estabelecer uma base: construir uma toca, uma serraria de guerra e um quartel, e treinar 5 grunts. Uma mensagem diz que não há ouro suficiente, e o HUD mostra o salão principal selecionado."
+  caption="A segunda missão do prólogo apresenta a base como uma lista curta de objetivos (versão em espanhol)."
+/>
+
+## Atenção, memória e aprendizado
+
+### Atenção
+
+Hodent escreve em [*The Gamer's Brain*](https://www.amazon.com/Gamers-Brain-Neuroscience-Impact-Design/dp/1498775500) que "os recursos de atenção são extremamente escassos" e que, quando focamos numa tarefa, "podemos ficar completamente cegos para eventos inesperados que acontecem bem na nossa frente". Uma partida online, ou uma partida em rede local na LAN house, levava a atenção ao limite: base, exército e herói ao mesmo tempo, contra outra pessoa. Essa sobrecarga fazia parte da graça.
+
+Mas as campanhas e as partidas 1v1 contra o computador já tinham me ensinado a rotina de abertura, feita o mais rápido possível: coletar recursos, conseguir um herói, subir o nível dele, montar um exército e melhorar a base. Quando essa rotina ficou automática, parou de competir pela atenção. O jogo também ajudava onde mais importava: o retrato do herói pisca em vermelho quando ele sofre dano, então eu sabia que ele estava em apuros sem precisar procurá-lo.
+
+### Memória
+
+[Hermann Ebbinghaus](https://psychclassics.yorku.ca/Ebbinghaus/memory7.htm) mostrou em 1885 que esquecemos mais rápido logo depois de aprender algo, e as pesquisas sobre o efeito de espaçamento ([Cepeda e colaboradores, 2006](https://escholarship.org/uc/item/3rr6q10c)) mostram que a prática distribuída no tempo faz o aprendizado durar. Hodent transforma isso num conselho para jogos: "Distribuir o aprendizado ao longo do tempo (efeito de espaçamento). Repetir a informação. Dar lembretes".
+
+Os atalhos dependiam disso. O tooltip de cada comando mostrava o atalho como uma letra amarela, um lembrete toda vez que eu passava o mouse por cima, mas repetir até fixar ficava por minha conta.
+
+<Figure
+  src={tooltip}
+  alt="Captura de tela de Warcraft III com um camponês selecionado e o menu de construção dele. O tooltip de Build Scout Tower mostra em amarelo o T de Tower como atalho, um custo de 30 de ouro e 20 de madeira, e uma breve descrição da torre."
+  caption="O tooltip de cada comando marca o atalho em amarelo: o T de Build Scout Tower."
+/>
+
+Reviver um herói não dependia da memória. O altar mostra um botão para esse herói, com nome, nível, tipo e custo para revivê-lo, então você não precisa lembrar quem morreu. Jakob Nielsen chama isso de [reconhecimento em vez de memorização](https://www.nngroup.com/articles/ten-usability-heuristics/). O custo também passa uma mensagem: reviver um herói de nível baixo custa menos do que recrutar um novo, mas reviver um herói de nível 10 custa muito mais ([Blizzard, 2002](https://web.archive.org/web/20021201115940/http://www.battle.net:80/war3/faq/heroes.shtml)). Quanto mais forte o herói, mais há a perder.
+
+<Figure
+  src={altar}
+  alt="Captura de tela de Warcraft III: Reforged de uma base dos Mortos-Vivos durante uma missão de campanha. O Altar of Darkness selecionado mostra o retrato de um herói ao lado de uma barra de progresso com a palavra Reviving, e há três retratos de heróis no canto superior esquerdo."
+  caption="O altar traz de volta o herói que caiu, então ninguém precisa lembrar quem morreu (Warcraft III: Reforged)."
+/>
+
+### Aprendizado
+
+Nas campanhas, a pressão cresce missão a missão, então os jogadores praticam antes dos momentos difíceis. Numa partida, a dificuldade depende do seu adversário.
+
+## Modelos mentais e padrões conhecidos
+
+Os jogadores constroem um modelo mental de como um jogo funciona, e Hodent observa que a consistência entre jogos "facilita o onboarding de jogadores que conhecem certas convenções de jogos". Warcraft III manteve as convenções de RTS: apontar e clicar, e um HUD para a base, o exército e os recursos.
+
+Para o herói, o jogo usou padrões que eu conhecia de Diablo II, e a Blizzard já disse isso. Antes do lançamento, o [FAQ oficial de Warcraft III](https://classic.battle.net/war3/faq/heroes.shtml) descrevia a distribuição dos pontos de habilidade de um herói como "uma versão simplificada de como os personagens de Diablo II funcionam". Em 2020, [a Blizzard citou](https://news.blizzard.com/en-us/diablo3/23460551/diablo-ii-continues-to-inspire-blizzard-20-years-later) os itens que caíam aleatoriamente em Warcraft III e os heróis "que tinham níveis de experiência e pontos de habilidade a distribuir" entre as ideias de Diablo II que chegaram a outros jogos da Blizzard. Meu herói ganhava experiência, recebia um ponto para uma habilidade a cada nível e pegava os itens que os monstros deixavam cair, então eu não precisei aprender nada disso do zero.
+
+<Figure
+  src={newSkill}
+  alt="Captura de tela de Diablo II de um salão de pedra com uma lareira e armas nas paredes, onde um anjo de armadura dourada e asas brancas brilhantes está perto de dois personagens. A interface mostra um orbe vermelho de vida, um orbe azul de mana, um cinto de poções nas teclas 1 a 4 e um botão New Skill."
+  caption="O botão New Skill de Diablo II: um ponto para gastar a cada nível, um padrão que a Blizzard levou aos heróis de Warcraft III."
+/>
+
+Quase tudo no jogo batia com o que eu conhecia. Uma regra, não: nem toda unidade pode atacar unidades voadoras. Footmen, grunts, ghouls e huntresses só atingem unidades terrestres, enquanto riflemen, headhunters e archers atingem as duas. AoE II não tinha unidades voadoras, então, como jogador de AoE, eu tive que construir esse modelo, muitas vezes perdendo. Um jogador de StarCraft já tinha esse modelo, já que zealots e zerglings também não podiam atacar unidades aéreas.
+
+## Revendo o que eu melhoraria
+
+Minha recomendação da primeira parte continua valendo: manter o limite de 12 unidades e, na primeira vez que uma seleção com caixa passar de 12 unidades, mostrar uma dica que aponte para os grupos de controle. Agora consigo explicar por que isso funciona: uma regra que os jogadores tinham que descobrir errando vira uma informação que aparece quando importa.
+
+Esta análise acrescenta três lacunas, cada uma com uma solução baseada em como os jogadores pensam.
+
+**Os atalhos ficam por conta do jogador.** Os tooltips mostram os atalhos, mas o prólogo só menciona algumas teclas (A para atacar, as setas para rolar a tela, a barra de espaço para ir até uma tarefa concluída e Tab para trocar de subgrupo). Ele nunca menciona os grupos de controle nem as teclas que selecionam os heróis; o jogo deixou isso para o manual e para o site da Blizzard. Minha solução: quando um jogador clica várias vezes no mesmo botão de comando, o jogo fala o atalho em voz alta. Num experimento com software, [Grossman e colaboradores (2007)](https://www.dgp.toronto.edu/~ravin/papers/chi2007_learninghotkeys.pdf) falavam o comando e o atalho toda vez que alguém usava o menu, e o uso de atalhos subiu de 28,9% para 66,6%. Eles escolheram o som porque "o canal visual muitas vezes já está saturado", o que é ainda mais verdade num RTS.
+
+<Figure
+  src={hintAttackMove}
+  alt="Captura de tela da primeira missão do prólogo de Warcraft III, na versão em espanhol do jogo. Duas dicas na tela dizem que é possível mandar as tropas se moverem e atacarem apertando a tecla A e clicando com o botão esquerdo no destino, e que as unidades que avançam assim lutam contra qualquer inimigo que encontrarem. Alguns grunts lutam numa clareira da floresta, com um grunt selecionado no HUD."
+  caption="A primeira missão ensina a tecla A com uma dica, no contexto (versão em espanhol)."
+/>
+
+<Figure
+  src={hintSpacebar}
+  alt="Captura de tela da segunda missão do prólogo de Warcraft III, na versão em espanhol do jogo. A missão principal atualizada marca o quartel como concluído, e uma dica diz que apertar a barra de espaço depois de um aviso de trabalho concluído centraliza a tela na origem dele. Uma toca orc está em construção."
+  caption="A segunda missão acrescenta a barra de espaço, para ir até uma tarefa concluída (versão em espanhol)."
+/>
+
+**Quem pula o prólogo perde o básico.** Em vez de um tutorial antes da partida, o jogo ensinaria cada coisa básica na primeira vez que ela aparecesse: a experiência, o limite de seleção, os grupos de controle e as teclas dos heróis. A morte do herói é um bom exemplo. O prólogo ensina a reviver com uma dica na segunda missão, então quem pula o prólogo nunca vê essa dica. No meu redesenho, na primeira vez que um herói morre, o retrato dele no canto superior esquerdo pisca com um aviso curto, e clicar nele leva o jogador ao altar. Hodent defende que é mais eficiente colocar os jogadores "numa situação em que precisem aprender o novo comportamento e estejam motivados para isso" do que congelar o jogo e mostrar um texto de tutorial, e espalhar as dicas entre as partidas soma o efeito de espaçamento. Os jogadores poderiam pular as dicas e lê-las de novo no registro de mensagens que o jogo já tinha.
+
+**As unidades voadoras pegam os jogadores de surpresa.** O prólogo não ensina essa regra, e as campanhas só tocam no assunto em diálogos da história, nas campanhas dos Mortos-Vivos e dos Orcs. Aqui eu evitaria o erro antes de corrigi-lo, como sugere o pilar de prevenção de erros de Hodent. Se o exército de um jogador cresce sem nenhuma unidade capaz de atacar unidades aéreas, o jogo avisa. Se mesmo assim vier um ataque aéreo e as unidades selecionadas não puderem revidar, uma dica diz quais unidades podem.
+
+Nada disso tira o desafio. O pilar de carga de trabalho mínima de Hodent vale para a carga que "não faz parte do desafio do jogo em si", e num RTS competitivo a velocidade com os controles faz parte desse desafio. O objetivo não é tornar os atalhos desnecessários, mas fazer com que eles possam ser aprendidos.
+
+## O que isso me ensinou
+
+A primeira parte me mostrou o que funcionava em Warcraft III; esta me mostrou por quê. Para um jogador de RTS, quase todo o jogo rodava no Sistema 1, e as partes novas chegavam uma de cada vez num prólogo tranquilo. Os problemas começam onde essa estrutura termina: quando um jogador pula o prólogo, ou quando uma regra como o limite de seleção ou o ataque antiaéreo tem que ser descoberta perdendo.
+
+Você já soube que um atalho te deixaria mais rápido, mas continuou clicando porque aprender no meio da partida parecia lento demais? [Quero saber](#contact).
+
+## Fontes
+
+As citações de fontes em inglês são traduções minhas.
+
+- Kahneman, D. (2011). [*Thinking, Fast and Slow*](https://www.amazon.com/Thinking-Fast-Slow-Daniel-Kahneman/dp/0374533555). Farrar, Straus and Giroux.
+- Hodent, C. (2017). [*The Gamer's Brain: How Neuroscience and UX Can Impact Video Game Design*](https://www.amazon.com/Gamers-Brain-Neuroscience-Impact-Design/dp/1498775500). CRC Press.
+- Lane, D. M., Napier, H. A., Peres, S. C. e Sándor, A. (2005). [Hidden costs of graphical user interfaces: Failure to make the transition from menus and icon toolbars to keyboard shortcuts](https://www.ruf.rice.edu/~lane/papers/hidden_costs.pdf). *International Journal of Human-Computer Interaction*.
+- Cockburn, A., Gutwin, C., Scarr, J. e Malacria, S. (2014). [Supporting novice to expert transitions in user interfaces](https://dl.acm.org/doi/10.1145/2659796). *ACM Computing Surveys*.
+- Thompson, J. J., Blair, M. R., Chen, L. e Henrey, A. J. (2013). [Video game telemetry as a critical tool in the study of complex skill learning](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0075129). *PLOS ONE*.
+- Grossman, T., Dragicevic, P. e Balakrishnan, R. (2007). [Strategies for accelerating on-line learning of hotkeys](https://www.dgp.toronto.edu/~ravin/papers/chi2007_learninghotkeys.pdf). *CHI 2007*.

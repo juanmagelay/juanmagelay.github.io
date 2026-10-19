@@ -1,0 +1,81 @@
+---
+import { render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHead from '../../../components/PageHead.astro';
+import FactSheet from '../../../components/FactSheet.astro';
+import { getPosts, type Post } from '../../../lib/posts';
+import { LANGS, langParam, languages, ui } from '../../../i18n.mjs';
+
+// /writing/<slug>/ for the original, /es/writing/<slug>/ and /pt/writing/<slug>/ for each translation.
+export async function getStaticPaths() {
+  const paths = await Promise.all(
+    LANGS.map(async (lang) =>
+      (await getPosts(lang)).map((post) => ({ params: { lang: langParam(lang), slug: post.slug }, props: { post, lang } }))
+    )
+  );
+  return paths.flat();
+}
+
+const { post, lang } = Astro.props as { post: Post; lang: keyof typeof ui };
+const { Content } = await render(post.entry);
+const data = post.data;
+const t = ui[lang];
+
+const words = (post.entry.body ?? '')
+  .replace(/^import .*$/gm, ' ')
+  .replace(/\{\/\*[\s\S]*?\*\/\}/g, ' ')
+  .replace(/<[^>]+>/g, ' ')
+  .split(/\s+/)
+  .filter(Boolean).length;
+const readingMinutes = Math.max(1, Math.round(words / 230));
+
+const dateFormat = new Intl.DateTimeFormat(languages[lang].locale, { dateStyle: 'long', timeZone: 'UTC' });
+
+const og = data.ogImage ? await getImage({ src: data.ogImage, width: 1200, format: 'jpeg' }) : undefined;
+
+const meta = [
+  { label: t.meta.type, value: t.types[data.type] },
+  { label: t.meta.context, value: data.context },
+  { label: t.meta.published, value: dateFormat.format(data.pubDate), datetime: data.pubDate.toISOString() },
+  { label: t.meta.readingTime, value: `${readingMinutes} min` },
+];
+
+const gameFacts = data.game && [
+  { label: t.game.name, value: data.game.name },
+  { label: t.game.developer, value: data.game.developer },
+  { label: t.game.released, value: data.game.released },
+  { label: t.game.genre, value: data.game.genre },
+  { label: t.game.platform, value: data.game.platform },
+];
+---
+
+<BaseLayout title={data.title} description={data.description} ogImage={og?.src} ogType="article" publishedTime={data.pubDate}>
+  <article>
+    <PageHead title={data.title} dek={data.description} meta={meta}>
+      {gameFacts && <FactSheet slot="aside" label={t.aboutGame} items={gameFacts} image={data.cover} imageAlt={data.coverAlt} />}
+    </PageHead>
+
+    <div class="container container-reading article-body">
+      <div class="prose">
+        <Content />
+      </div>
+      {data.credits && <p class="article-credits">{data.credits}</p>}
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .article-body {
+    padding-bottom: var(--space-16);
+  }
+
+  .article-credits {
+    max-width: var(--layout-prose);
+    margin: var(--space-16) auto 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: var(--type-size-sm);
+  }
+</style>
