@@ -97,6 +97,11 @@ test('key ideas are emphasized', { skip }, () => {
   }
 });
 
-test('the altar image alt names the Altar of Darkness', { skip }, () => {
-  assert.match(body, /alt="[^"]*The Altar of Darkness is on the left\.[^"]*"/);
+// Issue #5: the altar image now shows a hero being revived, in Reforged, and the caption says so.
+test('the altar image shows a hero reviving at the Altar of Darkness, credited to Reforged', { skip }, () => {
+  assert.match(body, /alt="Warcraft III: Reforged screenshot[^"]*Altar of Darkness shows a hero's portrait next to a Reviving progress bar[^"]*"/);
+  assert.ok(
+    stripTags(body).includes('but it costs time and resources (Warcraft III: Reforged).'),
+    'The altar caption does not say the image is from Reforged'
+  );
 });
