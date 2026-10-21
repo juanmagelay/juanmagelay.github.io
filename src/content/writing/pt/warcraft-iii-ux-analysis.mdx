@@ -3,7 +3,7 @@
 # Only the text goes here: dates, type, game facts and images come from the original. Keep the file name.
 
 title: 'Quando a estratégia encontrou os heróis de RPG: um olhar de UX sobre Warcraft III (parte 1)'
-description: 'Uma análise de UX de jogos: usabilidade, engajamento e frustração por design no RTS da Blizzard de 2002.'
+description: 'Uma análise de UX de games: usabilidade, engajamento e frustração por design no RTS da Blizzard de 2002.'
 context: 'Curso de Game UX da IxDF'
 game:
   genre: 'Estratégia em tempo real com elementos de RPG'
@@ -26,21 +26,21 @@ import army from '../../../assets/games/warcraft-iii/army.jpg';
 
 Lidero um time de UX que projeta produtos de mensageria. Também estou fazendo o bacharelado em [Desenvolvimento de Videogames e Simulações](https://unahur.edu.ar/licenciatura-en-desarrollo-de-videojuegos-y-simulaciones/) na Universidad Nacional de Hurlingham, em Buenos Aires, Argentina. Para conectar os dois caminhos, estou fazendo o [curso de Game UX da Celia Hodent](https://ixdf.org/courses/game-ux-design-ultimate-guide) na Interaction Design Foundation (IxDF).
 
-A primeira tarefa pede para escolher um momento de um jogo que ficou marcado e analisá-lo como designer de UX: o que fez esse momento funcionar, o que não funcionou e o que ele ensina sobre a experiência do jogador. Este post é a minha resposta.
+A primeira tarefa pede para **escolher um jogo que você lembre de ter jogado muito e analisá-lo como designer UX**: o que fez o jogo funcionar, o que não funcionou e o que você pode melhorar na experiência do jogador. Este post é a minha resposta.
 
-Escolhi Warcraft III porque é o jogo em que tudo o que eu gostava como jogador se juntou pela primeira vez. Compará-lo com Age of Empires (AoE), o jogo de estratégia que eu mais tinha jogado até então, me ajudou a ver o que a Blizzard mudou e por que deu certo.
+Escolhi Warcraft III porque é o jogo em que, pela primeira vez, **se juntou tudo o que eu gostava** na mistura de gêneros daquela época. Compará-lo com Age of Empires I e II (AoE), os jogos de estratégia que eu mais tinha jogado até então, me ajudou a ver o que a Blizzard mudou e por que deu certo.
 
-## O momento
+## Três gêneros em um só jogo
 
-Antes de Warcraft III, eu tinha passado muitas horas jogando Age of Empires I e II e StarCraft, em que o que eu mais curtia era planejar as jogadas de que precisava para vencer. Também jogava jogos com progressão de RPG, como os Pokémon (Red, Blue, Gold e Silver), Diablo II e até Mario Tennis no Game Boy Color, e adorava deixar meus personagens mais fortes com novas habilidades e itens. E era fã de aventuras em 3D como Super Mario 64, Sonic 3D Blast e Crash Bandicoot.
+Antes de Warcraft III, eu tinha passado muitas horas jogando AoE e StarCraft, em que o que eu mais curtia era planejar as jogadas de que precisava para vencer. Também jogava jogos com progressão de RPG, como os Pokémon (Red, Blue, Gold e Silver), Diablo II e até Mario Tennis no Game Boy Color, e adorava deixar meus personagens mais fortes com novas habilidades e itens. E era fã de aventuras em 3D como Super Mario 64, Sonic 3D Blast e Crash Bandicoot.
 
-Na primeira vez que joguei Warcraft III, percebi que ele juntava esses três mundos num só jogo. O loop principal era o que eu conhecia de AoE: coletar recursos, construir uma base, treinar um exército e lutar. Mas meu exército tinha um herói, que ganhava experiência, subia até o nível 10, aprendia novas habilidades e carregava itens. E o mundo era em 3D: por padrão, uma câmera aérea inclinada, e a roda do mouse me deixava aproximar bem mais a visão. Eu não precisava mais escolher entre os jogos de que gostava. A nostalgia provavelmente pesa aqui, mas vou tentar manter esta análise objetiva.
+Na primeira vez que joguei Warcraft III, percebi que **ele juntava esses três mundos num só jogo**. O *core loop* era o que eu conhecia de AoE: coletar recursos, construir uma base, treinar um exército e atacar. Mas meu exército tinha um herói, que ganhava experiência, subia até o nível 10, aprendia novas habilidades e carregava itens. E o mundo era em 3D: por padrão, uma câmera aérea inclinada, e a roda do mouse me deixava aproximar bem mais a visão. A nostalgia provavelmente pesa aqui, mas vou tentar manter esta análise objetiva.
 
 ## Análise de UX
 
-### Usabilidade vs. engajamento
+### Usabilidade e engajamento
 
-Warcraft III era fácil de começar a jogar porque não reinventava os controles. Ele seguia as convenções de RTS que eu já conhecia de AoE e StarCraft: o HUD ficava na parte de baixo da tela, com o minimapa, as informações da unidade e os comandos, então eu podia controlar tudo sem cobrir a cena principal. O som fazia boa parte do trabalho de feedback. As vozes das unidades e os alertas me avisavam quando uma construção ficava pronta ou quando minha base estava sendo atacada, mesmo quando eu estava olhando para outro lugar. Isso é *usabilidade*: eu sempre sabia o que estava acontecendo e como agir.
+Warcraft III era fácil de começar a jogar porque **não reinventava os controles**. Ele seguia as convenções de RTS que eu já conhecia de AoE e StarCraft: o HUD ficava na parte de baixo da tela, com o minimapa, as informações da unidade e os comandos, então eu podia controlar tudo sem cobrir a cena principal. O som fazia boa parte do trabalho de feedback. As vozes das unidades e os alertas me avisavam quando uma construção ficava pronta ou quando minha base estava sendo atacada, mesmo quando eu estava olhando para outro lugar. Isso é *usabilidade*: eu sempre sabia o que estava acontecendo e como agir.
 
 <Figure
   src={hud}
@@ -49,11 +49,11 @@ Warcraft III era fácil de começar a jogar porque não reinventava os controles
   caption="Convenções conhecidas: o HUD deixa os controles embaixo e a ação à vista."
 />
 
-Mas a usabilidade sozinha não explica por que eu continuei jogando. As partidas duravam mais ou menos a metade das de AoE (as minhas levavam cerca de uma hora, enquanto em AoE podiam durar duas), então cada sessão parecia completa. As unidades voadoras, que AoE nunca teve, levaram a ação para o ar. E o herói me deu algo que AoE nunca tinha me dado: um personagem com quem me importar. Perder unidades comuns fazia parte do plano. Perder meu herói era pessoal.
+Mas **a usabilidade sozinha não explica por que eu continuei jogando**. As partidas duravam mais ou menos a metade das de AoE (as minhas levavam cerca de uma hora, enquanto em AoE podiam durar duas). As unidades voadoras, que AoE nunca teve, levaram a ação para o ar. E o herói me deu algo que AoE nunca tinha me dado: um personagem com quem me importar. Perder unidades comuns fazia parte do plano, mas o herói era alguém para treinar e cuidar.
 
 ### Frustração por design ou problema de usabilidade?
 
-Dois momentos me fizeram pensar nessa diferença. O primeiro foi perder meu herói. Doía: eu tinha que lutar sem ele por um tempo e pagar para revivê-lo no altar. Mas ele voltava com o nível e os itens, então o jogo punia meu erro sem apagar meu progresso. Isso é *frustração por design*: um custo colocado de propósito para eu cuidar dele.
+Dois momentos me fizeram pensar nessa diferença. O primeiro foi perder meu herói. Doía: lutar sem ele era uma grande desvantagem, eu perdia a chance de treiná-lo naquela batalha e pagava para revivê-lo no altar. Mas ele voltava com o nível e os itens, então **o jogo punia meu erro sem apagar meu progresso**. Isso é *frustração por design*: um custo colocado de propósito para eu cuidar dele.
 
 <Figure
   src={altar}
@@ -71,22 +71,22 @@ O segundo foi o limite de seleção de 12 unidades. Vindo de AoE, onde eu podia 
 
 ### Considerações de gênero e plataforma
 
-Quem joga RTS espera um controle rápido e claro, e quem joga RPG espera uma sensação de progressão. Misturar os dois é arriscado: com RPG demais, a estratégia fica lenta; com RPG de menos, o herói vira só mais uma unidade. Warcraft III equilibrou isso mantendo a progressão dentro da partida: o herói subia de nível lutando, então ficar mais forte acontecia enquanto eu jogava a estratégia, e não no lugar dela. E o limite de nível 10 impedia que o herói substituísse o exército.
+Quem joga RTS espera um controle rápido e claro, e quem joga RPG espera uma sensação de progressão. Misturar os dois é arriscado: com RPG demais, a estratégia fica lenta; com RPG de menos, o herói vira só mais uma unidade. Warcraft III equilibrou isso **mantendo a progressão dentro da partida**: o herói subia de nível lutando, então ficar mais forte acontecia enquanto eu jogava a estratégia, e não no lugar dela. E o limite de nível 10 impedia que o herói substituísse o exército.
 
-Quanto à plataforma, Warcraft III saiu só para PC, e a Blizzard nunca lançou uma versão para console. Faz sentido: um RTS precisa da precisão do mouse e do teclado para selecionar unidades e dar ordens rápido, algo que um controle torna muito mais difícil.
+Quanto à plataforma, Warcraft III saiu só para PC, e a Blizzard nunca lançou uma versão para console. Faz sentido: **um RTS precisa da precisão do mouse e do teclado** para selecionar unidades e dar ordens rápido, algo que um controle torna muito mais difícil.
 
-A Argentina acrescentou sua própria camada. 2002 foi o ano da crise econômica, e os consoles na maioria das casas eram mais antigos e mais baratos: o PlayStation original, o Family Game (um clone do NES), o Sega Genesis (Mega Drive) ou o Nintendo 64. O PlayStation 2, o GameCube e o Xbox eram luxo. Os jogos de PC viviam nos cibercafés, os cybers, como a gente chamava lá (no Brasil, as LAN houses), e foi ali que Warcraft III decolou. Para mim e para muitos jogadores, a plataforma não era um PC em casa, mas uma sala cheia deles, ligados em rede local.
+A Argentina acrescentou sua própria camada. 2002 foi o ano da crise econômica, e os consoles na maioria das casas eram mais antigos e mais baratos: o PlayStation original, o Family Game (um clone do NES), o Sega Genesis (Mega Drive) ou o Nintendo 64. O PlayStation 2, o GameCube e o Xbox eram luxo. Eu praticava Warcraft III em casa e **jogava multiplayer nos cibercafés** (os cybers, como a gente chamava lá; no Brasil, as LAN houses), e foi ali que ele decolou.
 
 ## Minha visão como UX Designer
 
-**Manter:** o sistema de heróis e a penalidade pela morte deles. Reviver no altar com o nível e os itens intactos é um custo justo: forte o bastante para fazer você proteger seu herói, leve o bastante para que um erro não acabe com a partida. Eu também manteria o feedback sonoro, que permite gerenciar uma base inteira sem checar cada canto do mapa.
+**Manter:** o sistema de heróis e a penalidade pela morte deles. Reviver no altar com o nível e os itens intactos **é um custo justo**: forte o bastante para fazer você proteger seu herói, leve o bastante para que um erro não acabe com a partida. Eu também manteria o feedback sonoro, que permite gerenciar uma base inteira sem checar cada canto do mapa.
 
-**Mudar:** não conheço as restrições do time, que em 2002 podiam incluir limites técnicos ou de espaço na tela, então eu não mexeria no limite. **O problema que eu apontaria é como o limite é comunicado.** Na primeira vez que uma seleção com caixa passa de 12 unidades, uma dica curta poderia apresentar ao jogador os grupos de controle (<kbd>Ctrl</kbd> + uma tecla numérica). Uma mensagem, uma vez só, e o limite deixa de parecer um bug e passa a ser lido como uma regra. Em setembro de 2026, a Blizzard aumentou a seleção máxima de 12 para 24 unidades no [Patch 3.0 de Warcraft III: Reforged](https://liquipedia.net/warcraft/Patch_3.0.0), o que sugere que o atrito era real para muitos jogadores. Mas aumentar o limite muda o jeito de jogar, enquanto uma dica corrige a comunicação e deixa o design intacto.
+**Mudar:** não conheço as restrições que existiam naquele momento, em 2002, então vamos supor que o limite de 12 tinha que ser mantido. **O problema que eu apontaria é como o limite é comunicado.** Na primeira vez que uma seleção com caixa passa de 12 unidades, uma dica curta poderia apresentar ao jogador os grupos de controle (<kbd>Ctrl</kbd> + uma tecla numérica). Com uma mensagem, acho que o limite deixa de parecer um bug e passa a ser lido como uma regra. Em setembro de 2026, a Blizzard aumentou a seleção máxima de 12 para 24 unidades no [Patch 3.0 de Warcraft III: Reforged](https://liquipedia.net/warcraft/Patch_3.0.0), o que sugere que o atrito era real para muitos jogadores. Mas aumentar o limite muda o jeito de jogar, enquanto uma dica corrige a comunicação e deixa o design intacto.
 
-## O que isso me ensinou
+## O que analisar a experiência do jogador me ensinou
 
 A lição mais clara de olhar para Warcraft III como designer: **usabilidade e engajamento cumprem papéis diferentes**. Controles conhecidos e um bom feedback deixaram o jogo fácil de aprender, mas o herói, as partidas mais curtas e as unidades voadoras são o que me fez querer continuar jogando. E nem toda frustração é um problema a resolver: a morte do herói era um custo que valia a pena manter, enquanto o limite de seleção só precisava ser mais bem comunicado.
 
-Se você jogou Warcraft III naquela época, o limite de 12 unidades também te incomodou? [Quero saber](#contact).
+Se você jogou Warcraft III naquela época, o limite de 12 unidades também te incomodou? [Quero saber](/pt/writing/warcraft-iii-ux-analysis/#contact).
 
-Continuei esta análise na [parte 2](/pt/writing/warcraft-iii-cognitive-science-analysis/), pela lente da ciência cognitiva.
+Você pode continuar lendo outra análise do jogo na [parte 2](/pt/writing/warcraft-iii-cognitive-science-analysis/), pela lente da ciência cognitiva.

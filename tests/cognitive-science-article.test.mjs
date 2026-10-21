@@ -62,7 +62,7 @@ const HEADINGS = [
   ['h3', 'learning', 'Learning'],
   ['h2', 'mental-models-and-familiar-patterns', 'Mental models and familiar patterns'],
   ['h2', 'revisiting-what-i-would-improve', 'Revisiting what I would improve'],
-  ['h2', 'what-this-taught-me', 'What this taught me'],
+  ['h2', 'what-analyzing-the-game-from-a-cognitive-perspective-taught-me', 'What analyzing the game from a cognitive perspective taught me'],
   ['h2', 'sources', 'Sources'],
 ];
 
@@ -80,7 +80,7 @@ const LINKS = [
   ['part 2', html, "Celia Hodent's Game UX course", 'https://ixdf.org/courses/game-ux-design-ultimate-guide'],
   ['part 2', html, 'The first part', PART_1],
   ['part 2', html, 'the first part', `${PART_1}#frustration-by-design-or-usability-problem`],
-  ['part 2', html, "I'd like to know", '#contact'],
+  ['part 2', html, "I'd like to know", `${PART_2}#contact`],
   ['part 1', part1, 'part 2', PART_2],
 ];
 

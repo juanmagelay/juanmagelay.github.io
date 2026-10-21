@@ -23,13 +23,13 @@ const stripTags = (fragment) => fragment.replace(/<[^>]+>/g, '').replace(/\s+/g,
 const text = stripTags(body);
 
 const HEADINGS = [
-  ['h2', 'the-moment', 'The moment'],
+  ['h2', 'three-genres-in-one-game', 'Three genres in one game'],
   ['h2', 'ux-analysis', 'UX analysis'],
-  ['h3', 'usability-vs-engageability', 'Usability vs. engageability'],
+  ['h3', 'usability-and-engageability', 'Usability and engageability'],
   ['h3', 'frustration-by-design-or-usability-problem', 'Frustration by design or usability problem?'],
   ['h3', 'genre-and-platform-considerations', 'Genre and platform considerations'],
   ['h2', 'my-take-as-a-ux-designer', 'My take as a UX Designer'],
-  ['h2', 'what-this-taught-me', 'What this taught me'],
+  ['h2', 'what-analyzing-the-player-experience-taught-me', 'What analyzing the player experience taught me'],
 ];
 
 test('headings keep their text, ids and order', { skip }, () => {
@@ -41,10 +41,11 @@ test('headings keep their text, ids and order', { skip }, () => {
   assert.deepEqual(found, HEADINGS);
 });
 
+// Issue #13: the first mention names both games.
 test('Age of Empires is introduced as AoE and never written AOE', { skip }, () => {
-  const intro = text.indexOf('Age of Empires (AoE)');
-  assert.ok(intro >= 0, 'Missing "Age of Empires (AoE)"');
-  assert.equal(text.indexOf('AoE'), intro + 'Age of Empires ('.length, 'AoE is used before it is introduced');
+  const intro = text.indexOf('Age of Empires I and II (AoE)');
+  assert.ok(intro >= 0, 'Missing "Age of Empires I and II (AoE)"');
+  assert.equal(text.indexOf('AoE'), intro + 'Age of Empires I and II ('.length, 'AoE is used before it is introduced');
   assert.doesNotMatch(text, /AOE/);
 });
 
@@ -52,7 +53,8 @@ const LINKS = [
   ['Video Game and Simulation Development', 'https://unahur.edu.ar/licenciatura-en-desarrollo-de-videojuegos-y-simulaciones/'],
   ["Celia Hodent's Game UX course", 'https://ixdf.org/courses/game-ux-design-ultimate-guide'],
   ['Warcraft III: Reforged Patch 3.0', 'https://liquipedia.net/warcraft/Patch_3.0.0'],
-  ["I'd like to know", '#contact'],
+  // Issue #13: a path, so Medium's importer turns it into an absolute link.
+  ["I'd like to know", '/writing/warcraft-iii-ux-analysis/#contact'],
 ];
 const links = [...body.matchAll(/<a\b[^>]*\bhref="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)].map(([, href, inner]) => [
   stripTags(inner),
