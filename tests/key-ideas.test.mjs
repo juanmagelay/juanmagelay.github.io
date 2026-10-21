@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { assertBuilt } from './site-checks.mjs';
+import { assertBuilt, findDashes } from './site-checks.mjs';
 import { LANGS, localizePath } from '../src/i18n.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -124,3 +124,41 @@ for (const name of originals) {
     }
   });
 }
+
+// Scenario: mi voz queda documentada para los próximos posts. What the guide says is the PO's call.
+const guidePath = join(root, 'design/voice-and-tone.md');
+const guide = existsSync(guidePath) ? readFileSync(guidePath, 'utf8') : '';
+
+test('the voice and tone guide exists', () => {
+  assert.ok(guide, 'Missing design/voice-and-tone.md');
+});
+
+test('every principle in the guide has at least one example and one counterexample', { skip: !guide }, () => {
+  const principles =
+    guide
+      .split(/^## /m)
+      .find((section) => section.startsWith('Principios'))
+      ?.split(/^### /m)
+      .slice(1) ?? [];
+  assert.ok(principles.length > 0, 'No principles under "## Principios"');
+  const incomplete = principles
+    .filter((principle) => !/^- Sí: /m.test(principle) || !/^- No: /m.test(principle))
+    .map((principle) => principle.split('\n')[0]);
+  assert.deepEqual(incomplete, []);
+});
+
+test(`the guide and these checks agree on ${MAX_WORDS} words per idea in bold`, { skip: !guide }, () => {
+  assert.match(guide, new RegExp(`${MAX_WORDS} palabras o menos`));
+});
+
+test('the guide has no dashes', { skip: !guide }, () => {
+  assert.deepEqual(findDashes(guide), []);
+});
+
+// CLAUDE.md is git-ignored, so this check only runs where the file exists, not in the deploy workflow.
+const claudePath = join(root, 'CLAUDE.md');
+
+test('CLAUDE.md asks to read the guide before writing, editing or translating a post', { skip: !existsSync(claudePath) }, () => {
+  const claude = readFileSync(claudePath, 'utf8');
+  assert.match(claude, /Before writing, editing or translating a post, read `design\/voice-and-tone\.md`/);
+});
