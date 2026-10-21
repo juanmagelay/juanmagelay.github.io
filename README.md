@@ -47,6 +47,7 @@ src/content/writing/es/    Spanish translations, published at /es/writing/<file 
 src/pages/[...lang]/       the /writing list (newest first, first image as thumbnail) and each post page, per language
 src/lib/                   first-figure.mjs: each post's first image for its thumbnail; posts.ts: posts per language
 src/assets/games/          images, optimized at build time
+src/assets/icons/          icons from Material Symbols Rounded and their license
 src/components/            header, footer, button, page head, spec list, fact sheet, figure, copy email, row list
 src/styles/                design tokens (tokens.css) and global styles
 src/assets/fonts/          font files and their licenses
@@ -62,3 +63,4 @@ tests/                     checks for the built site (npm test)
 - Content is not covered by the MIT license: texts, images and the CV are all rights reserved.
 - Warcraft III screenshots and box art belong to Blizzard Entertainment and are shown for analysis.
 - Fonts: SIL Open Font License 1.1, see the `OFL.txt` file in each folder of `src/assets/fonts/`.
+- Icons: Material Symbols by Google, Apache License 2.0, see `src/assets/icons/LICENSE.txt`.

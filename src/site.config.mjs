@@ -4,21 +4,23 @@
 
 export const site = {
   name: 'Juan Manuel Gelay',
+  // The job title only. The footer adds the company, linked: "<role> at Auronix".
   role: {
-    en: 'Product Design Manager at Auronix',
-    es: 'Product Design Manager en Auronix',
-    pt: 'Product Design Manager na Auronix',
+    en: 'Product Design Manager',
+    es: 'Product Design Manager',
+    pt: 'Product Design Manager',
   },
+  company: { name: 'Auronix', url: 'https://www.auronix.com/' },
   location: {
     en: 'Buenos Aires, Argentina (UTC-3)',
     es: 'Buenos Aires, Argentina (UTC-3)',
     pt: 'Buenos Aires, Argentina (UTC-3)',
   },
-  // Optional. Leave empty to hide. Example: 'Spanish (native), English (B2)'
+  // Optional. Leave empty to hide. Example: 'Spanish (native), English'
   languages: {
-    en: 'Spanish (native), English (B2+), Portuguese (B2)',
-    es: 'español (nativo), inglés (B2+), portugués (B2)',
-    pt: 'espanhol (nativo), inglês (B2+), português (B2)',
+    en: 'Spanish (native), English, Portuguese',
+    es: 'español (nativo), inglés, portugués',
+    pt: 'espanhol (nativo), inglês, português',
   },
   email: 'juanmanuelgelay@gmail.com',
   linkedin: 'https://www.linkedin.com/in/juanmagelay/',

@@ -18,6 +18,7 @@ import {
   findFontFaces,
   findFontVariables,
   buttonMinHeight,
+  classDeclarations,
 } from './design-checks.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -83,6 +84,14 @@ test('font faces and font variables are read with their family', () => {
 test('the button height is read from the .button rule only', () => {
   assert.equal(buttonMinHeight('.button[data-x]{min-height:2.75rem}.button-quiet{min-height:1rem}'), 2.75);
   assert.equal(buttonMinHeight('.card{min-height:2rem}'), undefined);
+});
+
+test('class rules are read outside media queries or inside the one asked for', () => {
+  const css = '.a{top:0}@media (width<40rem){.b .a[data-x]{width:1rem}}@media (width >= 56rem){.a{width:2rem}}.ab{left:0}.a:hover{right:0}';
+  assert.equal(classDeclarations(css, 'a'), 'top:0');
+  assert.equal(classDeclarations(css, 'a', 'width<40rem'), 'width:1rem');
+  assert.equal(classDeclarations(css, 'a', 'width>=56rem'), 'width:2rem');
+  assert.equal(classDeclarations(css, 'c'), '');
 });
 
 // Scenario: los colores de marca coinciden con el design system en los dos temas.
@@ -232,6 +241,36 @@ for (const file of pages) {
       const rule = css.match(/\.fact-sheet-image\s*\{([^}]*)\}/)?.[1] ?? '';
       assert.match(rule, /aspect-ratio:\s*2\s*\/\s*3/);
       assert.match(rule, /object-fit:\s*cover/);
+    });
+  }
+
+  // Issue #12. Scenario: el footer se acomoda al ancho de la pantalla.
+  if (html.includes('id="contact"')) {
+    // From 64rem: below it, the left column can't hold the email and the copy button on one line.
+    test(`${name}: the footer has one column, and two from 64rem`, () => {
+      const base = classDeclarations(css, 'contact');
+      assert.match(base, /display:\s*grid/);
+      assert.doesNotMatch(base, /grid-template-columns/);
+      assert.equal(classDeclarations(css, 'contact', 'width>=56rem'), '', 'The footer has two columns from 56rem');
+      assert.match(classDeclarations(css, 'contact', 'width>=64rem'), /grid-template-columns:\s*minmax\(0(?:px)?,\s*1fr\)\s*minmax\(0(?:px)?,\s*1fr\)/);
+    });
+
+    test(`${name}: the footer lead is in the Lead style and the name in the accent`, () => {
+      const lead = classDeclarations(css, 'contact-lead');
+      assert.match(lead, /font-family:\s*var\(--font-text\)/);
+      assert.match(lead, /font-size:\s*var\(--type-size-lead\)/);
+      assert.doesNotMatch(lead, /font-weight/);
+      assert.match(classDeclarations(css, 'contact-name'), /color:\s*var\(--color-accent\)/);
+    });
+
+    // Scenario: el botón solo ícono sigue siendo usable.
+    test(`${name}: the copy button shows icon and text, and only the 44px icon under 40rem`, () => {
+      assert.match(classDeclarations(css, 'copy-email-button'), /gap:\s*var\(--space-1\)/);
+      assert.equal(classDeclarations(css, 'copy-email-label'), '', 'The label has styles outside the under-40rem rule');
+      assert.match(classDeclarations(css, 'copy-email-button', 'width<40rem'), /width:\s*2\.75rem/);
+      const label = classDeclarations(css, 'copy-email-label', 'width<40rem');
+      assert.match(label, /position:\s*absolute/);
+      assert.match(label, /clip:\s*rect\(0 0 0 0\)/);
     });
   }
 }

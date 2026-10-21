@@ -1,5 +1,6 @@
 ---
 import Button from './Button.astro';
+import CopyIcon from '../assets/icons/content_copy.svg';
 import { t } from '../i18n.mjs';
 
 interface Props {
@@ -7,11 +8,15 @@ interface Props {
 }
 const { email } = Astro.props;
 const copy = t(Astro.url.pathname);
+// The icon is decorative: the button keeps its text as its name, hidden on screens under 40rem. Issue #12.
 ---
 
 <div class="copy-email">
   <a class="copy-email-address" href={`mailto:${email}`} data-umami-event="email-click">{email}</a>
-  <Button variant="quiet" data-copy-email={email} data-copied={copy.copied} data-copy-failed={copy.copyFailed}>{copy.copyEmail}</Button>
+  <Button variant="quiet" class="copy-email-button" data-copy-email={email} data-copied={copy.copied} data-copy-failed={copy.copyFailed}>
+    <CopyIcon class="copy-email-icon" width="24" height="24" fill="currentColor" aria-hidden="true" />
+    <span class="copy-email-label">{copy.copyEmail}</span>
+  </Button>
   <span class="copy-email-status" role="status" aria-live="polite"></span>
 </div>
 
@@ -56,9 +61,36 @@ const copy = t(Astro.url.pathname);
     text-decoration: underline;
   }
 
+  /* The icon's 24px box has about 4px of air on its left, so the left padding is 4px shorter to look even. */
+  .copy-email :global(.copy-email-button) {
+    gap: var(--space-1);
+    padding-inline: var(--space-4) var(--space-5);
+  }
+
+  .copy-email :global(.copy-email-icon) {
+    flex-shrink: 0;
+  }
+
   .copy-email-status {
     color: var(--color-text-secondary);
     font-family: var(--font-data);
     font-size: var(--type-size-meta);
+  }
+
+  /* Icon only: a 44px square next to the address. The text stays for screen readers. */
+  @media (width < 40rem) {
+    .copy-email :global(.copy-email-button) {
+      width: 2.75rem;
+      padding: 0;
+    }
+
+    .copy-email-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
   }
 </style>

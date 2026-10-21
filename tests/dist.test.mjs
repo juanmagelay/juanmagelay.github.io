@@ -1,7 +1,7 @@
 // Runs the site rules on every page of the build. Run npm run build first. Issue #1.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,7 +18,7 @@ import {
   findLinks,
   checkAnalytics,
 } from './site-checks.mjs';
-import { langFromPath } from '../src/i18n.mjs';
+import { langFromPath, ui } from '../src/i18n.mjs';
 
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 
@@ -46,21 +46,27 @@ const ENGLISH_CV = { href: site.cvPath, download: 'CV Juan Manuel Gelay · Produ
 const SPANISH_CV = { href: site.cvSpanishPath, download: 'CV Juan Manuel Gelay · Product Design Manager (ES).pdf', language: 'es' };
 const CV = { en: ENGLISH_CV, es: SPANISH_CV, pt: ENGLISH_CV };
 
-// The contact section in each language.
+// The contact section in each language: the lead, the bio line by line and the note issue #12 removed.
 const CONTACT = {
   en: {
-    next: 'Case studies from my product work are on the way.',
-    who: 'Juan Manuel Gelay, Product Design Manager at Auronix. Based in Buenos Aires, Argentina (UTC-3). Languages: Spanish (native), English (B2+), Portuguese (B2).',
+    lead: 'Email is the fastest way to reach me.',
+    bio: ['Juan Manuel Gelay', 'Product Design Manager at Auronix.', 'Based in Buenos Aires, Argentina (UTC-3).', 'Languages: Spanish (native), English, Portuguese.'],
+    removedNote: 'Case studies from my product work are on the way.',
   },
   es: {
-    next: 'Los casos de estudio de mi trabajo en producto están en camino.',
-    who: 'Juan Manuel Gelay, Product Design Manager en Auronix. Radicado en Buenos Aires, Argentina (UTC-3). Idiomas: español (nativo), inglés (B2+), portugués (B2).',
+    lead: 'El email es la forma más rápida de contactarme.',
+    bio: ['Juan Manuel Gelay', 'Product Design Manager en Auronix.', 'Radicado en Buenos Aires, Argentina (UTC-3).', 'Idiomas: español (nativo), inglés, portugués.'],
+    removedNote: 'Los casos de estudio de mi trabajo en producto están en camino.',
   },
   pt: {
-    next: 'Os estudos de caso do meu trabalho com produto estão a caminho.',
-    who: 'Juan Manuel Gelay, Product Design Manager na Auronix. Baseado em Buenos Aires, Argentina (UTC-3). Idiomas: espanhol (nativo), inglês (B2+), português (B2).',
+    lead: 'O e-mail é o jeito mais rápido de falar comigo.',
+    bio: ['Juan Manuel Gelay', 'Product Design Manager na Auronix.', 'Baseado em Buenos Aires, Argentina (UTC-3).', 'Idiomas: espanhol (nativo), inglês, português.'],
+    removedNote: 'Os estudos de caso do meu trabalho com produto estão a caminho.',
   },
 };
+
+// The path of the copy icon, as Google publishes it in Material Symbols. Issue #12.
+const COPY_ICON = readFileSync(new URL('../src/assets/icons/content_copy.svg', import.meta.url), 'utf8').match(/\sd="([^"]+)"/)[1];
 
 const decode = (text) =>
   text
@@ -69,6 +75,8 @@ const decode = (text) =>
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&amp;/g, '&');
+
+const stripTags = (fragment) => decode(fragment.replace(/<[^>]*>/g, '')).replace(/\s+/g, ' ').trim();
 
 // Issue #7. This URL is already shared: renaming the file would break those links.
 test('the English CV keeps its published URL', () => {
@@ -146,15 +154,57 @@ for (const file of pages) {
     assert.deepEqual(findLinks(html).filter((link) => link.href === other), []);
   });
 
-  // Issue #6
-  test(`${name}: the contact note only says case studies are on the way`, () => {
-    const note = html.match(/<p\b[^>]*class="[^"]*\bcontact-next\b[^"]*"[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? '';
-    assert.equal(decode(note.replace(/<[^>]*>/g, '')).replace(/\s+/g, ' ').trim(), CONTACT[lang].next);
+  // Issue #12. Scenario: el footer separa el contacto de la presentación.
+  test(`${name}: the footer shows how to reach me first, then who I am`, () => {
+    const footer = html.slice(html.indexOf('<footer'), html.indexOf('</footer>'));
+    const order = [
+      ['how to reach me', /class="[^"]*\bcontact-reach\b/],
+      ['title', /id="contact-title"/],
+      ['lead', /class="[^"]*\bcontact-lead\b/],
+      ['email and copy button', /class="[^"]*\bcopy-email\b/],
+      ['who I am', /class="[^"]*\bcontact-about\b/],
+      ['bio', /class="[^"]*\bcontact-who\b/],
+      ['CV', /data-umami-event="cv-download"/],
+      ['LinkedIn', /data-umami-event="linkedin"/],
+    ];
+    let previous = -1;
+    for (const [part, pattern] of order) {
+      const at = footer.search(pattern);
+      assert.ok(at > previous, `The footer's ${part} is missing or out of order`);
+      previous = at;
+    }
+    assert.equal(stripTags(footer.match(/<p\b[^>]*class="[^"]*\bcontact-lead\b[^"]*"[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? ''), CONTACT[lang].lead);
+    assert.ok(!stripTags(footer).includes(CONTACT[lang].removedNote), 'The case studies note is still in the footer');
   });
 
-  test(`${name}: the contact section shows the current role, location and languages`, () => {
+  // Issue #12. Scenario: la presentación se lee en cuatro líneas.
+  test(`${name}: the bio reads in four lines, with the name in the accent, the role in bold and a link to Auronix`, () => {
     const who = html.match(/<p\b[^>]*class="[^"]*\bcontact-who\b[^"]*"[^>]*>([\s\S]*?)<\/p>/)?.[1] ?? '';
-    assert.equal(decode(who.replace(/<[^>]*>/g, '')).replace(/\s+/g, ' ').trim(), CONTACT[lang].who);
+    assert.deepEqual(who.split(/<br\b[^>]*>/).map(stripTags), CONTACT[lang].bio);
+    assert.equal(stripTags(who.match(/<span\b[^>]*class="contact-name"[^>]*>([\s\S]*?)<\/span>/)?.[1] ?? ''), site.name);
+    assert.equal(stripTags(who.match(/<strong\b[^>]*>([\s\S]*?)<\/strong>/)?.[1] ?? ''), 'Product Design Manager');
+    const links = [...who.matchAll(/<a\b[^>]*\bhref="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)].map(([, href, inner]) => [stripTags(inner), href]);
+    assert.deepEqual(links, [['Auronix', 'https://www.auronix.com/']]);
+  });
+
+  // Issue #12. Scenario: el botón solo ícono sigue siendo usable.
+  test(`${name}: the copy button shows the Material Symbols icon before its text`, () => {
+    const button = html.match(/<button\b[^>]*data-copy-email[^>]*>([\s\S]*?)<\/button>/)?.[1] ?? '';
+    const icon = button.search(/<svg\b/);
+    const label = button.search(/<span\b[^>]*class="copy-email-label"/);
+    assert.ok(icon >= 0 && button.includes(COPY_ICON), 'The copy button has no content_copy icon');
+    assert.ok(label > icon, 'The icon is not before the text');
+    assert.equal(stripTags(button.slice(label)), ui[lang].copyEmail);
+  });
+
+  // Issue #12: icons are decorative. The button or link around one is named by its text.
+  test(`${name}: every icon is hidden from screen readers and sits in a control with text`, () => {
+    for (const [tag] of html.matchAll(/<svg\b[^>]*>/g)) {
+      assert.match(tag, /\baria-hidden="true"/, `Icon not hidden from screen readers: ${tag}`);
+    }
+    for (const [, , inner] of html.matchAll(/<(button|a)\b[^>]*>([\s\S]*?)<\/\1>/g)) {
+      if (inner.includes('<svg')) assert.notEqual(stripTags(inner), '', 'A control with an icon has no text');
+    }
   });
 
   test(`${name}: copying the email sends email-copy`, () => {

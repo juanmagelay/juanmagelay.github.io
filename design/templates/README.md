@@ -44,7 +44,7 @@ Se mantienen sin cambios de nombre: `--space-N`, `--type-size-display`, `--type-
 | Section title | `.section-title` | | estilo de texto | todas |
 | Spec list | `.spec-list` | grid, stacked | `SpecList.astro` | hero, encabezados, resumen, fact sheet |
 | Tag | `.tag` | | `Tag.astro` | tarjetas, encabezado de caso |
-| Copy email | `.copy-email` | | `CopyEmail.astro` | hero, footer |
+| Copy email | `.copy-email` | ícono y texto; solo ícono debajo de 640px | `CopyEmail.astro` | hero, footer |
 | Case card | `.case-card` | default, featured | `CaseCard.astro` | home, siguiente caso |
 | Row | `.row` | con link, sin link, con descripción, con miniatura (`.row-with-image`) | `RowList.astro` | home, writing |
 | Page head | `.page-head` | con aside, sin aside | `PageHead.astro` | caso, artículo |
@@ -57,13 +57,23 @@ Se mantienen sin cambios de nombre: `--space-N`, `--type-size-display`, `--type-
 | Figure | `.figure` | ancho con `--figure-width` | `Figure.astro` (ya existe) | caso, artículo |
 | Contact footer | `.site-footer` | | `SiteFooter.astro` | todas |
 
-Hechos en la #6: Site header, Button, Section title, Spec list, Copy email, Page head, Fact sheet, Figure y Contact footer. En la #10: Row. En la #11: Language switch. El resto se crea cuando una página lo necesite.
+Hechos en la #6: Site header, Button, Section title, Spec list, Copy email, Page head, Fact sheet, Figure y Contact footer. En la #10: Row. En la #11: Language switch. En la #12: el Contact footer en dos bloques y el ícono de Copy email. El resto se crea cuando una página lo necesite.
 
 Writing (decidido en la #10): la sección reúne todos los posts, de juegos y de otros temas, del más nuevo al más antiguo. Cada fila lleva una miniatura 3:2 a la izquierda, al ancho del rail (12rem), y arriba a todo el ancho por debajo de 40rem. La miniatura es siempre la primera imagen del post, con su mismo alt: no se elige a mano (`src/lib/first-figure.mjs`). Los posts viven en `/writing/<slug>/`. Las URLs viejas en `/games/` redirigen ahí.
 
 Idiomas (decidido en la #11): el sitio está en inglés (original, sin prefijo), español de Argentina, con voseo (`/es/`) y portugués de Brasil (`/pt/`), con los mismos paths en los tres. El selector va arriba a la derecha, después del CV: los códigos EN, ES y PT en JetBrains Mono, el actual en ink y subrayado, los otros en texto secundario. Cada código es un link de 44px con `hreflang`, `lang` y el nombre del idioma en ese idioma para lectores de pantalla (`.visually-hidden`). Debajo de 768px el header pasa a dos filas: nombre y CV arriba; menú e idiomas abajo, con los idiomas a la derecha. En español el botón de CV baja el CV en español; en portugués, el CV en inglés.
 
 Artículos (decidido en la #6): cada bloque tiene el mismo espacio a ambos lados. El encabezado va al ancho del contenedor, igual que el header del sitio: el título en el borde izquierdo y, desde 56rem, la ficha del juego en el borde derecho. El cuerpo va en una columna central (`.container-reading`) donde cada bloque se centra: el texto a 42rem y las figuras hasta 52rem.
+
+Footer (decidido en la #12): dos bloques, lado a lado desde 64rem (1024px) y uno debajo del otro antes, con 32px (`--space-8`) entre los dos. Con 56rem la columna izquierda quedaba angosta y el botón de copiar bajaba abajo del email hasta 936px. El primero es cómo contactarme: el título de sección, la frase "Email is the fastest way to reach me." en el estilo Lead (no es un titular) y el email con Copy email. El segundo es quién soy: la bio en cuatro líneas (el nombre en acento; el cargo en negrita "at" la empresa con link; la ubicación; los idiomas) y debajo Download CV y LinkedIn. Copy email lleva el ícono a la izquierda del texto, con 4px entre los dos; debajo de 640px queda solo el ícono, en un botón de 44 × 44px, y el texto sigue en el botón para lectores de pantalla.
+
+## Íconos
+
+- Librería: [Material Symbols](https://fonts.google.com/icons) de Google, estilo Rounded, con Fill 0, Weight 200, Grade 0 y Optical size 24. Todos los íconos usan esta configuración.
+- Cada ícono es un SVG en `src/assets/icons/`, guardado tal cual lo publica Google, con el nombre de Material (`content_copy.svg`). Para bajar uno: `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/<nombre>/wght200/24px.svg`, o el mismo archivo en el repo `google/material-design-icons` (`symbols/web/<nombre>/materialsymbolsrounded/<nombre>_wght200_24px.svg`).
+- En Astro se importa como componente, a 24px, con `fill="currentColor"` (toma el color del texto, también en hover y en tema oscuro) y `aria-hidden="true"`: el ícono es decorativo y el botón o link que lo lleva se nombra con su texto.
+- En los templates va inline, con el mismo `path`.
+- Licencia: Apache 2.0, en `src/assets/icons/LICENSE.txt`.
 
 ## Tokens que agrega el template (aprobados en la #6; Figma se alinea a estos)
 

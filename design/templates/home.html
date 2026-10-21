@@ -505,10 +505,39 @@ kbd {
   text-decoration: underline;
 }
 
+/* Ícono content_copy a la izquierda del texto (#12). La caja de 24px del ícono trae unos 4px
+   de aire a la izquierda: el padding de ese lado es 4px más corto para que se vea parejo. */
+.copy-email .copy-email-button {
+  gap: var(--space-1);
+  padding-inline: var(--space-4) var(--space-5);
+}
+
+.copy-email-icon {
+  flex-shrink: 0;
+}
+
 .copy-email-status {
   color: var(--color-text-secondary);
   font-family: var(--font-data);
   font-size: var(--type-size-meta);
+}
+
+/* Debajo de 640px, solo el ícono: un cuadrado de 44px al lado del email.
+   El texto sigue en el botón para lectores de pantalla. */
+@media (width < 40rem) {
+  .copy-email .copy-email-button {
+    width: 2.75rem;
+    padding: 0;
+  }
+
+  .copy-email-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 }
 
 /* Placeholder de imagen (solo template: se reemplaza por <Image />) */
@@ -851,25 +880,36 @@ kbd {
   padding-block: var(--space-16);
 }
 
-.contact-lead {
-  margin-top: var(--space-4);
-  font-family: var(--font-voice);
-  font-weight: 700;
-  font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.5rem);
-  line-height: 1.1;
-  letter-spacing: var(--tracking-display);
-  max-width: 16ch;
+/* Dos bloques (#12): cómo contactarme (título, frase y email) y quién soy (bio, CV y LinkedIn).
+   Uno debajo del otro, con 32px entre los dos, y lado a lado desde 64rem: antes, la columna
+   izquierda no tiene lugar para el email y el botón de copiar en una línea. */
+.contact-reach {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
+/* Estilo de texto Lead: una frase de intro, no un titular. */
+.contact-lead {
+  font-family: var(--font-text);
+  font-size: var(--type-size-lead);
+  line-height: var(--type-leading-body);
+}
+
+.contact-about {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* La bio en cuatro líneas: nombre en acento, cargo en negrita y link a la empresa, ubicación e idiomas. */
 .contact-who {
   max-width: 36rem;
   color: var(--color-text-secondary);
 }
 
-.contact-actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+.contact-name {
+  color: var(--color-accent);
 }
 
 .contact-links {
@@ -881,7 +921,7 @@ kbd {
   list-style: none;
 }
 
-@media (width >= 56rem) {
+@media (width >= 64rem) {
   .contact {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
@@ -1314,17 +1354,20 @@ kbd {
 </main>
 <footer class="site-footer">
   <section class="container contact" id="contact" aria-labelledby="contact-title">
-    <div>
+    <div class="contact-reach">
       <h2 class="section-title" id="contact-title">Contact</h2>
       <p class="contact-lead">Email is the fastest way to reach me.</p>
-    </div>
-    <div class="contact-actions">
-      <p class="contact-who">Juan Manuel Gelay, UX &amp; Product Design Manager at Auronix. Based in Hurlingham City, Argentina (UTC-3).</p>
       <div class="copy-email">
         <a class="copy-email-address" href="mailto:juanmanuelgelay@gmail.com" data-umami-event="email-click" data-umami-event-location="footer">juanmanuelgelay@gmail.com</a>
-        <button type="button" class="button button-quiet" data-copy-email="juanmanuelgelay@gmail.com">Copy email</button>
+        <button type="button" class="button button-quiet copy-email-button" data-copy-email="juanmanuelgelay@gmail.com">
+          <svg class="copy-email-icon" width="24" height="24" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M364.62-280q-27.62 0-46.12-18.5Q300-317 300-344.62v-430.76q0-27.62 18.5-46.12Q337-840 364.62-840h310.76q27.62 0 46.12 18.5Q740-803 740-775.38v430.76q0 27.62-18.5 46.12Q703-280 675.38-280H364.62Zm0-40h310.76q9.24 0 16.93-7.69 7.69-7.69 7.69-16.93v-430.76q0-9.24-7.69-16.93-7.69-7.69-16.93-7.69H364.62q-9.24 0-16.93 7.69-7.69 7.69-7.69 16.93v430.76q0 9.24 7.69 16.93 7.69 7.69 16.93 7.69Zm-120 160q-27.62 0-46.12-18.5Q180-197 180-224.61v-450.77q0-8.54 5.73-14.27t14.27-5.73q8.54 0 14.27 5.73t5.73 14.27v450.77q0 9.23 7.69 16.92 7.69 7.69 16.93 7.69h330.76q8.54 0 14.27 5.73t5.73 14.27q0 8.54-5.73 14.27T575.38-160H244.62ZM340-320v-480 480Z"/></svg>
+          <span class="copy-email-label">Copy email</span>
+        </button>
         <span class="copy-email-status" role="status" aria-live="polite"></span>
       </div>
+    </div>
+    <div class="contact-about">
+      <p class="contact-who"><span class="contact-name">Juan Manuel Gelay</span><br><strong>Product Design Manager</strong> at <a href="https://www.auronix.com/">Auronix</a>.<br>Based in Buenos Aires, Argentina (UTC-3).<br>Languages: Spanish (native), English, Portuguese.</p>
       <ul class="contact-links">
         <li><a class="button" href="/cv/Juan%20Manuel%20Gelay%20-%20UX%20&amp;%20Product%20Design%20Manager%20(English).pdf" download data-umami-event="cv-download" data-umami-event-location="footer">Download CV</a></li>
         <li><a class="button button-quiet" href="https://www.linkedin.com/in/juanmagelay/" rel="me" data-umami-event="linkedin">LinkedIn</a></li>

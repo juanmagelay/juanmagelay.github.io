@@ -90,6 +90,42 @@ export function findFontVariables(css) {
   return Object.fromEntries([...css.matchAll(/(--font-[\w-]+)\s*:\s*["']([^"']+)["']/g)].map(([, name, family]) => [name, family]));
 }
 
+// The blocks at the top level of some CSS: a selector or an at-rule, with what its braces hold.
+function blocks(css) {
+  const found = [];
+  let depth = 0;
+  let start = 0;
+  let head = '';
+  for (let i = 0; i < css.length; i++) {
+    if (css[i] === '{') {
+      if (depth === 0) [head, start] = [css.slice(start, i).trim(), i + 1];
+      depth++;
+    } else if (css[i] === '}') {
+      depth--;
+      if (depth === 0) {
+        found.push({ head, body: css.slice(start, i) });
+        start = i + 1;
+      }
+    }
+  }
+  return found;
+}
+
+// The declarations of the rules whose selector ends in this class, outside media queries,
+// or inside the one given without spaces, such as 'width<40rem'. Issue #12.
+export function classDeclarations(css, className, media) {
+  const top = blocks(css.replace(COMMENTS, ''));
+  const rules =
+    media === undefined
+      ? top.filter(({ head }) => !head.startsWith('@'))
+      : top.filter(({ head }) => head.replace(/\s/g, '') === `@media(${media})`).flatMap(({ body }) => blocks(body));
+  const endsInClass = new RegExp(`\\.${className}(?:\\[[^\\]]*\\])?$`);
+  return rules
+    .filter(({ head }) => head.split(',').some((selector) => endsInClass.test(selector.trim())))
+    .map(({ body }) => body.trim())
+    .join(';');
+}
+
 // The smallest min-height, in rem, among rules for the .button class.
 export function buttonMinHeight(css) {
   const heights = [...css.matchAll(/\.button(?:\[[^\]]*\])?\s*\{([^}]*)\}/g)]

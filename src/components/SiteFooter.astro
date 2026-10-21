@@ -7,29 +7,33 @@ import CopyEmail from './CopyEmail.astro';
 const lang = langFromPath(Astro.url.pathname);
 const t = ui[lang];
 const cv = cvFor(lang);
-const who = t.contactWho({ name: site.name, role: site.role[lang], location: site.location[lang], languages: site.languages[lang] });
+const languages = site.languages[lang];
 const year = new Date().getFullYear();
+// Two blocks, side by side from 64rem and stacked below: how to reach me, then who I am. Issue #12.
+// Under 64rem the left column is too narrow for the email and the copy button on one line.
 // The base row's rule sits on an inner block so it spans the content, not the gutters.
 ---
 
 <footer class="site-footer">
   <section class="container contact" id="contact" aria-labelledby="contact-title">
-    <div>
+    <div class="contact-reach">
       <h2 class="section-title" id="contact-title">{t.contactTitle}</h2>
       <p class="contact-lead">{t.contactLead}</p>
+      <CopyEmail email={site.email} />
     </div>
 
-    <div class="contact-actions">
-      <p class="contact-who">{who}</p>
-
-      <CopyEmail email={site.email} />
+    <div class="contact-about">
+      <p class="contact-who">
+        <span class="contact-name">{site.name}</span><br />
+        <strong>{site.role[lang]}</strong>{` ${t.contactAt} `}<a href={site.company.url}>{site.company.name}</a>.<br />
+        {`${t.contactBased} ${site.location[lang]}.`}
+        {languages && <><br />{`${t.contactLanguages} ${languages}.`}</>}
+      </p>
 
       <ul class="contact-links">
         <li><Button href={cv.href} download={cv.download} hreflang={cv.language} data-umami-event="cv-download" data-umami-event-location="footer" data-umami-event-language={cv.language}>{t.downloadCv}</Button></li>
         <li><Button variant="quiet" href={site.linkedin} rel="me" data-umami-event="linkedin">LinkedIn</Button></li>
       </ul>
-
-      <p class="contact-next">{t.contactNext}</p>
     </div>
   </section>
 
@@ -52,17 +56,20 @@ const year = new Date().getFullYear();
     padding-block: var(--space-16);
   }
 
-  .contact-lead {
-    max-width: 16ch;
-    margin-top: var(--space-4);
-    font-family: var(--font-voice);
-    font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.5rem);
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: var(--tracking-display);
+  .contact-reach {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
   }
 
-  .contact-actions {
+  /* Text style Lead: an intro line, not a headline. */
+  .contact-lead {
+    font-family: var(--font-text);
+    font-size: var(--type-size-lead);
+    line-height: var(--type-leading-body);
+  }
+
+  .contact-about {
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
@@ -71,6 +78,10 @@ const year = new Date().getFullYear();
   .contact-who {
     max-width: 36rem;
     color: var(--color-text-secondary);
+  }
+
+  .contact-name {
+    color: var(--color-accent);
   }
 
   .contact-links {
@@ -82,13 +93,7 @@ const year = new Date().getFullYear();
     list-style: none;
   }
 
-  .contact-next {
-    max-width: 36rem;
-    color: var(--color-text-secondary);
-    font-size: var(--type-size-sm);
-  }
-
-  @media (width >= 56rem) {
+  @media (width >= 64rem) {
     .contact {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       align-items: start;

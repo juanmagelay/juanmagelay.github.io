@@ -484,10 +484,39 @@ kbd {
   text-decoration: underline;
 }
 
+/* Ícono content_copy a la izquierda del texto (#12). La caja de 24px del ícono trae unos 4px
+   de aire a la izquierda: el padding de ese lado es 4px más corto para que se vea parejo. */
+.copy-email .copy-email-button {
+  gap: var(--space-1);
+  padding-inline: var(--space-4) var(--space-5);
+}
+
+.copy-email-icon {
+  flex-shrink: 0;
+}
+
 .copy-email-status {
   color: var(--color-text-secondary);
   font-family: var(--font-data);
   font-size: var(--type-size-meta);
+}
+
+/* Debajo de 640px, solo el ícono: un cuadrado de 44px al lado del email.
+   El texto sigue en el botón para lectores de pantalla. */
+@media (width < 40rem) {
+  .copy-email .copy-email-button {
+    width: 2.75rem;
+    padding: 0;
+  }
+
+  .copy-email-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 }
 
 /* Placeholder de imagen (solo template: se reemplaza por <Image />) */
@@ -830,25 +859,36 @@ kbd {
   padding-block: var(--space-16);
 }
 
-.contact-lead {
-  margin-top: var(--space-4);
-  font-family: var(--font-voice);
-  font-weight: 700;
-  font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.5rem);
-  line-height: 1.1;
-  letter-spacing: var(--tracking-display);
-  max-width: 16ch;
+/* Dos bloques (#12): cómo contactarme (título, frase y email) y quién soy (bio, CV y LinkedIn).
+   Uno debajo del otro, con 32px entre los dos, y lado a lado desde 64rem: antes, la columna
+   izquierda no tiene lugar para el email y el botón de copiar en una línea. */
+.contact-reach {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
+/* Estilo de texto Lead: una frase de intro, no un titular. */
+.contact-lead {
+  font-family: var(--font-text);
+  font-size: var(--type-size-lead);
+  line-height: var(--type-leading-body);
+}
+
+.contact-about {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* La bio en cuatro líneas: nombre en acento, cargo en negrita y link a la empresa, ubicación e idiomas. */
 .contact-who {
   max-width: 36rem;
   color: var(--color-text-secondary);
 }
 
-.contact-actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+.contact-name {
+  color: var(--color-accent);
 }
 
 .contact-links {
@@ -860,7 +900,7 @@ kbd {
   list-style: none;
 }
 
-@media (width >= 56rem) {
+@media (width >= 64rem) {
   .contact {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
