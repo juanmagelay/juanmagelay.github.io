@@ -17,6 +17,7 @@ import {
   findBrokenCvLinks,
   findLinks,
   checkAnalytics,
+  webpSize,
 } from './site-checks.mjs';
 import { langFromPath, ui } from '../src/i18n.mjs';
 
@@ -63,6 +64,13 @@ const CONTACT = {
     bio: ['Juan Manuel Gelay', 'Product Design Manager na Auronix.', 'Baseado em Buenos Aires, Argentina (UTC-3).', 'Idiomas: espanhol (nativo), inglês, português.'],
     removedNote: 'Os estudos de caso do meu trabalho com produto estão a caminho.',
   },
+};
+
+// The alt text of my photo in each language. Issue #15.
+const PHOTO_ALT = {
+  en: 'Juan Manuel Gelay smiling, in a black T-shirt, against a blue background.',
+  es: 'Juan Manuel Gelay sonriendo, con remera negra, sobre un fondo azul.',
+  pt: 'Juan Manuel Gelay sorrindo, de camiseta preta, sobre um fundo azul.',
 };
 
 // The path of the copy icon, as Google publishes it in Material Symbols. Issue #12.
@@ -185,6 +193,29 @@ for (const file of pages) {
     assert.equal(stripTags(who.match(/<strong\b[^>]*>([\s\S]*?)<\/strong>/)?.[1] ?? ''), 'Product Design Manager');
     const links = [...who.matchAll(/<a\b[^>]*\bhref="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)].map(([, href, inner]) => [stripTags(inner), href]);
     assert.deepEqual(links, [['Auronix', 'https://www.auronix.com/']]);
+  });
+
+  // Issue #15. Scenario: mi foto acompaña la bio en todas las páginas, también al final de cada post.
+  test(`${name}: my photo sits before the bio, with its alt text in the page's language`, () => {
+    const about = html.slice(html.search(/class="[^"]*\bcontact-about\b/), html.indexOf('</footer>'));
+    const photo = about.match(/<img\b[^>]*\bclass="[^"]*\bcontact-photo\b[^"]*"[^>]*>/);
+    assert.ok(photo, 'No photo next to the bio');
+    assert.ok(photo.index < about.search(/class="[^"]*\bcontact-who\b/), 'The photo is not before the bio');
+    assert.equal(decode(photo[0].match(/\salt="([^"]*)"/)?.[1] ?? ''), PHOTO_ALT[lang]);
+  });
+
+  // Issue #15. Scenario: la foto se sirve al tamaño en que se ve.
+  test(`${name}: my photo is served at 64px and at 128px for 2x screens, never at its original size`, () => {
+    const photo = html.match(/<img\b[^>]*\bclass="[^"]*\bcontact-photo\b[^"]*"[^>]*>/)?.[0] ?? '';
+    assert.match(photo, /\swidth="64"/);
+    assert.match(photo, /\sheight="64"/);
+    const src = photo.match(/\ssrc="([^"]+)"/)?.[1];
+    const retina = (photo.match(/\ssrcset="([^"]*)"/)?.[1] ?? '')
+      .split(',')
+      .map((candidate) => candidate.trim().split(/\s+/))
+      .find(([, descriptor]) => descriptor === '2x')?.[0];
+    const size = (url) => (url && existsSync(join(dist, url)) ? webpSize(readFileSync(join(dist, url))) : undefined);
+    assert.deepEqual([size(src), size(retina)], [{ width: 64, height: 64 }, { width: 128, height: 128 }]);
   });
 
   // Issue #12. Scenario: el botón solo ícono sigue siendo usable.

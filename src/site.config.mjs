@@ -22,6 +22,12 @@ export const site = {
     es: 'español (nativo), inglés, portugués',
     pt: 'espanhol (nativo), inglês, português',
   },
+  // My photo, the same as on LinkedIn, is src/assets/profile-photo.jpg. The footer shows it next to the bio.
+  photoAlt: {
+    en: 'Juan Manuel Gelay smiling, in a black T-shirt, against a blue background.',
+    es: 'Juan Manuel Gelay sonriendo, con remera negra, sobre un fondo azul.',
+    pt: 'Juan Manuel Gelay sorrindo, de camiseta preta, sobre um fundo azul.',
+  },
   email: 'juanmanuelgelay@gmail.com',
   linkedin: 'https://www.linkedin.com/in/juanmagelay/',
   github: 'https://github.com/juanmagelay',

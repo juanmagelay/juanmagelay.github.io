@@ -12,6 +12,7 @@ import {
   findBrokenCvLinks,
   findLinks,
   checkAnalytics,
+  webpSize,
 } from './site-checks.mjs';
 
 const SITE = 'https://juanmagelay.github.io';
@@ -148,4 +149,21 @@ test('links are read with their download name, language and event language', () 
   assert.deepEqual(findLinks(html), [
     { href: '/cv/es.pdf', download: 'CV A & B (ES).pdf', hreflang: 'es', event: 'cv-download', location: undefined, language: 'es' },
   ]);
+});
+
+// Image sizes. Issue #15.
+// The first bytes of a WebP file: its RIFF header, then the image chunk with its data.
+const webp = (chunk, data) => Buffer.concat([Buffer.from(`RIFF\0\0\0\0WEBP${chunk}\0\0\0\0`, 'latin1'), Buffer.from(data)]);
+
+test('the size of a lossy WebP is read from its header', () => {
+  assert.deepEqual(webpSize(webp('VP8 ', [0x10, 0x12, 0x00, 0x9d, 0x01, 0x2a, 0x40, 0x00, 0x80, 0x00])), { width: 64, height: 128 });
+});
+
+test('the size of a lossless or extended WebP is read from its header', () => {
+  assert.deepEqual(webpSize(webp('VP8L', [0x2f, 0x3f, 0xc0, 0x1f, 0x00])), { width: 64, height: 128 });
+  assert.deepEqual(webpSize(webp('VP8X', [0, 0, 0, 0, 63, 0, 0, 127, 0, 0])), { width: 64, height: 128 });
+});
+
+test('a file that is not a WebP has no size', () => {
+  assert.equal(webpSize(Buffer.from([0xff, 0xd8, 0xff, 0xe0, ...new Array(28).fill(0)])), undefined);
 });

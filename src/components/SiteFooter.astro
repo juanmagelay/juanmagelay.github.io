@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import photo from '../assets/profile-photo.jpg';
 import { site } from '../site.config.mjs';
 import { cvFor, langFromPath, ui } from '../i18n.mjs';
 import Button from './Button.astro';
@@ -12,6 +14,7 @@ const year = new Date().getFullYear();
 // Two blocks, side by side from 64rem and stacked below: how to reach me, then who I am. Issue #12.
 // Under 64rem the left column is too narrow for the email and the copy button on one line.
 // The base row's rule sits on an inner block so it spans the content, not the gutters.
+// My photo goes next to the bio, so it also closes every post: a 64px circle, served at 1x and 2x. Issue #15.
 ---
 
 <footer class="site-footer">
@@ -23,12 +26,15 @@ const year = new Date().getFullYear();
     </div>
 
     <div class="contact-about">
-      <p class="contact-who">
-        <span class="contact-name">{site.name}</span><br />
-        <strong>{site.role[lang]}</strong>{` ${t.contactAt} `}<a href={site.company.url}>{site.company.name}</a>.<br />
-        {`${t.contactBased} ${site.location[lang]}.`}
-        {languages && <><br />{`${t.contactLanguages} ${languages}.`}</>}
-      </p>
+      <div class="contact-person">
+        <Image class="contact-photo" src={photo} alt={site.photoAlt[lang]} width={64} height={64} densities={[2]} quality={80} />
+        <p class="contact-who">
+          <span class="contact-name">{site.name}</span><br />
+          <strong>{site.role[lang]}</strong>{` ${t.contactAt} `}<a href={site.company.url}>{site.company.name}</a>.<br />
+          {`${t.contactBased} ${site.location[lang]}.`}
+          {languages && <><br />{`${t.contactLanguages} ${languages}.`}</>}
+        </p>
+      </div>
 
       <ul class="contact-links">
         <li><Button href={cv.href} download={cv.download} hreflang={cv.language} data-umami-event="cv-download" data-umami-event-location="footer" data-umami-event-language={cv.language}>{t.downloadCv}</Button></li>
@@ -73,6 +79,21 @@ const year = new Date().getFullYear();
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
+  }
+
+  /* The photo's top lines up with the name's line, at every width. */
+  .contact-person {
+    display: flex;
+    align-items: start;
+    gap: var(--space-4);
+  }
+
+  .contact-person :global(.contact-photo) {
+    flex: none;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    object-fit: cover;
   }
 
   .contact-who {

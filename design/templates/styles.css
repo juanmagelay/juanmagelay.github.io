@@ -859,7 +859,7 @@ kbd {
   padding-block: var(--space-16);
 }
 
-/* Dos bloques (#12): cómo contactarme (título, frase y email) y quién soy (bio, CV y LinkedIn).
+/* Dos bloques (#12): cómo contactarme (título, frase y email) y quién soy (foto, bio, CV y LinkedIn).
    Uno debajo del otro, con 32px entre los dos, y lado a lado desde 64rem: antes, la columna
    izquierda no tiene lugar para el email y el botón de copiar en una línea. */
 .contact-reach {
@@ -879,6 +879,22 @@ kbd {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+}
+
+/* Foto (#15): un círculo de 64px a la izquierda de la bio, con su borde de arriba en la línea del
+   nombre, en todos los anchos. Sin borde: el fondo azul de la foto marca el círculo en los dos temas. */
+.contact-person {
+  display: flex;
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.contact-photo {
+  flex: none;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 /* La bio en cuatro líneas: nombre en acento, cargo en negrita y link a la empresa, ubicación e idiomas. */

@@ -880,7 +880,7 @@ kbd {
   padding-block: var(--space-16);
 }
 
-/* Dos bloques (#12): cómo contactarme (título, frase y email) y quién soy (bio, CV y LinkedIn).
+/* Dos bloques (#12): cómo contactarme (título, frase y email) y quién soy (foto, bio, CV y LinkedIn).
    Uno debajo del otro, con 32px entre los dos, y lado a lado desde 64rem: antes, la columna
    izquierda no tiene lugar para el email y el botón de copiar en una línea. */
 .contact-reach {
@@ -900,6 +900,22 @@ kbd {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+}
+
+/* Foto (#15): un círculo de 64px a la izquierda de la bio, con su borde de arriba en la línea del
+   nombre, en todos los anchos. Sin borde: el fondo azul de la foto marca el círculo en los dos temas. */
+.contact-person {
+  display: flex;
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.contact-photo {
+  flex: none;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 /* La bio en cuatro líneas: nombre en acento, cargo en negrita y link a la empresa, ubicación e idiomas. */
@@ -1419,7 +1435,10 @@ kbd {
       </div>
     </div>
     <div class="contact-about">
-      <p class="contact-who"><span class="contact-name">Juan Manuel Gelay</span><br><strong>Product Design Manager</strong> at <a href="https://www.auronix.com/">Auronix</a>.<br>Based in Buenos Aires, Argentina (UTC-3).<br>Languages: Spanish (native), English, Portuguese.</p>
+      <div class="contact-person">
+        <div class="placeholder contact-photo" role="img" aria-label="Juan Manuel Gelay smiling, in a black T-shirt, against a blue background."><svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="0" x2="100" y2="100"/><line x1="100" y1="0" x2="0" y2="100"/></svg></div>
+        <p class="contact-who"><span class="contact-name">Juan Manuel Gelay</span><br><strong>Product Design Manager</strong> at <a href="https://www.auronix.com/">Auronix</a>.<br>Based in Buenos Aires, Argentina (UTC-3).<br>Languages: Spanish (native), English, Portuguese.</p>
+      </div>
       <ul class="contact-links">
         <li><a class="button" href="/cv/Juan%20Manuel%20Gelay%20-%20UX%20&amp;%20Product%20Design%20Manager%20(English).pdf" download data-umami-event="cv-download" data-umami-event-location="footer">Download CV</a></li>
         <li><a class="button button-quiet" href="https://www.linkedin.com/in/juanmagelay/" rel="me" data-umami-event="linkedin">LinkedIn</a></li>

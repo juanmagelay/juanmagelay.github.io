@@ -263,6 +263,15 @@ for (const file of pages) {
       assert.match(classDeclarations(css, 'contact-name'), /color:\s*var\(--color-accent\)/);
     });
 
+    // Issue #15. Scenario: mi foto se ve como un círculo al lado del nombre.
+    test(`${name}: my photo is a 64px circle beside the bio`, () => {
+      assert.match(classDeclarations(css, 'contact-person'), /display:\s*flex/);
+      const photo = classDeclarations(css, 'contact-photo');
+      assert.match(photo, /(?:^|;)\s*width:\s*4rem/);
+      assert.match(photo, /(?:^|;)\s*height:\s*4rem/);
+      assert.match(photo, /border-radius:\s*50%/);
+    });
+
     // Scenario: el botón solo ícono sigue siendo usable.
     test(`${name}: the copy button shows icon and text, and only the 44px icon under 40rem`, () => {
       assert.match(classDeclarations(css, 'copy-email-button'), /gap:\s*var\(--space-1\)/);

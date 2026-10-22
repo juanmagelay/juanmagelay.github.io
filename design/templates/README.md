@@ -57,7 +57,7 @@ Se mantienen sin cambios de nombre: `--space-N`, `--type-size-display`, `--type-
 | Figure | `.figure` | ancho con `--figure-width` | `Figure.astro` (ya existe) | caso, artículo |
 | Contact footer | `.site-footer` | | `SiteFooter.astro` | todas |
 
-Hechos en la #6: Site header, Button, Section title, Spec list, Copy email, Page head, Fact sheet, Figure y Contact footer. En la #10: Row. En la #11: Language switch. En la #12: el Contact footer en dos bloques y el ícono de Copy email. El resto se crea cuando una página lo necesite.
+Hechos en la #6: Site header, Button, Section title, Spec list, Copy email, Page head, Fact sheet, Figure y Contact footer. En la #10: Row. En la #11: Language switch. En la #12: el Contact footer en dos bloques y el ícono de Copy email. En la #15: mi foto en el Contact footer. El resto se crea cuando una página lo necesite.
 
 Writing (decidido en la #10): la sección reúne todos los posts, de juegos y de otros temas, del más nuevo al más antiguo. Cada fila lleva una miniatura 3:2 a la izquierda, al ancho del rail (12rem), y arriba a todo el ancho por debajo de 40rem. La miniatura es siempre la primera imagen del post, con su mismo alt: no se elige a mano (`src/lib/first-figure.mjs`). Los posts viven en `/writing/<slug>/`. Las URLs viejas en `/games/` redirigen ahí.
 
@@ -66,6 +66,8 @@ Idiomas (decidido en la #11): el sitio está en inglés (original, sin prefijo),
 Artículos (decidido en la #6): cada bloque tiene el mismo espacio a ambos lados. El encabezado va al ancho del contenedor, igual que el header del sitio: el título en el borde izquierdo y, desde 56rem, la ficha del juego en el borde derecho. El cuerpo va en una columna central (`.container-reading`) donde cada bloque se centra: el texto a 42rem y las figuras hasta 52rem.
 
 Footer (decidido en la #12): dos bloques, lado a lado desde 64rem (1024px) y uno debajo del otro antes, con 32px (`--space-8`) entre los dos. Con 56rem la columna izquierda quedaba angosta y el botón de copiar bajaba abajo del email hasta 936px. El primero es cómo contactarme: el título de sección, la frase "Email is the fastest way to reach me." en el estilo Lead (no es un titular) y el email con Copy email. El segundo es quién soy: la bio en cuatro líneas (el nombre en acento; el cargo en negrita "at" la empresa con link; la ubicación; los idiomas) y debajo Download CV y LinkedIn. Copy email lleva el ícono a la izquierda del texto, con 4px entre los dos; debajo de 640px queda solo el ícono, en un botón de 44 × 44px, y el texto sigue en el botón para lectores de pantalla.
+
+Foto (decidido en la #15): mi foto, la misma que en LinkedIn, va en un círculo de 64px a la izquierda de la bio (`.contact-person`, `.contact-photo`), con su borde de arriba en la línea del nombre y 16px entre la foto y el texto, en todos los anchos. Sin borde: el fondo azul de la foto marca el círculo en los dos temas. Como el footer cierra todas las páginas, la foto también queda al final de cada artículo, junto a la bio; no hay un bloque de autor aparte. El archivo, `src/assets/profile-photo.jpg`, entra tal cual: Astro arma en el build las versiones de 64 y 128px (pantallas 2x). El alt describe la foto en cada idioma y vive en `photoAlt`, en `src/site.config.mjs`. En los templates va un placeholder circular.
 
 ## Íconos
 
