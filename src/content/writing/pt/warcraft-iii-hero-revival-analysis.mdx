@@ -1,0 +1,103 @@
+---
+# Portuguese (Brazil) translation of ../warcraft-iii-hero-revival-analysis.mdx,
+# published at /pt/writing/warcraft-iii-hero-revival-analysis/.
+# Only the text goes here: dates, type, game facts and images come from the original. Keep the file name.
+
+title: 'O que custava de verdade reviver um herói em Warcraft III (parte 3)'
+description: 'Uma análise de UX de games: atenção, carga cognitiva, usabilidade e motivação no momento em que um herói morre no meio da luta.'
+context: 'Curso de Game UX da IxDF'
+game:
+  genre: 'Estratégia em tempo real com elementos de RPG'
+  platform: 'PC (Windows e Mac)'
+coverAlt: 'Arte da caixa de Warcraft III: Reign of Chaos: um close do rosto de um orc, com presas e uma argola no nariz, acima do logo do jogo.'
+credits: 'Capturas de tela e arte de Warcraft III © Blizzard Entertainment, exibidas aqui para fins de análise.'
+---
+
+import Figure from '../../../components/Figure.astro';
+import battle from '../../../assets/games/warcraft-iii/warcraft-iii-reign-of-chaos-battle.jpg';
+import altar from '../../../assets/games/warcraft-iii/warcraft-iii-reign-of-chaos-altar-reviving-hero.png';
+
+<Figure
+  src={battle}
+  loading="eager"
+  alt="Captura de tela de Warcraft III de uma grande batalha de campanha numa clareira da floresta. Unidades, efeitos de feitiços e partículas se amontoam no centro da tela, um cronômetro da missão mostra que faltam 2 minutos e 59 segundos, e o painel de seleção, embaixo, mostra 12 unidades."
+  caption="Numa luta grande, unidades, feitiços e efeitos se acumulam na mesma tela."
+/>
+
+Esta é a terceira parte do meu estudo de Warcraft III para o curso de Game UX da Celia Hodent na IxDF. [A primeira parte](/pt/writing/warcraft-iii-ux-analysis/) olhou para o que fazia o jogo funcionar para os jogadores, e [a segunda](/pt/writing/warcraft-iii-cognitive-science-analysis/), para o que acontecia na cabeça deles.
+
+A terceira e a quarta tarefa pedem para **voltar a um momento e diagnosticá-lo com frameworks específicos**: primeiro memória, atenção e carga cognitiva, depois princípios de usabilidade e motivação. Este post é a minha resposta às duas.
+
+Escolhi um momento que vivi muitas vezes: **meu herói morre no meio de uma luta**, e eu tenho que trazê-lo de volta sem perder a batalha.
+
+## O momento
+
+Joguei as campanhas, mas esse momento vem do multiplayer: partidas 1v1, 2v2 e 3v3 nas LAN houses e online, de casa. No meio da partida, os dois exércitos se encontram e meu herói cai. **A batalha não para enquanto eu decido o que fazer.**
+
+O herói é revivido no altar, lá na minha base. **Para a maioria dos jogadores, isso significava uma ida e volta**: mover a câmera até a base, encontrar o altar, clicar em reviver e levar a câmera de volta para a luta. Os jogadores avançados pulavam essa parte: tinham salvado o altar num grupo de controle (<kbd>Ctrl</kbd> + uma tecla numérica), então apertavam esse número e a tecla de reviver sem mover a câmera. O jogo nunca ensinou isso.
+
+## Atenção, memória e carga cognitiva
+
+### Coisa demais na tela
+
+Numa luta grande, a tela se enche de unidades sobrepostas, efeitos de feitiços, auras e partículas. Tudo isso cai no esboço visuoespacial, a parte da memória de trabalho que registra o que vemos e onde está (Baddeley e Hitch, 1974). O retrato piscando em vermelho me avisava que meu herói estava em apuros, mas **no meio de tanto ruído, muitas vezes eu perdia de vista onde ele estava**.
+
+### Dois lugares ao mesmo tempo
+
+Reviver dividia minha atenção em duas. Minha atenção ativa ia para o altar, o que eu estava procurando, enquanto a luta continuava puxando minha atenção passiva com sons, vozes das unidades e alertas no minimapa. **O jogo empilhava as duas demandas em dois pontos do mapa**: a batalha numa ponta, o altar na outra.
+
+Enquanto eu estava no altar, ainda ouvia a luta e via pontos se mexendo no minimapa. Isso me dizia onde estava a luta, mas não deixava claro como ela ia, então eu tinha que guardar na cabeça a última imagem da batalha. **Eu só sabia se estava ganhando quando levava a câmera de volta.**
+
+### Atalhos sob pressão
+
+As campanhas me davam tempo para praticar sem pressão, mas, como contei na parte 2, o jogo deixou as teclas dos heróis e os grupos de controle para o manual. Saber um atalho (memória explícita) não é o mesmo que usá-lo sem pensar (memória implícita). **Sob pressão, os jogadores recorrem ao que já é automático.** Para um jogador novo, isso é mover a câmera e clicar. Um grupo de controle para o altar nunca teve a chance de virar automático.
+
+## Análise de usabilidade e motivação
+
+### Desafio ou atrito?
+
+Na parte 1, chamei a morte do herói de frustração por design: lutar sem ele, perder a chance de treiná-lo naquela batalha e pagar para revivê-lo são um custo colocado de propósito para eu cuidar dele. Isso continua valendo. **A ida e volta até o altar é outro tipo de custo**: não me faz cuidar melhor do meu herói.
+
+A velocidade também não é o problema. Como escrevi na parte 2, a velocidade com os controles faz parte do desafio num RTS competitivo, e dar conta de base, exército e herói ao mesmo tempo faz parte da graça. **Não saber que existe um caminho mais rápido não faz parte do desafio.** Dois pilares de usabilidade de Hodent ajudam a separar as duas coisas.
+
+**Carga de trabalho mínima:** nenhum dos passos da ida e volta era uma decisão. Eram navegação, e enquanto eu fazia esses passos, a batalha seguia sem que eu a visse. **Para um jogador novo, reviver o herói custava perder a batalha de vista.** Para um jogador avançado, custava duas teclas.
+
+**Flexibilidade:** o caminho mais rápido já estava no jogo: os grupos de controle funcionam para construções, não só para unidades. Mas nada no jogo sugere salvar o altar num deles, então **o atalho só ajudava os jogadores que já o tinham encontrado**.
+
+### O progresso que eu não via
+
+Na teoria da autodeterminação (Ryan e Deci, 2000), competência é a necessidade de sentir que você está melhorando em alguma coisa. Dentro de uma partida, o nível do herói mostrava meu progresso. Fora dela, a campanha ensinava o básico, e o multiplayer só mostrava se eu tinha ganhado e uma tela de pontuação. **Nada apontava para a próxima técnica a aprender**, como salvar o altar numa tecla ou separar em dois grupos as unidades corpo a corpo e as de ataque à distância, então o jogo deixava esse aprendizado por conta do jogador.
+
+## Minha visão como UX Designer
+
+**Manter:** a penalidade pela morte do jeito que está. Lutar sem o herói, perder a chance de treiná-lo naquela batalha e pagar para revivê-lo **me fazem proteger meu herói**, e a ideia é essa.
+
+**Mudar:** eu não mexeria na regra, só **no jeito como os jogadores aprendem o caminho rápido**. Três tipos de ajuda, cada um no seu momento.
+
+**Antes: ensinar o atalho quando o altar está pronto.** Quando seleciono o altar para treinar meu primeiro herói, aparece uma dica curta: "Aperte <kbd>Ctrl</kbd> + um número para salvar este altar. Se seu herói morrer, aperte esse número para revivê-lo sem sair da luta". A partida ainda está tranquila, o altar já está selecionado e a ação leva uma tecla. Eu mostraria a dica ali, e não quando o herói aparece, porque nesse momento minha atenção vai para ele. É a mesma ferramenta que propus na parte 1 para o limite de 12 unidades e, como as dicas da parte 2, os jogadores poderiam pular a dica e lê-la de novo no registro de mensagens.
+
+<Figure
+  src={altar}
+  alt="Captura de tela de Warcraft III: The Frozen Throne de uma base orc na versão em espanhol do jogo. O Altar de tormentas selecionado mostra um herói caído no painel de comandos, com um tooltip que diz Revive Shadow Hunter (H), Zul'kis, nível 1, por 160 de ouro e 5 de comida. Há um retrato de herói acinzentado no canto superior esquerdo."
+  caption="O painel de comandos do altar: a dica ficaria aqui e, com o altar salvo numa tecla, este painel abre sem mover a câmera (Warcraft III: The Frozen Throne, versão em espanhol)."
+/>
+
+**Durante: manter a mensagem para a primeira morte.** Na parte 2, propus uma mensagem interativa na primeira vez que um herói morre: "Seu herói caiu. Ir ao altar e revivê-lo". Clicar nela levaria o jogador direto para lá. Ainda custa perder a luta de vista, mas um jogador que perde um herói pela primeira vez sabe o que fazer em seguida. A dica prepara os jogadores antes de o herói morrer, e a mensagem pega quem não viu a dica.
+
+**Depois: mostrar o que eu aprendi.** Ao fim de cada partida, ao lado da pontuação, uma linha com uma técnica que usei pela primeira vez ("Você reviveu seu herói com um grupo de controle") e a próxima para testar. Uma técnica de cada vez, no fim da partida, quando há tempo para ler. A linha só funciona se mostrar algo que agora eu consigo fazer, e não uma medalha para colecionar.
+
+## O que analisar um momento a fundo me ensinou
+
+Na parte 1, mantive a penalidade pela morte do herói: perdê-lo tem que custar alguma coisa. Na parte 2, propus uma mensagem na primeira vez que ele morre, para os jogadores que pularam o prólogo. Olhar para a atenção e a carga cognitiva me mostrou o que essa mensagem deixa de fora: ir ao altar tira seus olhos da luta. **Nem todo custo num momento difícil faz parte do desafio.**
+
+Lutar sem o herói e pagar para revivê-lo são o desafio. Perder a batalha de vista é atrito, e só pagam esse preço os jogadores que nunca aprenderam os grupos de controle. **O jogo tinha a ferramenta certa e nunca a ensinou**, assim como com o limite de 12 unidades na parte 1.
+
+Então a solução é uma questão de timing: ensinar o atalho antes de o herói morrer, guiar o jogador na primeira vez que isso acontece e mostrar o progresso depois da partida. **A penalidade fica exatamente como estava.**
+
+Se você jogou Warcraft III naquela época, salvava seu altar numa tecla ou fazia a viagem toda vez? [Quero saber](/pt/writing/warcraft-iii-hero-revival-analysis/#contact).
+
+## Fontes
+
+- Hodent, C. (2017). *The Gamer's Brain: How Neuroscience and UX Can Impact Video Game Design*. CRC Press.
+- Baddeley, A. D. e Hitch, G. (1974). Working memory. Em G. H. Bower (Ed.), *The Psychology of Learning and Motivation* (Vol. 8). Academic Press.
+- Ryan, R. M. e Deci, E. L. (2000). Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being. *American Psychologist*.

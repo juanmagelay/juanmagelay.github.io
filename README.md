@@ -4,7 +4,7 @@ Source code of my portfolio site: https://juanmagelay.github.io
 
 ## Status
 
-Pre-launch. A game UX analysis of Warcraft III: Reign of Chaos, in two parts, is live in English, Spanish and Portuguese. Product case studies are in progress.
+Pre-launch. A game UX analysis of Warcraft III: Reign of Chaos, in three parts, is live in English, Spanish and Portuguese. Product case studies are in progress.
 
 ## My role
 

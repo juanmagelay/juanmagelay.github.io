@@ -1,0 +1,110 @@
+---
+# The file name sets the URL: /writing/warcraft-iii-hero-revival-analysis/
+# Do not rename it after publishing: every external link will point here.
+
+title: 'What reviving a hero really cost in Warcraft III (part 3)'
+description: 'A game UX analysis: attention, cognitive load, usability and motivation in the moment a hero dies mid-fight.'
+type: analysis
+status: academic
+context: 'IxDF Game UX course'
+pubDate: 2026-11-21
+game:
+  name: 'Warcraft III: Reign of Chaos'
+  developer: 'Blizzard Entertainment'
+  released: 2002
+  genre: 'Real-time strategy with RPG elements'
+  platform: 'PC (Windows and Mac)'
+cover: ../../assets/games/warcraft-iii/cover.jpg
+coverAlt: "Warcraft III: Reign of Chaos box art: a close-up of an orc's face with tusks and a nose ring, above the game logo."
+ogImage: ../../assets/games/warcraft-iii/warcraft-iii-reign-of-chaos-battle.jpg
+credits: 'Warcraft III screenshots and art © Blizzard Entertainment, shown here for analysis.'
+---
+
+import Figure from '../../components/Figure.astro';
+import battle from '../../assets/games/warcraft-iii/warcraft-iii-reign-of-chaos-battle.jpg';
+import altar from '../../assets/games/warcraft-iii/warcraft-iii-reign-of-chaos-altar-reviving-hero.png';
+
+<Figure
+  src={battle}
+  loading="eager"
+  alt="Warcraft III screenshot of a large campaign battle in a forest clearing. Units, spell effects and particles crowd the center of the screen, a mission timer shows 2 minutes 59 seconds left, and the selection panel at the bottom shows 12 units."
+  caption="In a big fight, units, spells and effects pile up on the same screen."
+/>
+
+This is the third part of my Warcraft III study for Celia Hodent's Game UX course at IxDF. [The first part](/writing/warcraft-iii-ux-analysis/) looked at what made the game work for players, and [the second](/writing/warcraft-iii-cognitive-science-analysis/) at what happened in their minds.
+
+The third and fourth assignments ask you to **return to one moment and diagnose it with specific frameworks**: memory, attention and cognitive load first, then usability principles and motivation. This post is my answer to both.
+
+I chose a moment I lived many times: **my hero dies in the middle of a fight**, and I have to bring him back without losing the battle.
+
+## The moment
+
+I played the campaigns, but this moment comes from multiplayer: 1v1, 2v2 and 3v3 matches at the cybers and online from home. Mid-game, both armies meet and my hero falls. **The battle doesn't stop while I decide what to do.**
+
+Reviving him happens at the altar, back in my base. **For most players, that meant a round trip**: move the camera to the base, find the altar, click revive and move the camera back to the fight. Advanced players skipped it: they had saved the altar to a control group (<kbd>Ctrl</kbd> + a number key), so they pressed that number and the revive key without moving the camera. The game never taught that.
+
+## Attention, memory and cognitive load
+
+### Too much on screen
+
+In a big fight, the screen fills up with overlapping units, spell effects, auras and particles. All of that lands on the visuospatial sketchpad, the part of working memory that keeps track of what we see and where it is (Baddeley and Hitch, 1974). The portrait flashing red told me my hero was in trouble, but **in all that noise, I often lost track of where he was**.
+
+### Two places at once
+
+Reviving split my attention in two. My active attention went to the altar, the thing I was looking for, while the fight kept pulling my passive attention with sounds, unit voices and minimap pings. **The game stacked both demands in two places on the map**: the battle at one end, the altar at the other.
+
+While I was at the altar, I could still hear the fight and see dots moving on the minimap. That told me where the fight was, but not clearly how it was going, so I had to keep the last picture of the battle in my head. **I only knew if I was winning when I moved the camera back.**
+
+### Shortcuts under pressure
+
+The campaigns gave me low-pressure time to practice, but as I wrote in part 2, the game left the hero keys and control groups to the manual. Knowing a shortcut (explicit memory) is not the same as using it without thinking (implicit memory). **Under pressure, players fall back on what's automatic.** For a new player, that's moving the camera and clicking. A control group for the altar never got the chance to become automatic.
+
+## Usability and motivation analysis
+
+### Challenge or friction?
+
+In part 1, I called the hero's death frustration by design: fighting without him, losing the chance to train him in that battle and paying to revive him are a cost placed on purpose, so I'd take care of him. That still holds. **The round trip to the altar is a different cost**: it doesn't make me take care of my hero any better.
+
+Speed isn't the problem either. As I wrote in part 2, speed with the controls is part of the challenge in a competitive RTS, and juggling base, army and hero at once is part of the appeal. **What isn't part of the challenge is not knowing a faster path exists.** Two of Hodent's usability pillars help separate them.
+
+**Minimum workload:** none of the steps of the round trip was a decision. They were navigation, and while I made them, the battle went on without me watching. **For a new player, the same revive cost the view of the battle.** For an advanced player, it cost two keys.
+
+**Flexibility:** the faster path was already in the game: control groups work for buildings, not only for units. But nothing in the game suggests saving the altar to one, so **the shortcut only helped the players who had already found it**.
+
+### Progress I couldn't see
+
+In self-determination theory (Ryan and Deci, 2000), competence is the need to feel you're getting better at something. Inside a match, the hero's level showed my progress. Outside it, the campaign taught the basics, and multiplayer only showed whether I won and a score screen. **Nothing pointed at the next technique to learn**, like saving the altar to a key or splitting melee and ranged units into two groups, so the game left that learning to the player.
+
+## My take as a UX Designer
+
+**Keep:** the death penalty as it is. Fighting without the hero, losing the chance to train him in that battle and paying to revive him **make me protect my hero**, and that's the point.
+
+**Change:** I wouldn't touch the rule, only **how players learn the fast path**. Three kinds of help, each at its own moment.
+
+**Before: teach the shortcut when the altar is ready.** When I select the altar to train my first hero, a short hint appears: "Press <kbd>Ctrl</kbd> + a number to save this altar. If your hero dies, press that number to revive him without leaving the fight." The match is still calm, the altar is already selected and the action takes one key. I'd show it there and not when the hero appears, because by then my attention goes to him. It's the same tool I proposed in part 1 for the 12-unit limit, and like the hints in part 2, players could skip it and read it again in the message log.
+
+<Figure
+  src={altar}
+  alt="Warcraft III: The Frozen Throne screenshot of an Orc base in the Spanish version of the game. The selected Altar of Storms shows a fallen hero in its command card, with a tooltip that reads Revive Shadow Hunter (H), Zul'kis, level 1, for 160 gold and 5 food. A grayed-out hero portrait sits in the top left corner."
+  caption="The altar's command card: the hint would sit here, and with the altar saved to a key, this panel opens without moving the camera (Warcraft III: The Frozen Throne, Spanish version)."
+/>
+
+**During: keep the message for the first death.** In part 2, I proposed an interactive message the first time a hero dies: "Your hero has fallen. Go to the altar and revive him." Clicking it would take the player straight there. It still costs the view of the fight, but a player losing a hero for the first time knows what to do next. The hint prepares players before their hero dies, and the message catches whoever missed it.
+
+**After: show what I've learned.** After each match, next to the score, one line with a technique I used for the first time ("You revived your hero from a control group") and the next one to try. One technique at a time, at the end of the match, when there's time to read it. The line only works if it reflects something I can now do, not a badge to collect.
+
+## What analyzing one moment in depth taught me
+
+In part 1, I kept the hero's death penalty: losing him should cost something. In part 2, I proposed a message the first time he dies, for players who skipped the prologue. Looking at attention and cognitive load showed me what that message leaves out: going to the altar pulls your eyes away from the fight. **Not every cost in a hard moment is part of the challenge.**
+
+Fighting without the hero and paying to revive him are the challenge. Losing the battle from view is friction, and only players who never learned control groups pay it. **The game had the right tool and never taught it**, the same as with the 12-unit limit in part 1.
+
+So the fix is about timing: teach the shortcut before the hero dies, guide the player the first time it happens, and show progress after the match. **The penalty stays exactly as it was.**
+
+If you played Warcraft III back then, did you save your altar to a key, or did you make the trip every time? [I'd like to know](/writing/warcraft-iii-hero-revival-analysis/#contact).
+
+## Sources
+
+- Hodent, C. (2017). *The Gamer's Brain: How Neuroscience and UX Can Impact Video Game Design*. CRC Press.
+- Baddeley, A. D., and Hitch, G. (1974). Working memory. In G. H. Bower (Ed.), *The Psychology of Learning and Motivation* (Vol. 8). Academic Press.
+- Ryan, R. M., and Deci, E. L. (2000). Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being. *American Psychologist*.

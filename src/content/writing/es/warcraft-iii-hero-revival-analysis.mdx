@@ -1,0 +1,103 @@
+---
+# Spanish (Argentina) translation of ../warcraft-iii-hero-revival-analysis.mdx,
+# published at /es/writing/warcraft-iii-hero-revival-analysis/.
+# Only the text goes here: dates, type, game facts and images come from the original. Keep the file name.
+
+title: 'Lo que costaba de verdad revivir a un héroe en Warcraft III (parte 3)'
+description: 'Un análisis de UX de videojuegos: atención, carga cognitiva, usabilidad y motivación en el momento en que un héroe muere en plena pelea.'
+context: 'Curso de Game UX de IxDF'
+game:
+  genre: 'Estrategia en tiempo real con elementos de RPG'
+  platform: 'PC (Windows y Mac)'
+coverAlt: 'Arte de la caja de Warcraft III: Reign of Chaos: un primer plano de la cara de un orco, con colmillos y un aro en la nariz, sobre el logo del juego.'
+credits: 'Capturas y arte de Warcraft III © Blizzard Entertainment, mostrados aquí con fines de análisis.'
+---
+
+import Figure from '../../../components/Figure.astro';
+import battle from '../../../assets/games/warcraft-iii/warcraft-iii-reign-of-chaos-battle.jpg';
+import altar from '../../../assets/games/warcraft-iii/warcraft-iii-reign-of-chaos-altar-reviving-hero.png';
+
+<Figure
+  src={battle}
+  loading="eager"
+  alt="Captura de Warcraft III de una gran batalla de campaña en un claro del bosque. Unidades, efectos de hechizos y partículas se amontonan en el centro de la pantalla, un temporizador de la misión marca que quedan 2 minutos y 59 segundos, y el panel de selección de abajo muestra 12 unidades."
+  caption="En una pelea grande, las unidades, los hechizos y los efectos se acumulan en la misma pantalla."
+/>
+
+Esta es la tercera parte de mi estudio de Warcraft III para el curso de Game UX de Celia Hodent en IxDF. [La primera parte](/es/writing/warcraft-iii-ux-analysis/) miraba qué hacía que el juego funcionara para los jugadores, y [la segunda](/es/writing/warcraft-iii-cognitive-science-analysis/), qué pasaba en su cabeza.
+
+La tercera y la cuarta consigna piden **volver sobre un momento y diagnosticarlo con frameworks específicos**: primero memoria, atención y carga cognitiva, y después principios de usabilidad y motivación. Este post es mi respuesta a las dos.
+
+Elegí un momento que viví muchas veces: **mi héroe muere en medio de una pelea**, y tengo que traerlo de vuelta sin perder la batalla.
+
+## El momento
+
+Jugué las campañas, pero este momento viene del multiplayer: partidas 1v1, 2v2 y 3v3 en los cibers y online desde casa. A mitad de la partida, los dos ejércitos se cruzan y mi héroe cae. **La batalla no frena mientras decido qué hacer.**
+
+Al héroe se lo revive en el altar, allá en mi base. **Para la mayoría de los jugadores, eso implicaba una ida y vuelta**: mover la cámara a la base, encontrar el altar, hacer clic en revivir y volver a llevar la cámara a la pelea. Los jugadores avanzados se la ahorraban: habían guardado el altar en un grupo de control (<kbd>Ctrl</kbd> + una tecla numérica), así que apretaban ese número y la tecla de revivir sin mover la cámara. El juego nunca enseñó eso.
+
+## Atención, memoria y carga cognitiva
+
+### Demasiado en pantalla
+
+En una pelea grande, la pantalla se llena de unidades superpuestas, efectos de hechizos, auras y partículas. Todo eso cae en la agenda visoespacial, la parte de la memoria de trabajo que registra lo que vemos y dónde está (Baddeley y Hitch, 1974). El retrato que parpadeaba en rojo me avisaba que mi héroe estaba en problemas, pero **entre tanto ruido, muchas veces perdía de vista dónde estaba**.
+
+### Dos lugares a la vez
+
+Revivir me partía la atención en dos. Mi atención activa iba al altar, lo que estaba buscando, mientras la pelea seguía tirando de mi atención pasiva con sonidos, voces de las unidades y avisos en el minimapa. **El juego acumulaba las dos demandas en dos puntos del mapa**: la batalla en una punta y el altar en la otra.
+
+Mientras estaba en el altar, todavía escuchaba la pelea y veía puntos que se movían en el minimapa. Eso me decía dónde era la pelea, pero no con claridad cómo venía, así que tenía que guardar en la cabeza la última imagen de la batalla. **Recién sabía si iba ganando cuando volvía con la cámara.**
+
+### Atajos bajo presión
+
+Las campañas me daban tiempo para practicar sin presión, pero, como conté en la parte 2, el juego dejó las teclas de los héroes y los grupos de control para el manual. Saber un atajo (memoria explícita) no es lo mismo que usarlo sin pensar (memoria implícita). **Bajo presión, los jugadores vuelven a lo que ya es automático.** Para un jugador nuevo, eso es mover la cámara y hacer clic. Un grupo de control para el altar nunca tuvo la oportunidad de volverse automático.
+
+## Análisis de usabilidad y motivación
+
+### ¿Desafío o fricción?
+
+En la parte 1 llamé a la muerte del héroe frustración por diseño: pelear sin él, perder la oportunidad de entrenarlo en esa batalla y pagar para revivirlo son un costo puesto a propósito para que lo cuidara. Eso sigue en pie. **La ida y vuelta al altar es otro costo**: no hace que cuide mejor a mi héroe.
+
+La velocidad tampoco es el problema. Como escribí en la parte 2, la velocidad con los controles es parte del desafío en un RTS competitivo, y manejar base, ejército y héroe a la vez es parte del atractivo. **No saber que existe un camino más rápido no es parte del desafío.** Dos de los pilares de usabilidad de Hodent ayudan a separarlos.
+
+**Carga de trabajo mínima:** ninguno de los pasos de la ida y vuelta era una decisión. Eran navegación, y mientras los hacía, la batalla seguía sin que yo la viera. **A un jugador nuevo, revivir al héroe le costaba perder de vista la batalla.** A uno avanzado, le costaba dos teclas.
+
+**Flexibilidad:** el camino más rápido ya estaba en el juego: los grupos de control funcionan para edificios, no solo para unidades. Pero nada en el juego sugiere guardar el altar en uno, así que **el atajo solo ayudaba a los jugadores que ya lo habían descubierto**.
+
+### El progreso que no veía
+
+En la teoría de la autodeterminación (Ryan y Deci, 2000), la competencia es la necesidad de sentir que estás mejorando en algo. Dentro de una partida, el nivel del héroe mostraba mi progreso. Fuera de ella, la campaña enseñaba lo básico, y el multiplayer solo mostraba si había ganado y una pantalla de puntajes. **Nada señalaba la siguiente técnica para aprender**, como guardar el altar en una tecla o separar en dos grupos las unidades cuerpo a cuerpo y las de ataque a distancia, así que el juego dejaba ese aprendizaje en manos del jugador.
+
+## Mi mirada como UX Designer
+
+**Mantener:** la penalización por muerte tal como está. Pelear sin el héroe, perder la oportunidad de entrenarlo en esa batalla y pagar para revivirlo **hacen que proteja a mi héroe**, y de eso se trata.
+
+**Cambiar:** no tocaría la regla, solo **cómo aprenden los jugadores el camino rápido**. Tres tipos de ayuda, cada una en su momento.
+
+**Antes: enseñar el atajo cuando el altar está listo.** Cuando selecciono el altar para entrenar a mi primer héroe, aparece una pista breve: "Apretá <kbd>Ctrl</kbd> + un número para guardar este altar. Si tu héroe muere, apretá ese número para revivirlo sin dejar la pelea". La partida todavía está tranquila, el altar ya está seleccionado y la acción lleva una tecla. La mostraría ahí y no cuando aparece el héroe, porque en ese momento mi atención va hacia él. Es la misma herramienta que propuse en la parte 1 para el límite de 12 unidades y, como las pistas de la parte 2, los jugadores podrían saltearla y volver a leerla en el registro de mensajes.
+
+<Figure
+  src={altar}
+  alt="Captura de Warcraft III: The Frozen Throne de una base orca en la versión en español del juego. El Altar de tormentas seleccionado muestra un héroe caído en su panel de comandos, con un tooltip que dice Revive Shadow Hunter (H), Zul'kis, nivel 1, por 160 de oro y 5 de comida. En la esquina superior izquierda hay un retrato de héroe en gris."
+  caption="El panel de comandos del altar: ahí iría la pista y, con el altar guardado en una tecla, este panel se abre sin mover la cámara (Warcraft III: The Frozen Throne, versión en español)."
+/>
+
+**Durante: mantener el mensaje para la primera muerte.** En la parte 2 propuse un mensaje interactivo la primera vez que muere un héroe: "Tu héroe cayó. Ir al altar y revivirlo". Al cliquearlo iría directamente allí. Sigue costando perder de vista la pelea, pero un jugador que pierde un héroe por primera vez sabe qué hacer después. La pista prepara a los jugadores antes de que muera su héroe, y el mensaje ataja a quien se la perdió.
+
+**Después: mostrar lo que aprendí.** Al terminar cada partida, junto al puntaje, una línea con una técnica que usé por primera vez ("Reviviste a tu héroe desde un grupo de control") y la siguiente para probar. Una técnica por vez, al final de la partida, cuando hay tiempo para leerla. La línea solo funciona si refleja algo que ahora puedo hacer, no una insignia para coleccionar.
+
+## Lo que me enseñó analizar un momento en profundidad
+
+En la parte 1 mantuve la penalización por la muerte del héroe: perderlo tiene que costar algo. En la parte 2 propuse un mensaje la primera vez que muere, para los jugadores que se saltearon el prólogo. Mirar la atención y la carga cognitiva me mostró lo que ese mensaje deja afuera: ir al altar te obliga a dejar de mirar la pelea. **No todo costo en un momento difícil es parte del desafío.**
+
+Pelear sin el héroe y pagar para revivirlo son el desafío. Perder de vista la batalla es fricción, y solo la pagan los jugadores que nunca aprendieron los grupos de control. **El juego tenía la herramienta correcta y nunca la enseñó**, igual que con el límite de 12 unidades en la parte 1.
+
+Así que la solución pasa por el cuándo: enseñar el atajo antes de que muera el héroe, guiar al jugador la primera vez que pasa y mostrar el progreso después de la partida. **La penalización queda exactamente como estaba.**
+
+Si jugaste Warcraft III en esa época, ¿guardabas el altar en una tecla o hacías el viaje cada vez? [Me gustaría saberlo](/es/writing/warcraft-iii-hero-revival-analysis/#contact).
+
+## Fuentes
+
+- Hodent, C. (2017). *The Gamer's Brain: How Neuroscience and UX Can Impact Video Game Design*. CRC Press.
+- Baddeley, A. D. y Hitch, G. (1974). Working memory. En G. H. Bower (Ed.), *The Psychology of Learning and Motivation* (Vol. 8). Academic Press.
+- Ryan, R. M. y Deci, E. L. (2000). Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being. *American Psychologist*.
