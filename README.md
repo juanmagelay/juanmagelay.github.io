@@ -4,7 +4,7 @@ Source code of my portfolio site: https://juanmagelay.github.io
 
 ## Status
 
-Pre-launch. A game UX analysis of Warcraft III: Reign of Chaos, in three parts, is live in English, Spanish and Portuguese. Product case studies are in progress.
+Pre-launch. A game UX analysis of Warcraft III: Reign of Chaos, in three parts, is live in English, Spanish and Portuguese. Hurlinstein3D, a game from my degree, is playable at /games/hurlinstein3d/. Product case studies are in progress.
 
 ## My role
 
@@ -44,8 +44,10 @@ src/site.config.mjs        personal data: name, email, links, CV paths
 src/i18n.mjs               languages (en, es, pt), interface copy and path helpers
 src/content/writing/       posts, one MDX file each, published at /writing/<file name>/
 src/content/writing/es/    Spanish translations, published at /es/writing/<file name>/ (pt/ for Portuguese)
-src/pages/[...lang]/       the /writing list (newest first, first image as thumbnail) and each post page, per language
-src/lib/                   first-figure.mjs: each post's first image for its thumbnail; posts.ts: posts per language
+src/content/games/         game pages, one MDX file each, published at /games/<file name>/ (es/ and pt/ for translations)
+src/pages/[...lang]/       the /writing and /games lists and each post and game page, per language
+src/lib/                   first-figure.mjs: each post's first image for its thumbnail; posts.ts and games.ts: posts and games per language
+public/games/<slug>/game/  the copy of each game that runs in the browser, published as it is (see Update a game)
 src/assets/games/          images, optimized at build time
 src/assets/icons/          icons from Material Symbols Rounded and their license
 src/components/            header, footer, button, page head, spec list, fact sheet, figure, copy email, row list
@@ -56,6 +58,24 @@ integrations/              build guard
 tests/                     checks for the built site (npm test)
 .github/workflows/         deploy to GitHub Pages
 ```
+
+## Update a game
+
+Each game that runs in the browser is a copy of its own repo, made from this repo. The two repos are never connected: no Actions, tokens, deploy keys, secrets or submodules. The copy is published as it is, without passing through Astro, and is never edited here: a change goes to the game's repo first.
+
+1. Check the game on its `main` branch.
+2. Copy it from `main` as committed, not from the working folder. From the root of this repo:
+
+   ```sh
+   SRC="<local-path-to-Hurlinstein3D>"
+   DEST=public/games/hurlinstein3d
+   rm -rf "$DEST/game" && mkdir -p "$DEST/game"
+   git -C "$SRC" archive main index.html lib js assets | tar -x -C "$DEST/game"
+   git -C "$SRC" log -1 --format="%H %cs %s" main > "$DEST/game/SOURCE.txt"
+   ```
+
+   Deleting `game/` first makes files removed from the game disappear here too.
+3. Run `npm run build` and `npm test` (they check that the build publishes the copy without changing a byte), try it with `npm run preview`, and commit.
 
 ## Licenses
 

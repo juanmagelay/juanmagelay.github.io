@@ -6,7 +6,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import config from '../astro.config.mjs';
-import { assertBuilt, isRedirect } from './site-checks.mjs';
+import { assertBuilt, isGameCopy, isRedirect } from './site-checks.mjs';
 import {
   parseTokens,
   contrast,
@@ -154,7 +154,7 @@ test('the site is built', () => {
   assertBuilt(dist);
 });
 
-const pages = existsSync(dist) ? files(dist, ['.html']) : [];
+const pages = existsSync(dist) ? files(dist, ['.html']).filter((file) => !isGameCopy(relative(dist, file))) : [];
 const FAMILIES = { '--font-voice': 'Bricolage Grotesque', '--font-text': 'Schibsted Grotesk', '--font-data': 'JetBrains Mono' };
 
 for (const file of pages) {

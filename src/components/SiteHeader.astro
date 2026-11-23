@@ -12,8 +12,10 @@ const cv = cvFor(lang);
 // Menu items. Add Work and About here once those pages exist.
 // `within` lists the paths of the pages that belong to the item's section, such as posts in Writing.
 const writing = localizePath('/writing/', lang);
+const games = localizePath('/games/', lang);
 const nav = [
   { label: t.navWriting, href: writing, event: 'nav-writing', within: [writing] },
+  { label: t.navGames, href: games, event: 'nav-games', within: [games] },
   { label: t.navContact, href: '#contact', event: 'nav-contact' },
 ];
 
@@ -122,8 +124,10 @@ const current = (item: (typeof nav)[number]) => {
       margin-left: 0;
     }
 
+    /* With three items, the menu goes to a second line when it doesn't fit beside the languages. */
     .site-nav {
-      gap: var(--space-5);
+      flex-wrap: wrap;
+      gap: 0 var(--space-4);
     }
 
     .site-nav a {

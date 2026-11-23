@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { assertBuilt, isRedirect, pathForFile } from './site-checks.mjs';
+import { assertBuilt, isGameCopy, isRedirect, pathForFile } from './site-checks.mjs';
 import { firstFigure, importPath } from '../src/lib/first-figure.mjs';
 import { langFromPath, localizePath } from '../src/i18n.mjs';
 
@@ -161,11 +161,8 @@ for (const list of LISTS) {
   }
 }
 
-// Scenario: los links viejos a /games/ siguen funcionando.
-const OLD_URLS = [
-  ['/games/', '/writing/'],
-  ['/games/warcraft-iii-ux-analysis/', '/writing/warcraft-iii-ux-analysis/'],
-];
+// Scenario: los links viejos a /games/ siguen funcionando. /games/ itself is the list of games since #17.
+const OLD_URLS = [['/games/warcraft-iii-ux-analysis/', '/writing/warcraft-iii-ux-analysis/']];
 
 for (const [from, to] of OLD_URLS) {
   test(`${from} redirects to ${to}`, () => {
@@ -189,7 +186,7 @@ function htmlFiles(dir) {
   });
 }
 
-const pages = existsSync(dist) ? htmlFiles(dist) : [];
+const pages = existsSync(dist) ? htmlFiles(dist).filter((file) => !isGameCopy(relative(dist, file))) : [];
 
 for (const file of pages) {
   const pageHtml = readFileSync(file, 'utf8');

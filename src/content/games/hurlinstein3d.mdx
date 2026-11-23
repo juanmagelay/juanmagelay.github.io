@@ -1,0 +1,53 @@
+---
+title: Hurlinstein3D
+description: A first-person procedural dungeon built with grid raycasting, DDA and PixiJS 8.
+type: academic
+year: 2026
+image: ../../assets/games/hurlinstein3d/screenshot.png
+imageAlt: 'Hurlinstein3D in first person: a mutant with yellow eyes blocks a brick corridor, the shotgun is in the lower right corner, the LIFE and AMMO bars in the upper left and the minimap in the upper right.'
+logo: /games/hurlinstein3d/game/assets/logo/logomark.png
+logoAlt: 'Hurlinstein3D logo: the pixel art head of the mutant enemy.'
+favicon: /games/hurlinstein3d/game/assets/logo/favicon-32.png
+play: /games/hurlinstein3d/game/index.html
+repo: https://github.com/juanmagelay/Hurlinstein3D
+---
+
+## About the game
+
+The world is infinite: it is generated in 16 by 16 cell chunks as you explore it, and each area stays the same when you come back. Enemies patrol and chase you when they have you in their line of sight. You have a shotgun with a magazine and reloads, and a minimap.
+
+## Controls
+
+- <kbd>W</kbd> or up arrow: move forward.
+- <kbd>S</kbd> or down arrow: move backward.
+- <kbd>A</kbd> and <kbd>D</kbd>: strafe left and right.
+- Left and right arrows: turn.
+- Mouse: turn. The first click on the game captures the mouse.
+- <kbd>Space</kbd> or left click: fire.
+- <kbd>R</kbd> or right click: reload.
+- <kbd>P</kbd>: admin panel, with FPS, fisheye mode, rays on the minimap and a stress test.
+- <kbd>Esc</kbd>: back to this page.
+
+## Requirements
+
+A computer with a keyboard. Chrome is the recommended browser. Each time you press Play, a new game starts.
+
+## How it works
+
+- The camera uses the dir and plane vectors from [Lode Vandevenne's raycasting tutorial](https://lodev.org/cgtutor/raycasting.html).
+- Each ray walks the grid with DDA.
+- Walls are drawn with the perpendicular distance, which avoids the fisheye effect.
+- The world is stored in chunks, in a Map with a Cantor key.
+- Enemy sprites use a z-buffer, so the walls in front of them hide them.
+
+## Credits
+
+- Course: Simulación I, Licenciatura en Desarrollo de Videojuegos y Simulación, Universidad Nacional de Hurlingham (UNAHUR), 2026.
+- Professor: Facundo Toufick Saiegh.
+- Team: Juan Manuel Gelay and Alejo Hutmacher.
+
+### Third parties
+
+- [PixiJS](https://pixijs.com) 8.21.0, MIT license.
+- [Lucide](https://lucide.dev) icons, ISC license.
+- [Husk Mutant](https://opengameart.org/content/husk-mutant) enemy sprite by HorrorMovieRei on OpenGameArt, CC0. The logo is cropped from it.

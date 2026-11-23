@@ -16,6 +16,12 @@ export function pathForFile(relativePath) {
   return `/${path}`.replace(/\/+/g, '/');
 }
 
+// A game that runs in the browser is a copy published as it is, at /games/<slug>/game/, and not a page of the
+// site: it has no header, footer or translations, so the page checks skip it. tests/games.test.mjs covers it. Issue #17.
+export function isGameCopy(relativePath) {
+  return /^games\/[^/]+\/game\//.test(relativePath.split('\\').join('/'));
+}
+
 export function isRedirect(html) {
   return /<meta\s[^>]*http-equiv="refresh"/i.test(html);
 }

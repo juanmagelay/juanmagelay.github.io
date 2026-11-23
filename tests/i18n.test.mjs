@@ -6,7 +6,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import config from '../astro.config.mjs';
-import { assertBuilt, isRedirect, pathForFile } from './site-checks.mjs';
+import { assertBuilt, isGameCopy, isRedirect, pathForFile } from './site-checks.mjs';
 import { LANGS, languages, langFromPath, localizePath, unlocalizePath } from '../src/i18n.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -73,7 +73,7 @@ function builtFile(sitePath) {
   return join(dist, decodeURI(sitePath), sitePath.endsWith('/') ? 'index.html' : '');
 }
 
-const built = existsSync(dist) ? htmlFiles(dist) : [];
+const built = existsSync(dist) ? htmlFiles(dist).filter((file) => !isGameCopy(relative(dist, file))) : [];
 const pages = built
   .map((file) => ({ path: pathForFile(relative(dist, file)), html: readFileSync(file, 'utf8') }))
   .filter((page) => !isRedirect(page.html));

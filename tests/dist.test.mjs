@@ -11,6 +11,7 @@ import {
   assertBuilt,
   pathForFile,
   isRedirect,
+  isGameCopy,
   findImagesWithoutAlt,
   findDashes,
   checkCanonical,
@@ -39,7 +40,7 @@ test('the site is built', () => {
   assertBuilt(dist);
 });
 
-const pages = existsSync(dist) ? await htmlFiles(dist) : [];
+const pages = existsSync(dist) ? (await htmlFiles(dist)).filter((file) => !isGameCopy(relative(dist, file))) : [];
 const builtFileExists = (sitePath) => existsSync(join(dist, sitePath));
 
 // Issue #11: the Spanish site links the Spanish CV. There is no Portuguese CV, so the Portuguese site links the English one.

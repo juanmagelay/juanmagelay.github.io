@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHead from '../../../components/PageHead.astro';
+import RowList from '../../../components/RowList.astro';
+import { getGames } from '../../../lib/games';
+import { LANGS, langParam, langFromPath, localizePath, ui } from '../../../i18n.mjs';
+
+// /games/, /es/games/ and /pt/games/: every game, newest first, with its screenshot as the thumbnail. Issue #17.
+export function getStaticPaths() {
+  return LANGS.map((lang) => ({ params: { lang: langParam(lang) } }));
+}
+
+const lang = langFromPath(Astro.url.pathname);
+const t = ui[lang];
+
+const rows = (await getGames(lang)).map((game) => ({
+  title: game.data.title,
+  href: localizePath(`/games/${game.slug}/`, lang),
+  text: game.data.description,
+  meta: t.types[game.data.type],
+  image: game.data.image,
+  imageAlt: game.data.imageAlt,
+}));
+---
+
+<BaseLayout title={t.gamesTitle} description={t.gamesIntro}>
+  <PageHead title={t.gamesTitle} dek={t.gamesIntro} />
+  <div class="container games-list">
+    <RowList items={rows} headingLevel={2} />
+  </div>
+</BaseLayout>
+
+<style>
+  .games-list {
+    padding-bottom: var(--space-16);
+  }
+</style>

@@ -5,6 +5,7 @@ import {
   assertBuilt,
   pathForFile,
   isRedirect,
+  isGameCopy,
   findImagesWithoutAlt,
   findDashes,
   checkCanonical,
@@ -16,6 +17,14 @@ import {
 } from './site-checks.mjs';
 
 const SITE = 'https://juanmagelay.github.io';
+
+test('only files inside a game copy count as the game copy', () => {
+  assert.equal(isGameCopy('games/hurlinstein3d/game/index.html'), true);
+  assert.equal(isGameCopy('games\\hurlinstein3d\\game\\index.html'), true);
+  assert.equal(isGameCopy('games/hurlinstein3d/index.html'), false);
+  assert.equal(isGameCopy('es/games/hurlinstein3d/index.html'), false);
+  assert.equal(isGameCopy('games/index.html'), false);
+});
 
 test('an image without an alt attribute is reported with its source', () => {
   const problems = findImagesWithoutAlt('<p>Text</p><img src="/a.jpg" width="10">');

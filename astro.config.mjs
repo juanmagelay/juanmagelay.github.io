@@ -80,8 +80,8 @@ export default defineConfig({
     '/': '/writing/warcraft-iii-ux-analysis/',
     '/es/': '/es/writing/warcraft-iii-ux-analysis/',
     '/pt/': '/pt/writing/warcraft-iii-ux-analysis/',
-    // Published under /games/ before posts moved to /writing/. Keep them so old links still work.
-    '/games/': '/writing/',
+    // Published under /games/ before posts moved to /writing/. Keep it so old links still work.
+    // /games/ itself is the list of games since #17.
     '/games/warcraft-iii-ux-analysis/': '/writing/warcraft-iii-ux-analysis/',
   },
 });

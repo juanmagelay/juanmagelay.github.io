@@ -1,0 +1,240 @@
+---
+import { langFromPath, ui } from '../i18n.mjs';
+import Button from './Button.astro';
+
+// Play for a game that runs in the browser. Issue #17.
+// Play loads the game in an iframe inside a stage and puts the stage in full screen. Leaving full screen (Esc)
+// closes the game: the iframe goes back to about:blank, which ends the game and frees the CPU and GPU, and
+// the focus returns to Play. Each Play starts a new game.
+// Without full screen, the stage covers the page and Esc closes it. Without a fine pointer, as on phones and
+// tablets, Play stays disabled with a note.
+// The game is a copy published as it is (public/games/<slug>/game/), from the same origin: no sandbox, so it can
+// capture the mouse, and the stage can listen to its keys.
+interface Props {
+  /** Path of the game's index.html. */
+  src: string;
+  /** Name of the game, for the iframe title and the analytics event. */
+  title: string;
+  slug: string;
+}
+
+const { src, title, slug } = Astro.props;
+const t = ui[langFromPath(Astro.url.pathname)];
+const unavailableId = `game-play-unavailable-${slug}`;
+---
+
+<div class="game-play" data-game-play>
+  <div class="game-play-actions">
+    <Button class="game-play-button" data-game-play-button data-umami-event="game-play" data-umami-event-game={slug}>{t.play}</Button>
+    <slot />
+  </div>
+  <p class="game-play-note" data-game-play-note>{t.playNote}</p>
+  <p class="game-play-note" id={unavailableId} data-game-play-unavailable hidden>{t.playNeedsKeyboard}</p>
+
+  <div class="game-stage" id="game-stage" hidden>
+    <iframe title={title} allow="fullscreen" data-game-src={src}></iframe>
+    <p class="game-stage-hint" data-game-stage-hint hidden>{t.playHint}</p>
+  </div>
+</div>
+
+<style>
+  .game-play {
+    margin-top: var(--space-8);
+  }
+
+  .game-play-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  /* The game's accent, only here: its dark text on it reaches 11.6:1 in both themes. */
+  .game-play :global(.game-play-button) {
+    min-width: 8rem;
+    border-color: var(--color-game-accent);
+    background: var(--color-game-accent);
+    color: var(--color-game-surface);
+    font-size: var(--type-size-base);
+  }
+
+  .game-play :global(.game-play-button:hover) {
+    border-color: var(--color-game-accent);
+    background: var(--color-game-surface);
+    color: var(--color-game-accent);
+  }
+
+  .game-play :global(.game-play-button:disabled),
+  .game-play :global(.game-play-button:disabled:hover) {
+    border-color: var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: not-allowed;
+  }
+
+  .game-play-note {
+    max-width: var(--layout-prose);
+    margin-top: var(--space-3);
+    color: var(--color-text-secondary);
+    font-size: var(--type-size-sm);
+  }
+
+  /* The stage covers the window while it shows, and fills the screen in full screen. */
+  .game-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    width: 100vw;
+    height: 100dvh;
+    background: var(--color-game-surface);
+  }
+
+  .game-stage[hidden] {
+    display: none;
+  }
+
+  .game-stage iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: var(--color-game-surface);
+  }
+
+  /* Over the game for 3 seconds, between the LIFE bars and the minimap, below the strip that opens the admin panel.
+     Clicks go through it to the game. */
+  .game-stage-hint {
+    position: absolute;
+    top: var(--space-16);
+    left: 50%;
+    max-width: calc(100% - 2 * var(--space-4));
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-game-accent);
+    border-radius: var(--radius-control);
+    background: var(--color-game-surface);
+    color: var(--color-game-text);
+    font-size: var(--type-size-sm);
+    text-align: center;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .game-stage-hint[hidden] {
+    display: none;
+  }
+
+  /* Without full screen, the page under the stage doesn't scroll. */
+  :global(html.game-stage-open) {
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  const HINT_MS = 3000;
+
+  type FullscreenDocument = Document & { webkitFullscreenElement?: Element | null };
+  type FullscreenElement = HTMLElement & { webkitRequestFullscreen?: () => void };
+
+  function fullscreenElement() {
+    const page = document as FullscreenDocument;
+    return page.fullscreenElement ?? page.webkitFullscreenElement ?? null;
+  }
+
+  function setUp(root: HTMLElement) {
+    const button = root.querySelector<HTMLButtonElement>('[data-game-play-button]')!;
+    const note = root.querySelector<HTMLElement>('[data-game-play-note]')!;
+    const unavailable = root.querySelector<HTMLElement>('[data-game-play-unavailable]')!;
+    const stage = root.querySelector<FullscreenElement>('.game-stage')!;
+    const frame = stage.querySelector('iframe')!;
+    const hint = stage.querySelector<HTMLElement>('[data-game-stage-hint]')!;
+    const src = frame.dataset.gameSrc!;
+    let covering = false;
+    let hintTimer: number | undefined;
+
+    // Phones and tablets without a keyboard: no fine pointer, no Play. It comes back if one connects.
+    const finePointer = matchMedia('(any-pointer: fine)');
+    const updateAvailability = () => {
+      const available = finePointer.matches;
+      button.disabled = !available;
+      note.hidden = !available;
+      unavailable.hidden = available;
+      if (available) button.removeAttribute('aria-describedby');
+      else button.setAttribute('aria-describedby', unavailable.id);
+    };
+    updateAvailability();
+    finePointer.addEventListener('change', updateAvailability);
+
+    // Everything before requestFullscreen runs in the click: after an await, the browser would refuse it.
+    button.addEventListener('click', () => {
+      frame.src = src;
+      stage.hidden = false;
+      showHint();
+      if (!requestFullscreen()) cover();
+    });
+
+    function requestFullscreen() {
+      try {
+        if (stage.requestFullscreen) {
+          // Older browsers return nothing instead of a promise.
+          Promise.resolve(stage.requestFullscreen()).catch(cover);
+          return true;
+        }
+        if (stage.webkitRequestFullscreen) {
+          stage.webkitRequestFullscreen();
+          return true;
+        }
+      } catch {
+        // Refused: the stage covers the page instead.
+      }
+      return false;
+    }
+
+    function cover() {
+      if (stage.hidden || covering) return;
+      covering = true;
+      document.documentElement.classList.add('game-stage-open');
+    }
+
+    function showHint() {
+      window.clearTimeout(hintTimer);
+      hint.hidden = false;
+      hintTimer = window.setTimeout(() => (hint.hidden = true), HINT_MS);
+    }
+
+    function closeGame() {
+      window.clearTimeout(hintTimer);
+      hint.hidden = true;
+      stage.hidden = true;
+      frame.src = 'about:blank';
+      if (covering) {
+        covering = false;
+        document.documentElement.classList.remove('game-stage-open');
+      }
+      button.focus();
+    }
+
+    // In full screen the browser keeps Esc: leaving full screen is the signal to close.
+    const onFullscreenChange = () => {
+      if (!fullscreenElement() && !stage.hidden && !covering) closeGame();
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    document.addEventListener('fullscreenerror', cover);
+    document.addEventListener('webkitfullscreenerror', cover);
+
+    // Outside full screen (refused, missing or never granted), Esc closes the game, from the page or from inside it.
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !stage.hidden && !fullscreenElement()) closeGame();
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    // The game listens to the keyboard on its own window: give it the focus, so W, A, S and D work without a click.
+    frame.addEventListener('load', () => {
+      if (stage.hidden || !frame.contentWindow) return;
+      frame.contentWindow.focus();
+      frame.contentWindow.addEventListener('keydown', onKeyDown);
+    });
+    stage.addEventListener('pointerdown', () => frame.contentWindow?.focus());
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-game-play]').forEach(setUp);
+</script>

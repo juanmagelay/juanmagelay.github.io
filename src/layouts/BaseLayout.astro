@@ -14,9 +14,11 @@ interface Props {
   publishedTime?: Date;
   /** For pages search engines should not list, such as the 404 pages. */
   noindex?: boolean;
+  /** A PNG favicon for this page, such as a game's. The site's SVG otherwise. */
+  favicon?: string;
 }
 
-const { title, description, ogImage, ogType = 'website', publishedTime, noindex = false } = Astro.props;
+const { title, description, ogImage, ogType = 'website', publishedTime, noindex = false, favicon } = Astro.props;
 const path = Astro.url.pathname;
 const lang = langFromPath(path);
 const canonical = new URL(path, Astro.site).href;
@@ -39,7 +41,7 @@ const defaultHref = new URL(localizePath(path, DEFAULT_LANG), Astro.site).href;
     {noindex && <meta name="robots" content="noindex" />}
     {!noindex && alternates.map((alternate) => <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />)}
     {!noindex && <link rel="alternate" hreflang="x-default" href={defaultHref} />}
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {favicon ? <link rel="icon" href={favicon} type="image/png" /> : <link rel="icon" href="/favicon.svg" type="image/svg+xml" />}
     <meta name="color-scheme" content="light dark" />
     {/* Same as --color-paper in each theme (src/styles/tokens.css). */}
     <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />

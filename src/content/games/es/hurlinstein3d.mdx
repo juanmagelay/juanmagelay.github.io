@@ -1,0 +1,45 @@
+---
+description: Mazmorra procedural en primera persona hecha con raycasting por grilla, DDA y PixiJS 8.
+imageAlt: 'Hurlinstein3D en primera persona: un mutante de ojos amarillos bloquea un pasillo de ladrillos, la escopeta está abajo a la derecha, las barras de LIFE y AMMO arriba a la izquierda y el minimapa arriba a la derecha.'
+logoAlt: 'Logo de Hurlinstein3D: la cabeza en pixel art del enemigo mutante.'
+---
+
+## Sobre el juego
+
+El mundo es infinito: se genera en chunks de 16 por 16 celdas a medida que lo explorás, y cada zona sigue igual cuando volvés. Los enemigos patrullan y te persiguen cuando te tienen en su línea de visión. Tenés una escopeta con cargador y recarga, y un minimapa.
+
+## Controles
+
+- <kbd>W</kbd> o flecha arriba: avanzar.
+- <kbd>S</kbd> o flecha abajo: retroceder.
+- <kbd>A</kbd> y <kbd>D</kbd>: desplazamiento lateral.
+- Flechas izquierda y derecha: girar.
+- Mouse: girar. El primer clic sobre el juego captura el mouse.
+- <kbd>Espacio</kbd> o clic izquierdo: disparar.
+- <kbd>R</kbd> o clic derecho: recargar.
+- <kbd>P</kbd>: panel de admin, con FPS, modo ojo de pez, rayos en el minimapa y prueba de estrés.
+- <kbd>Esc</kbd>: volver a esta página.
+
+## Requisitos
+
+Una computadora con teclado. Chrome es el navegador recomendado. Cada vez que tocás Jugar empieza una partida nueva.
+
+## Cómo funciona
+
+- La cámara usa los vectores dir y plane del [tutorial de raycasting de Lode Vandevenne](https://lodev.org/cgtutor/raycasting.html).
+- Cada rayo recorre la grilla con DDA.
+- Las paredes se dibujan con la distancia perpendicular, que evita el efecto ojo de pez.
+- El mundo se guarda en chunks, en un Map con clave de Cantor.
+- Los sprites de los enemigos usan un z-buffer, así las paredes que tienen adelante los tapan.
+
+## Créditos
+
+- Materia: Simulación I, Licenciatura en Desarrollo de Videojuegos y Simulación, Universidad Nacional de Hurlingham (UNAHUR), 2026.
+- Profesor: Facundo Toufick Saiegh.
+- Equipo: Juan Manuel Gelay y Alejo Hutmacher.
+
+### De terceros
+
+- [PixiJS](https://pixijs.com) 8.21.0, licencia MIT.
+- Íconos [Lucide](https://lucide.dev), licencia ISC.
+- Sprite del enemigo [Husk Mutant](https://opengameart.org/content/husk-mutant), de HorrorMovieRei en OpenGameArt, CC0. El logo sale de ese sprite.

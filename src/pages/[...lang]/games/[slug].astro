@@ -1,0 +1,81 @@
+---
+import { render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHead from '../../../components/PageHead.astro';
+import Figure from '../../../components/Figure.astro';
+import Button from '../../../components/Button.astro';
+import GameStage from '../../../components/GameStage.astro';
+import { getGames, type Game } from '../../../lib/games';
+import { LANGS, langParam, ui } from '../../../i18n.mjs';
+
+// The page of each game: /games/<slug>/ for the original, /es/games/<slug>/ and /pt/games/<slug>/ for each
+// translation. Play comes right under the title, before the screenshot, so it shows without scrolling. Issue #17.
+export async function getStaticPaths() {
+  const paths = await Promise.all(
+    LANGS.map(async (lang) =>
+      (await getGames(lang)).map((game) => ({ params: { lang: langParam(lang), slug: game.slug }, props: { game, lang } }))
+    )
+  );
+  return paths.flat();
+}
+
+const { game, lang } = Astro.props as { game: Game; lang: keyof typeof ui };
+const { Content } = await render(game.entry);
+const data = game.data;
+const t = ui[lang];
+
+const og = await getImage({ src: data.image, width: 1200, format: 'jpeg' });
+---
+
+<BaseLayout title={data.title} description={data.description} ogImage={og.src} favicon={data.favicon}>
+  <article>
+    <PageHead title={data.title} dek={data.description}>
+      {
+        data.play ? (
+          <GameStage src={data.play} title={data.title} slug={game.slug}>
+            {data.repo && <Button variant="quiet" href={data.repo} data-umami-event="game-code" data-umami-event-game={game.slug}>{t.viewCode}</Button>}
+          </GameStage>
+        ) : (
+          data.repo && (
+            <p class="game-code">
+              <Button variant="quiet" href={data.repo} data-umami-event="game-code" data-umami-event-game={game.slug}>{t.viewCode}</Button>
+            </p>
+          )
+        )
+      }
+      {data.logo && <img slot="aside" class="game-logo" src={data.logo} alt={data.logoAlt} width="224" height="224" />}
+    </PageHead>
+
+    <div class="container container-reading game-body">
+      <div class="prose">
+        <Figure src={data.image} alt={data.imageAlt} loading="eager" />
+        <Content />
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .game-code {
+    margin-top: var(--space-8);
+  }
+
+  /* Pixel art: scaled without smoothing, 7rem beside the text on small screens and 14rem in the head's column. */
+  .game-logo {
+    width: 7rem;
+    height: auto;
+    image-rendering: pixelated;
+    border-radius: var(--radius-media);
+  }
+
+  @media (width >= 56rem) {
+    .game-logo {
+      width: 100%;
+    }
+  }
+
+  .game-body {
+    padding-bottom: var(--space-16);
+  }
+</style>

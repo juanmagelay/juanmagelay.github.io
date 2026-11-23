@@ -18,6 +18,14 @@
   --color-border-on-dark: #2E323C;
 }
 
+/* Hurlinstein3D's palette, taken from the game. The same in both themes, and only on its Play button,
+   the stage that holds the game and the hint over it. Issue #17. */
+:root {
+  --color-game-surface: #08111D;
+  --color-game-text: #E6EDF3;
+  --color-game-accent: #4DE1BD;
+}
+
 /* Theme: follows the visitor's operating system, with no toggle.
    Components only use ink, text-secondary, accent, border and paper; here they change value.
    Figma: collection Theme, modes Light and Dark. */

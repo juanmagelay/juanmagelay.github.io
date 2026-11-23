@@ -1,0 +1,45 @@
+---
+description: Uma masmorra procedural em primeira pessoa feita com raycasting em grade, DDA e PixiJS 8.
+imageAlt: 'Hurlinstein3D em primeira pessoa: um mutante de olhos amarelos bloqueia um corredor de tijolos, a espingarda está no canto inferior direito, as barras de LIFE e AMMO no canto superior esquerdo e o minimapa no canto superior direito.'
+logoAlt: 'Logo do Hurlinstein3D: a cabeça em pixel art do inimigo mutante.'
+---
+
+## Sobre o jogo
+
+O mundo é infinito: ele é gerado em chunks de 16 por 16 células conforme você explora, e cada área continua igual quando você volta. Os inimigos patrulham e perseguem você quando têm você na linha de visão. Você tem uma espingarda com carregador e recarga, e um minimapa.
+
+## Controles
+
+- <kbd>W</kbd> ou seta para cima: avançar.
+- <kbd>S</kbd> ou seta para baixo: recuar.
+- <kbd>A</kbd> e <kbd>D</kbd>: andar de lado.
+- Setas para a esquerda e para a direita: girar.
+- Mouse: girar. O primeiro clique no jogo captura o mouse.
+- <kbd>Espaço</kbd> ou clique esquerdo: atirar.
+- <kbd>R</kbd> ou clique direito: recarregar.
+- <kbd>P</kbd>: painel de admin, com FPS, modo olho de peixe, raios no minimapa e teste de estresse.
+- <kbd>Esc</kbd>: voltar para esta página.
+
+## Requisitos
+
+Um computador com teclado. O navegador recomendado é o Chrome. Cada vez que você clica em Jogar, começa uma partida nova.
+
+## Como funciona
+
+- A câmera usa os vetores dir e plane do [tutorial de raycasting de Lode Vandevenne](https://lodev.org/cgtutor/raycasting.html).
+- Cada raio percorre a grade com DDA.
+- As paredes são desenhadas com a distância perpendicular, que evita o efeito olho de peixe.
+- O mundo é guardado em chunks, em um Map com chave de Cantor.
+- Os sprites dos inimigos usam um z-buffer, então as paredes na frente deles os escondem.
+
+## Créditos
+
+- Disciplina: Simulación I, Licenciatura en Desarrollo de Videojuegos y Simulación, Universidad Nacional de Hurlingham (UNAHUR), 2026.
+- Professor: Facundo Toufick Saiegh.
+- Equipe: Juan Manuel Gelay e Alejo Hutmacher.
+
+### De terceiros
+
+- [PixiJS](https://pixijs.com) 8.21.0, licença MIT.
+- Ícones [Lucide](https://lucide.dev), licença ISC.
+- Sprite do inimigo [Husk Mutant](https://opengameart.org/content/husk-mutant), de HorrorMovieRei no OpenGameArt, CC0. O logo vem desse sprite.

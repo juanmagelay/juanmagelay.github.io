@@ -50,4 +50,39 @@ const writingTranslations = defineCollection({
   }),
 });
 
-export const collections = { writing, writingTranslations };
+// Games in /games/: the English original of each game page, published at /games/<file name>/. Issue #17.
+// The image is the game's screenshot: the main image of its page, its og:image and its thumbnail in /games/.
+// A game that runs in the browser is a copy in public/games/<file name>/game/, published as it is, never edited
+// here: `play` is the path of its index.html, and logo and favicon are files of that copy.
+// A game without `play` gets its page with no Play button.
+const games = defineCollection({
+  loader: glob({ pattern: '*.{md,mdx}', base: './src/content/games' }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      type: z.enum(['playable', 'academic']),
+      year: z.number(),
+      image: image(),
+      imageAlt: z.string(),
+      logo: z.string().optional(),
+      logoAlt: z.string().optional(),
+      favicon: z.string().optional(),
+      play: z.string().optional(),
+      repo: z.string().url().optional(),
+    }),
+});
+
+// Translations of each game page: src/content/games/<lang>/<same file name>, published at /<lang>/games/<file name>/.
+// They only hold the text. Everything else comes from the original (src/lib/games.ts).
+const gamesTranslations = defineCollection({
+  loader: glob({ pattern: '*/*.{md,mdx}', base: './src/content/games' }),
+  schema: z.object({
+    title: z.string().optional(),
+    description: z.string(),
+    imageAlt: z.string(),
+    logoAlt: z.string().optional(),
+  }),
+});
+
+export const collections = { writing, writingTranslations, games, gamesTranslations };
