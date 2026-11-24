@@ -1,0 +1,160 @@
+---
+title: Escape de la Naranja
+description: 'A multiplayer horror game on Roblox: a laughing orange hunts you through a dark maze while you harvest glowing flowers.'
+type: personal
+year: 2026
+image: ../../assets/games/escape-de-la-naranja/promo.png
+imageAlt: A Roblox character runs from a giant orange with teeth under a full moon
+icon: ../../assets/games/escape-de-la-naranja/icon.png
+iconAlt: The orange's face, with bulging eyes and a mouth full of teeth
+playUrl: https://www.roblox.com/games/101195789678971/Escape-de-la-Naranja
+playLabel: Play on Roblox
+playNote: Opens the game on Roblox. Free on computer, phone and tablet.
+---
+
+import FigureGrid from '../../components/FigureGrid.astro';
+import card1 from '../../assets/games/escape-de-la-naranja/card-1.png';
+import card2 from '../../assets/games/escape-de-la-naranja/card-2.png';
+import card3 from '../../assets/games/escape-de-la-naranja/card-3.png';
+import card4 from '../../assets/games/escape-de-la-naranja/card-4.png';
+import card5 from '../../assets/games/escape-de-la-naranja/card-5.png';
+
+## About the game
+
+Escape de la Naranja is a multiplayer horror game on Roblox, played in third person. **Each round lasts two minutes: you land in a dark, roofed maze and a possessed orange comes looking for you.** If it catches you, you go back to the lobby to wait for the next round; if you last until the clock reaches zero, you win.
+
+While it hunts you, you harvest azahares, the flowers of the orange tree, which glow at night. **Each one pays a coin, the green ones of the luz mala pay ten, and everything you harvested is worth double if you come back whole.** Between rounds you wait in an open-air lobby, where you train your speed on treadmills and spend your coins at the stalls of the three people who stayed inside the farm.
+
+The orange measures itself against the player it chases. **It searches for you slower than you run; when it sees you, it laughs, its light turns red and it runs faster than you, but only while it sees you.** Turn a corner and it loses you.
+
+The game is in Spanish and has been public on Roblox since November 1, 2026, with real players. I made it with my 9-year-old son.
+
+## Controls
+
+- <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> / arrows: Move
+- <kbd>Space</kbd>: Jump (also gets you off a treadmill)
+- <kbd>Right click</kbd> + drag: Turn the camera
+- <kbd>Mouse wheel</kbd>: Zoom in and out
+- <kbd>E</kbd> / <kbd>Click</kbd>: Talk to a vendor
+- Walk into a flower: Harvest it
+- <kbd>Esc</kbd>: Roblox menu (volume, graphics, leave)
+- Phone and tablet: the thumbstick to move, the jump button, drag to turn the camera and tap a vendor's prompt to talk
+- Gamepad: <kbd>X</kbd> talks to a vendor
+
+## Requirements
+
+A free Roblox account and a computer, phone or tablet. **All the text in the game is in Spanish.** Headphones help: the orange's laugh comes from where it is.
+
+## A possessed orange on an Argentine farm
+
+**To make the orange scary, we set it in the Argentine countryside and gave it a story from rural folklore: the luz mala, a ghost light that wanders the fields at night.**
+
+Thirty years ago, on the night of the black frost, the luz mala came down over an orange grove and went into one orange. By morning every orange lay black on the ground except that one. The farmhands began to disappear, and the farm was closed. Three stayed inside: the owners, Doña Eulogia, a healer, and Don Anselmo, who ran the general store and paid the wages, and their last farmhand, who looked after the grove for so long that he can no longer be told apart from the straw. They run the stalls in the lobby and pay whoever dares to go in and harvest the flowers, because the orange already knows them.
+
+Everything else comes from the same place: the gate you jump over to get in, the general store, the alpargatas (espadrilles) you buy to run faster. The story is told in five cards the first time you open the game, with images made with Gemini and text typed out like on an old typewriter.
+
+<FigureGrid
+  images={[
+    { src: card1, alt: 'Card 1: the road between the orange trees and the windmill against the moon. "A farm that is no longer on any map. Thirty years ago."' },
+    { src: card2, alt: 'Card 2: the luz mala, a green light with a trail, coming down over the orange grove. "On the night of the black frost, a light came down over the orange grove. The luz mala."' },
+    { src: card3, alt: 'Card 3: the orange glowing in its tree and the others black on the ground. "It went into an orange. By morning, they all lay black on the ground. All but that one."' },
+    { src: card4, alt: 'Card 4: the chained gate, a CLOSED sign, a straw hat on the ground and an orange dot in the distance. "The farmhands disappeared one by one. They closed the farm and nobody went back in."' },
+    { src: card5, alt: 'Card 5: the open gate and the three vendors on the road, with the moon behind them. "The owners and their last farmhand stayed inside. Tonight, you go in."' },
+  ]}
+/>
+
+## From launch feedback to a game you can win
+
+I launched the game on November 1, 2026, before finishing every story in the roadmap: Roblox shows a new game to younger players only after it gathers enough engaged players, and that clock starts when you publish. **Nine days later, with no changes, players said the same things: nobody could win a round, the arena was too dark, and there was nothing to do but walk.**
+
+The game had been balanced for 12 players per server and was being played by very few. Alone against a new player, the orange ran at 22 studs per second (the stud is Roblox's unit of distance) and always knew where they were; the player ran at 12. It caught them in about a minute. I rebuilt the roadmap around that feedback, and in the next five days I built and published seven steps, one problem at a time.
+
+### A chase you can read
+
+- The orange measures itself against the player it chases, the nearest one, using that player's trained speed.
+- While it searches, it knows where you are and walks toward you at half your speed plus 4.5, in silence, with its orange light.
+- When it sees you (within 60 studs, from its eyes to your head or torso, with nothing in between), it laughs, its light turns red, your music switches to the chase music, and a second later it runs at 0.75 times your speed plus 6. Always faster than you, but training shrinks the gap.
+- It only runs while it sees you. Turn a corner and it walks; after 3 seconds without seeing you, it goes back to searching.
+- Hunger: in the last 20 seconds it searches 2 studs per second slower than you.
+- Tall debris hides you. Over low debris, it sees you.
+- **Before installing it, I simulated thousands of one-player rounds on the real maze, with bots that only know where the orange is from what they see and hear.** A new player who learns to turn corners wins 27% of the rounds, an average one 35% and a trained one 47%, against targets of 25 to 33%, 33% and no more than 50%. With the first numbers in the design, training made things worse: the trained bot won 9%.
+
+### Fire marks the way
+
+- The general light went up just enough to see where a wall ends, chosen in an audition in Studio where the camera tours the arena with each value. The far end and the corners stay dark.
+- A torch at every passage of the maze, 87 in total, placed from the real walls. **Where there's fire, there's a way; the dark is a corner.**
+- Each torch flickers on its own, only on your screen, and only the 4 nearest ones crackle.
+- When the orange passes within 20 studs of a torch, the torch goes out for a second on every screen: a hint of where it is while it searches in silence.
+- Players had found a hiding spot: they climbed the debris, where the orange couldn't reach. Now every tall piece of debris has an invisible cap from floor to ceiling, so nobody is safe standing still.
+
+### Something to do while it hunts you
+
+- About 300 white flowers across the arena. Each one goes to the spot farthest, walking, from the ones already placed, until no spot is more than 48 studs of walking from one.
+- About 65 dark corners, where two walls meet and no torch reaches. Each round the server picks 8 of them for the green flowers of the luz mala, worth 10.
+- **Each player has their own flowers: what one harvests takes nothing from another, and what you earn doesn't depend on how many people are in the server.**
+- Your screen notices the touch, and the server checks every flower: that the round is on, that the flower belongs to this round, the distance, walls in between, and that you didn't get there faster than you can walk.
+- Don Anselmo pays the day's wage when you come back: what you harvested if the orange caught you, double if you survived. Before, the game paid for minutes survived; now it pays for doing something.
+
+### Winning feels like something
+
+- When you survive, the HUD hides, "¡Sobreviviste!" (You survived!) comes in, and your flower counter flies to the center: Don Anselmo's account.
+- Your flowers count up, the "x2" stamp lands, and the flowers fly into his photo, which is his real head from the lobby, rendered in a ViewportFrame and tinted like an old photograph. He nods while his cash box rings, and the coins come out.
+- If the orange caught you, after the scare comes the short account, with what your flowers would have been worth if you had come back whole.
+
+## A story told by three vendors
+
+**Nobody reads a manual on Roblox, so every lesson is a line said by a character at the moment you need it, and only once.**
+
+- Three voices: the narrator in the cards, you when you wake up in the lobby ("Vos: Salté la tranquera. Ya es de noche.", "You: I jumped the gate. It's already night."), and the vendors for everything else. The orange doesn't talk: it laughs.
+- Each lesson is triggered by something you did, not by a timer. The Scarecrow sends you to a treadmill, and the free ones blink until you get on; Don Anselmo explains the flowers during the lobby countdown; in your first "Preparate" (Get ready), the Scarecrow teaches you to turn corners; Doña Eulogia calls you when you can afford a trail, and her flask blinks until you talk to her.
+- Never on top of the scare or the account, never more than two lines in a row, and never over the HUD, checked on a dozen screen sizes.
+- What you saw is saved, so nothing repeats.
+- A seven-step onboarding funnel in Roblox analytics: saw the menu, entered the lobby, got on a treadmill, harvested the first flower, finished the first round, got paid and bought the first trail.
+
+## Coins, treadmills and things you wear
+
+- Treadmills in the lobby, in the style of Steal an Egg: as many as half the players, rounded up. Every 37.5 seconds of running adds one point of speed, from 12 to 20 in five minutes.
+- Doña Eulogia sells eight trails, from Ceniza (50 coins) to Luz mala (2,000). Everyone sees them.
+- Don Anselmo's general store sells alpargatas (top speed 21, 22 and 23) and harvesting poles (reach of 8, 11 and 14 studs), three levels each.
+- **What you buy, you wear.** The server puts the alpargatas on your feet and the pole in your right hand in the arena, built from simple parts and measured on each avatar's feet and hands, so they fit R6 and R15 avatars of any size. When you harvest from far away, the pole leans toward the flower and the flower drops into its basket.
+- A leaderboard by rounds survived, with Friends, your country and Global tabs.
+- Everything is saved between sessions.
+
+## Made for phones too
+
+On touch screens without a mouse, the coins and the speed panel move to the top left so your thumb doesn't cover them, and nothing sits under the notch or the home bar. On phones, the clock gets smaller and the menu buttons are at least 44 pixels tall. On a computer nothing changes.
+
+## Built one tested installer at a time
+
+I'm a Product Design Manager, not a programmer, and I learned Roblox Studio and Luau from scratch for this game. **I don't build anything by hand: every step of the roadmap is a user story with Gherkin scenarios, and Claude writes it as an installer that I paste into Studio's Command Bar.**
+
+<blockquote lang="es">
+  <p>Como jugador que entra por primera vez</p>
+  <p>Deseo que el menú me cuente qué pasó en el campo</p>
+  <p>Para saber de quién me escapo antes de entrar</p>
+</blockquote>
+
+(As a player coming in for the first time, I want the menu to tell me what happened on the farm, so I know what I'm running from before I go in.)
+
+Each installer:
+
+- runs one automatic test per scenario before installing, writes OK or FAIL for each one, and cancels without changing anything if one fails;
+- checks the length and checksum of every script it changes or depends on, and won't touch a version it doesn't know;
+- backs up everything it replaces, writes down what it will undo before changing anything, and undoes it if the final check fails;
+- rebuilds any piece that's missing and ends with a visible "LISTO. Verificado" (Done. Verified) or "INSTALACIÓN CANCELADA" (Installation canceled).
+
+**Before I get an installer, it runs through every path in a simulator: a mock Roblox written in Luau that rebuilds Studio from the project's documents**, with the game's 57 scripts, the 203 pieces of the arena, the real fonts and a DataStore that, like Roblox, refuses two writes to the same key in under 6 seconds. Balance changes are simulated first on the real maze, and every script writes what it does in Studio's Output, so a round can be read line by line: who the orange saw, who it lost and what each player got paid. After each step, a dump of Studio updates the project's documents (roadmap, economy and onboarding), so the next step starts from what's really there.
+
+The game has 28 steps done, from the first map to the alpargatas on your feet.
+
+## Credits
+
+- Juan Manuel Gelay: game design, story, UX and art direction
+- My 9-year-old son: main creator of the lore, with an active part in many decisions on aesthetics, dynamics and mechanics
+- Code written with Claude (Anthropic)
+- Roblox Studio and Luau
+- Music and sound effects from the Roblox Creator Store audio library, including "The Chase Protocol" by Horror Music Archives and "Ghost Giggle Breathy Creepy Possessed 10" by Pro Sound Effects
+- Special Elite by Astigmatic, Apache License 2.0
+- Oswald by Vernon Adams, SIL Open Font License
+- Story cards and item icons by Juan Manuel Gelay, made with Gemini; backgrounds removed with rembg, MIT license
+- Cover art by Juan Manuel Gelay, made with ChatGPT

@@ -144,9 +144,13 @@ function gameParts(html) {
   };
 }
 
-// The Space key is named in each language. The rest are the same keys.
-const SPACE = { en: 'Space', es: 'Espacio', pt: 'Espaço' };
-const sameKeys = (keys, lang) => keys.map((key) => (key === SPACE[lang] ? 'Space' : key));
+// Keys with a name, such as Space, are named in each language. The rest are the same keys. Issue #19 adds the mouse.
+const KEY_NAMES = {
+  en: {},
+  es: { Espacio: 'Space', 'Clic derecho': 'Right click', 'Rueda del mouse': 'Mouse wheel', Clic: 'Click' },
+  pt: { Espaço: 'Space', 'Clique direito': 'Right click', 'Roda do mouse': 'Mouse wheel', Clique: 'Click' },
+};
+const sameKeys = (keys, lang) => keys.map((key) => KEY_NAMES[lang][key] ?? key);
 
 for (const lang of LANGS) {
   const t = ui[lang];
@@ -280,6 +284,54 @@ for (const lang of LANGS) {
       });
     }
 
+    if (data.playUrl) {
+      // Issue #19. Scenario: Play abre el juego en su plataforma, en otra pestaña, sin pantalla completa.
+      test(`${path}: Play is a link under the title that opens the game on its platform in a new tab`, { skip }, () => {
+        const link = page.head.match(/<a\b[^>]*class="[^"]*\bgame-link-button\b[^"]*"[^>]*>([\s\S]*?)<\/a>/);
+        assert.ok(link, 'No external Play link in the page head');
+        assert.match(link[0], /class="[^"]*\bbutton\b/);
+        assert.equal(attribute(link[0], 'href'), data.playUrl);
+        assert.equal(attribute(link[0], 'target'), '_blank');
+        assert.equal(attribute(link[0], 'rel'), 'noopener noreferrer');
+        assert.equal(attribute(link[0], 'data-umami-event'), 'game-play');
+        assert.ok(html.indexOf(link[0]) < html.indexOf('<figure'), 'Play comes after the main image');
+        assert.ok(!html.includes('id="game-stage"') && !/<iframe\b/.test(html), 'The page loads a stage for the game');
+      });
+
+      test(`${path}: the label and the note of Play are in the page's language, and the note describes the link`, { skip }, () => {
+        const link = page.head.match(/<a\b[^>]*class="[^"]*\bgame-link-button\b[^"]*"[^>]*>([\s\S]*?)<\/a>/);
+        const note = page.head.match(/<p\b[^>]*class="[^"]*\bgame-link-note\b[^"]*"[^>]*>([\s\S]*?)<\/p>/);
+        assert.ok(link && note, 'No Play link or no note');
+        assert.ok(stripTags(link[1]), 'Play has no text');
+        assert.ok(stripTags(note[1]), 'The note is empty');
+        assert.equal(attribute(link[0], 'aria-describedby'), attribute(note[0], 'id'));
+        assert.match(link[1], /<svg\b[^>]*aria-hidden="true"/, 'No new tab icon');
+        if (lang !== 'en') {
+          const originalHead = gameParts(readBuilt(`/games/${slug}/`)).head;
+          const originalLink = originalHead.match(/<a\b[^>]*class="[^"]*\bgame-link-button\b[^"]*"[^>]*>([\s\S]*?)<\/a>/);
+          const originalNote = originalHead.match(/<p\b[^>]*class="[^"]*\bgame-link-note\b[^"]*"[^>]*>([\s\S]*?)<\/p>/);
+          assert.notEqual(stripTags(link[1]), stripTags(originalLink?.[1] ?? ''), 'Play label not translated');
+          assert.notEqual(stripTags(note[1]), stripTags(originalNote?.[1] ?? ''), 'Play note not translated');
+        }
+      });
+    }
+
+    if (data.icon) {
+      // Issue #19. Scenario: el ícono del juego va arriba a la derecha, optimizado y con su alt en el idioma de la página.
+      test(`${path}: the game's icon sits in the head's column, optimized, with alt text in the page's language`, { skip }, () => {
+        const icon = page.head.match(/<img\b[^>]*class="[^"]*\bgame-icon\b[^"]*"[^>]*>/)?.[0];
+        assert.ok(icon, 'No icon in the page head');
+        assert.match(page.head, /class="[^"]*\bpage-head-with-aside\b/);
+        assert.match(attribute(icon, 'src'), /^\/_astro\/.+\.webp$/, 'The icon is not optimized');
+        assert.ok(attribute(icon, 'width') && attribute(icon, 'height'), 'The icon has no width and height');
+        assert.ok(attribute(icon, 'alt')?.trim(), 'The icon has no alt text');
+        if (lang !== 'en') {
+          const originalIcon = gameParts(readBuilt(`/games/${slug}/`)).head.match(/<img\b[^>]*class="[^"]*\bgame-icon\b[^"]*"[^>]*>/)?.[0];
+          assert.notEqual(attribute(icon, 'alt'), attribute(originalIcon, 'alt'), 'Icon alt text not translated');
+        }
+      });
+    }
+
     if (lang !== 'en') {
       test(`${path} keeps the original's sections, keys and links, with its own text`, { skip: skip || !original.title }, () => {
         assert.equal(page.title, original.title);
@@ -390,5 +442,43 @@ for (const lang of LANGS) {
     assert.deepEqual(names, ['promo', 'logo', 'screenshot']);
     assert.ok(attribute(figureOf(html, 'screenshot').img, 'alt')?.trim(), 'The screenshot has no alt text');
     translated('screenshot');
+  });
+}
+
+// Issue #19: Escape de la Naranja shows the five cards of its story in a grid, under the section that tells it.
+const ESCAPE = 'escape-de-la-naranja';
+const CARDS = ['card-1', 'card-2', 'card-3', 'card-4', 'card-5'];
+const cardGrid = (html) => html.match(/<figure\b[^>]*class="[^"]*\bfigure-grid\b[^"]*"[^>]*>([\s\S]*?)<\/figure>/);
+const cardImages = (html) => [...(cardGrid(html)?.[1] ?? '').matchAll(/<img\b[^>]*>/g)].map(([img]) => img);
+
+for (const lang of LANGS) {
+  const path = localizePath(`/games/${ESCAPE}/`, lang);
+  const html = readBuilt(path);
+  const original = readBuilt(`/games/${ESCAPE}/`);
+  const skip = !html;
+
+  // Scenario: las cinco tarjetas de la historia, en orden, después de la imagen principal.
+  test(`${path}: the five story cards are in one grid, in order, after the main image`, { skip }, () => {
+    assert.ok(cardGrid(html), 'No card grid');
+    assert.deepEqual(cardImages(html).map((img) => stem(attribute(img, 'src'))), CARDS);
+    assert.deepEqual(bodyFigures(html).map((figure) => stem(attribute(figure.img, 'src'))), ['promo', 'card-1']);
+  });
+
+  test(`${path}: each card has alt text in the page's language, its size and lazy loading`, { skip }, () => {
+    const originals = cardImages(original);
+    cardImages(html).forEach((img, index) => {
+      assert.ok(attribute(img, 'alt')?.trim(), `Card ${index + 1} has no alt text`);
+      assert.ok(attribute(img, 'width') && attribute(img, 'height'), `Card ${index + 1} has no width and height`);
+      assert.equal(attribute(img, 'loading'), 'lazy', `Card ${index + 1} does not load lazily`);
+      if (lang !== 'en') assert.notEqual(attribute(img, 'alt'), attribute(originals[index], 'alt'), `Card ${index + 1} alt text not translated`);
+    });
+  });
+
+  // Scenario: en compu, tres arriba y dos abajo centradas; en celular, una columna.
+  test(`${path}: the grid has three cards per row with the last row centered from 640px, one column below`, { skip }, () => {
+    const css = pageCss(html);
+    assert.match(css, /@media\s*\(width\s*>=\s*40rem\)\s*\{[^@]*\.figure-grid[^{]*\{[^}]*grid-template-columns:\s*repeat\(6,/);
+    assert.match(css, /\.figure-grid[^{]*img:nth-child\(3n\s*\+\s*1\):nth-last-child\(2\)[^{]*\{[^}]*grid-column:\s*2\s*\/\s*span\s*2/);
+    assert.doesNotMatch(css.replace(/@media[^{]*\{(?:[^{}]*\{[^}]*\})*[^{}]*\}/g, ''), /\.figure-grid[^{]*\{[^}]*grid-template-columns/, 'The grid has columns outside the media query');
   });
 }

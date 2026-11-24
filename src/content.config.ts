@@ -54,21 +54,29 @@ const writingTranslations = defineCollection({
 // The image is the game's screenshot: the main image of its page, its og:image and its thumbnail in /games/.
 // A game that runs in the browser is a copy in public/games/<file name>/game/, published as it is, never edited
 // here: `play` is the path of its index.html, and logo and favicon are files of that copy.
-// A game without `play` gets its page with no Play button.
+// A game that runs elsewhere, such as on Roblox, has `playUrl` instead: its Play button is a link that opens there
+// in a new tab, with `playLabel` and the note `playNote` under it. Its `icon` is the game's icon on that platform,
+// optimized at build time; it is not pixel art. Issue #19.
+// A game without `play` or `playUrl` gets its page with no Play button.
 const games = defineCollection({
   loader: glob({ pattern: '*.{md,mdx}', base: './src/content/games' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
       description: z.string(),
-      type: z.enum(['playable', 'academic']),
+      type: z.enum(['playable', 'academic', 'personal']),
       year: z.number(),
       image: image(),
       imageAlt: z.string(),
       logo: z.string().optional(),
       logoAlt: z.string().optional(),
+      icon: image().optional(),
+      iconAlt: z.string().optional(),
       favicon: z.string().optional(),
       play: z.string().optional(),
+      playUrl: z.string().url().optional(),
+      playLabel: z.string().optional(),
+      playNote: z.string().optional(),
       repo: z.string().url().optional(),
     }),
 });
@@ -82,6 +90,9 @@ const gamesTranslations = defineCollection({
     description: z.string(),
     imageAlt: z.string(),
     logoAlt: z.string().optional(),
+    iconAlt: z.string().optional(),
+    playLabel: z.string().optional(),
+    playNote: z.string().optional(),
   }),
 });
 

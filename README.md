@@ -4,7 +4,7 @@ Source code of my portfolio site: https://juanmagelay.github.io
 
 ## Status
 
-Pre-launch. A game UX analysis of Warcraft III: Reign of Chaos, in three parts, is live in English, Spanish and Portuguese. Hurlinstein3D, a game from my degree, is playable at /games/hurlinstein3d/. Product case studies are in progress.
+Pre-launch. A game UX analysis of Warcraft III: Reign of Chaos, in three parts, is live in English, Spanish and Portuguese. Hurlinstein3D, a game from my degree, is playable at /games/hurlinstein3d/. Escape de la Naranja, my horror game on Roblox, has its page at /games/escape-de-la-naranja/. Product case studies are in progress.
 
 ## My role
 

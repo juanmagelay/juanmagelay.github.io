@@ -1,0 +1,152 @@
+---
+description: 'Un juego de terror multijugador en Roblox: una naranja que se ríe te persigue por un laberinto oscuro mientras juntás flores que brillan.'
+imageAlt: Un personaje de Roblox corre delante de una naranja gigante con dientes bajo la luna llena
+iconAlt: La cara de la naranja, con los ojos desorbitados y la boca llena de dientes
+playLabel: Jugar en Roblox
+playNote: Abre el juego en Roblox. Gratis en compu, celular y tablet.
+---
+
+import FigureGrid from '../../../components/FigureGrid.astro';
+import card1 from '../../../assets/games/escape-de-la-naranja/card-1.png';
+import card2 from '../../../assets/games/escape-de-la-naranja/card-2.png';
+import card3 from '../../../assets/games/escape-de-la-naranja/card-3.png';
+import card4 from '../../../assets/games/escape-de-la-naranja/card-4.png';
+import card5 from '../../../assets/games/escape-de-la-naranja/card-5.png';
+
+## Sobre el juego
+
+Escape de la Naranja es un juego de terror multijugador en Roblox, en tercera persona. **Cada ronda dura dos minutos: llegás a un laberinto oscuro y techado y una naranja poseída te sale a buscar.** Si te alcanza, volvés al lobby a esperar la próxima ronda; si aguantás hasta que el reloj llegue a cero, ganás.
+
+Mientras te busca, juntás azahares, las flores del naranjo, que de noche brillan. **Cada uno paga una moneda, los verdes de la luz mala pagan diez y todo lo que juntaste vale el doble si volvés entero.** Entre rondas se espera en un lobby al aire libre: entrenás tu velocidad en las caminadoras y gastás tus monedas en los puestos de los tres que quedaron adentro del campo.
+
+La naranja se mide con el jugador que persigue. **Te busca más lento de lo que corrés; cuando te ve, se ríe, su luz se pone roja y corre más rápido que vos, pero solo mientras te ve.** Doblás una esquina y te pierde.
+
+El juego está en español y es público en Roblox desde el 1 de noviembre de 2026, con jugadores de verdad. Lo hice con mi hijo de 9 años.
+
+## Controles
+
+- <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> / flechas: Moverse
+- <kbd>Espacio</kbd>: Saltar (también para bajarte de una caminadora)
+- <kbd>Clic derecho</kbd> + arrastrar: Girar la cámara
+- <kbd>Rueda del mouse</kbd>: Acercar y alejar
+- <kbd>E</kbd> / <kbd>Clic</kbd>: Hablar con un vendedor
+- Pasar por una flor: Juntarla
+- <kbd>Esc</kbd>: Menú de Roblox (volumen, gráficos, salir)
+- Celular y tablet: el control para moverte, el botón de saltar, arrastrar para girar la cámara y tocar el aviso de un vendedor para hablarle
+- Joystick: la <kbd>X</kbd> habla con un vendedor
+
+## Requisitos
+
+Una cuenta de Roblox (es gratis) y una compu, un celular o una tablet. **Todo el texto del juego está en español.** Con auriculares se juega mejor: la risa de la naranja suena desde donde está.
+
+## Una naranja poseída en un campo argentino
+
+**Para que la naranja diera miedo, la llevamos al campo argentino y le dimos una historia del folclore rural: la luz mala, la luz que anda de noche por los campos.**
+
+Hace treinta años, la noche de la helada negra, la luz mala bajó sobre un naranjal y se metió en una naranja. A la mañana todas estaban negras en el piso, menos esa. Los peones empezaron a desaparecer y clausuraron el campo. Adentro quedaron tres: los dueños, Doña Eulogia, la curandera, y Don Anselmo, que tenía el almacén y pagaba los jornales, y su último peón, que de tanto cuidar el naranjal ya no se distingue de la paja. Atienden los puestos del lobby y le pagan al que se anima a entrar a juntar las flores, porque a ellos la naranja ya los conoce.
+
+Todo lo demás sale del mismo lugar: la tranquera que saltás para entrar, el almacén de campo, las alpargatas que comprás para correr más. La historia se cuenta en cinco tarjetas la primera vez que abrís el juego, con imágenes hechas con Gemini y el texto escrito a máquina.
+
+<FigureGrid
+  images={[
+    { src: card1, alt: 'Tarjeta 1: el camino entre los naranjos y el molino contra la luna. "Un campo que ya no figura en ningún mapa. Hace treinta años."' },
+    { src: card2, alt: 'Tarjeta 2: la luz mala bajando sobre el naranjal, verde, con su estela. "La noche de la helada negra bajó una luz sobre el naranjal. La luz mala."' },
+    { src: card3, alt: 'Tarjeta 3: ella encendida en su árbol y las demás negras en el piso. "Se metió en una naranja. A la mañana, todas estaban negras en el piso. Todas menos esa."' },
+    { src: card4, alt: 'Tarjeta 4: la tranquera con cadena, el cartel CLAUSURADO, un sombrero de paja tirado y un puntito naranja al fondo. "Los peones fueron desapareciendo. Clausuraron el campo y nadie volvió a entrar."' },
+    { src: card5, alt: 'Tarjeta 5: la tranquera abierta y los tres vendedores en el camino, con la luna atrás. "Adentro quedaron los dueños y su último peón. Esta noche entrás vos."' },
+  ]}
+/>
+
+## Del feedback del lanzamiento a un juego que se puede ganar
+
+Lancé el juego el 1 de noviembre de 2026, antes de terminar todas las historias del roadmap: Roblox le muestra un juego nuevo a los jugadores más chicos recién cuando junta suficientes jugadores comprometidos, y ese reloj arranca al publicar. **Nueve días después, sin cambios, los jugadores decían lo mismo: nadie podía ganar una ronda, la arena era demasiado oscura y no había nada para hacer salvo caminar.**
+
+El juego estaba balanceado para 12 jugadores por servidor y se jugaba con muy pocos. Sola contra un jugador nuevo, la naranja corría a 22 studs por segundo (el stud es la unidad de distancia de Roblox) y sabía siempre dónde estaba; el jugador corría a 12. Lo alcanzaba en más o menos un minuto. Rearmé el roadmap con ese feedback y en los cinco días siguientes construí y publiqué siete pasos, un problema por vez.
+
+### Una persecución que se puede leer
+
+- La naranja se mide con el jugador que persigue, el más cercano, con su velocidad entrenada.
+- Mientras te busca, sabe dónde estás y camina hacia vos a la mitad de tu velocidad más 4,5, en silencio y con su luz naranja.
+- Cuando te ve (a menos de 60 studs, desde sus ojos hasta tu cabeza o tu torso, sin nada en el medio), se ríe, su luz se pone roja, tu música pasa a la de persecución y, un segundo después, corre a 0,75 por tu velocidad más 6. Siempre más rápida que vos, pero entrenar achica la diferencia.
+- Corre solo mientras te ve. Si doblás, camina; a los 3 segundos sin verte, vuelve a buscarte.
+- Hambre: en los últimos 20 segundos te busca 2 studs por segundo más lento que vos.
+- Detrás de un escombro alto no te ve; por encima de uno bajo, sí.
+- **Antes de instalarlo, simulé miles de rondas de un jugador sobre el laberinto real, con bots que solo saben dónde está la naranja por lo que ven y oyen.** Un jugador nuevo que aprende a doblar gana el 27% de las rondas, uno promedio el 35% y uno entrenado el 47%, contra metas de 25 a 33%, 33% y no más de 50%. Con los primeros números del diseño, entrenar empeoraba: el bot entrenado ganaba el 9%.
+
+### Donde hay fuego, hay paso
+
+- La luz general subió lo justo para ver dónde termina una pared, elegida en una audición en Studio en la que la cámara recorre la arena con cada valor. Lo lejano y los rincones siguen oscuros.
+- Una antorcha en cada paso del laberinto, 87 en total, ubicadas con las paredes reales. **Donde hay fuego, hay paso; lo oscuro es rincón.**
+- Cada antorcha titila por su cuenta, solo en tu pantalla, y solo suenan las 4 más cercanas.
+- Cuando la naranja pasa a menos de 20 studs de una antorcha, la antorcha se apaga un segundo en todas las pantallas: un aviso de por dónde anda mientras te busca en silencio.
+- Los jugadores habían encontrado dónde esconderse: se subían a los escombros, donde la naranja no llegaba. Ahora cada escombro alto tiene una tapa invisible del piso al techo, así que nadie queda a salvo quieto.
+
+### Algo para hacer mientras te busca
+
+- Unos 300 azahares blancos por toda la arena. Cada uno va al lugar más lejos, caminando, de los que ya están, hasta que ningún lugar queda a más de 48 studs de camino de uno.
+- Unos 65 rincones oscuros, donde se juntan dos paredes y no llega ninguna antorcha. En cada ronda el servidor elige 8 para los azahares verdes de la luz mala, que valen 10.
+- **Cada jugador tiene sus propias flores: lo que junta uno no le saca nada a otro, y lo que ganás no depende de cuántos hay en el servidor.**
+- Tu pantalla nota el toque y el servidor revisa cada flor: que se esté jugando, que la flor sea de esta ronda, la distancia, que no haya una pared en el medio y que no hayas llegado más rápido de lo que se camina.
+- Don Anselmo paga el jornal al volver: lo que juntaste si te alcanzó, el doble si sobreviviste. Antes el juego pagaba por minuto aguantado; ahora paga por hacer algo.
+
+### Que ganar se sienta
+
+- Cuando sobrevivís, se esconde el HUD, entra "¡Sobreviviste!" y tu contador de azahares vuela al medio: la cuenta de Don Anselmo.
+- Tus azahares cuentan, cae el sello "x2" y las flores vuelan a su foto, que es su cabeza de verdad, la del lobby, dibujada en un ViewportFrame y teñida como foto vieja. Asiente mientras suena su caja y salen las monedas.
+- Si te alcanzó, después del susto sale la cuenta corta, con lo que valían tus azahares si volvías entero.
+
+## Una historia que cuentan tres vendedores
+
+**En Roblox nadie lee un manual, así que cada lección es una línea que dice un personaje en el momento justo, y una sola vez.**
+
+- Tres voces: el narrador en las tarjetas, vos al despertar en el lobby ("Vos: Salté la tranquera. Ya es de noche.") y los vendedores para todo lo demás. La naranja no habla: se ríe.
+- Cada lección la dispara algo que hiciste, no un tiempo fijo. El Espantapájaros te manda a una caminadora y las libres titilan hasta que te subís; Don Anselmo explica los azahares durante la cuenta del lobby; en tu primer "Preparate", el Espantapájaros te enseña a doblar; Doña Eulogia te llama cuando te alcanza para una estela, y su frasco titila hasta que le hablás.
+- Nunca encima del susto ni de la cuenta, nunca más de dos líneas seguidas y nunca encima del HUD, probado en una docena de tamaños de pantalla.
+- Lo que viste se guarda: nada se repite.
+- Un embudo de siete pasos en las analíticas de Roblox: vio el menú, entró al lobby, se subió a una caminadora, juntó su primer azahar, terminó su primera ronda, cobró y compró su primera estela.
+
+## Monedas, caminadoras y lo que te ponés
+
+- Caminadoras en el lobby, al estilo de Steal an Egg: tantas como la mitad de los jugadores, redondeando para arriba. Cada 37,5 segundos de correr suman un punto de velocidad, de 12 a 20 en cinco minutos.
+- Doña Eulogia vende ocho estelas, de la Ceniza (50 monedas) a la Luz mala (2.000). Las ven todos.
+- El almacén de Don Anselmo vende alpargatas (velocidad máxima de 21, 22 y 23) y cañas para juntar (alcance de 8, 11 y 14 studs), con tres niveles cada una.
+- **Lo que comprás, lo llevás puesto.** El servidor te pone las alpargatas en los pies y la caña en la mano derecha en la arena, armadas con piezas simples y medidas con los pies y las manos de cada avatar, así calzan en avatares R6 y R15 de cualquier tamaño. Cuando juntás una flor desde lejos, la caña se inclina hacia ella y la flor cae en el canasto.
+- Una tabla de posiciones por rondas sobrevividas, con las pestañas Amigos, tu país y Global.
+- Todo se guarda entre sesiones.
+
+## Hecho también para el celular
+
+En las pantallas táctiles sin mouse, las monedas y la placa de velocidad pasan arriba a la izquierda para que no las tape el pulgar, y nada queda debajo de la muesca ni de la barrita de abajo. En el celular, además, el reloj se achica y los botones del menú miden al menos 44 píxeles de alto. En la compu no cambia nada.
+
+## Un instalador probado por vez
+
+Soy Product Design Manager, no programador, y aprendí Roblox Studio y Luau desde cero para este juego. **No construyo nada a mano: cada paso del roadmap es una historia de usuario con escenarios en Gherkin, y Claude la escribe como un instalador que pego en la Command Bar de Studio.**
+
+<blockquote>
+  <p>Como jugador que entra por primera vez</p>
+  <p>Deseo que el menú me cuente qué pasó en el campo</p>
+  <p>Para saber de quién me escapo antes de entrar</p>
+</blockquote>
+
+Cada instalador:
+
+- corre una prueba automática por escenario antes de instalar, escribe OK o FALLA en cada una y, si alguna falla, cancela sin cambiar nada;
+- revisa el largo y la suma de control de cada script que cambia o del que depende, y no toca una versión que no conoce;
+- guarda un respaldo de todo lo que reemplaza, anota lo que va a deshacer antes de cambiar algo y lo deshace si la verificación final falla;
+- vuelve a armar las piezas que falten y termina con un "LISTO. Verificado" o un "INSTALACIÓN CANCELADA" bien visible.
+
+**Antes de que me llegue, cada instalador corre por todos sus caminos en un simulacro: un Roblox de mentira escrito en Luau que rearma Studio desde los documentos del proyecto**, con los 57 scripts del juego, las 203 piezas de la arena, las letras de verdad y un DataStore que, como Roblox, no deja escribir la misma clave dos veces en menos de 6 segundos. Los cambios de balance se simulan antes sobre el laberinto real, y cada script escribe lo que hace en la Salida de Studio, así una ronda se lee línea por línea: a quién vio la naranja, a quién perdió y cuánto cobró cada uno. Al cerrar cada paso, un volcado de Studio actualiza los documentos del proyecto (roadmap, economía y onboarding), así el paso siguiente arranca de lo que de verdad hay.
+
+El juego lleva 28 pasos hechos, del primer mapa a las alpargatas en tus pies.
+
+## Créditos
+
+- Juan Manuel Gelay: diseño del juego, historia, UX y dirección de arte
+- Mi hijo de 9 años: principal ideador del lore, con participación activa en muchas decisiones de estética, dinámicas y mecánicas
+- Código escrito con Claude (Anthropic)
+- Roblox Studio y Luau
+- Música y efectos de la biblioteca de audio de la Creator Store de Roblox, entre ellos "The Chase Protocol" de Horror Music Archives y "Ghost Giggle Breathy Creepy Possessed 10" de Pro Sound Effects
+- Special Elite de Astigmatic, Apache License 2.0
+- Oswald de Vernon Adams, SIL Open Font License
+- Tarjetas de la historia e íconos de los objetos de Juan Manuel Gelay, hechos con Gemini; fondos sacados con rembg, licencia MIT
+- Portada de Juan Manuel Gelay, hecha con ChatGPT

@@ -1,0 +1,154 @@
+---
+description: 'Um jogo de terror multijogador no Roblox: uma laranja que ri persegue você por um labirinto escuro enquanto você colhe flores que brilham.'
+imageAlt: Um personagem do Roblox corre de uma laranja gigante com dentes sob a lua cheia
+iconAlt: O rosto da laranja, com os olhos esbugalhados e a boca cheia de dentes
+playLabel: Jogar no Roblox
+playNote: Abre o jogo no Roblox. Grátis no computador, celular e tablet.
+---
+
+import FigureGrid from '../../../components/FigureGrid.astro';
+import card1 from '../../../assets/games/escape-de-la-naranja/card-1.png';
+import card2 from '../../../assets/games/escape-de-la-naranja/card-2.png';
+import card3 from '../../../assets/games/escape-de-la-naranja/card-3.png';
+import card4 from '../../../assets/games/escape-de-la-naranja/card-4.png';
+import card5 from '../../../assets/games/escape-de-la-naranja/card-5.png';
+
+## Sobre o jogo
+
+Escape de la Naranja é um jogo de terror multijogador no Roblox, em terceira pessoa. **Cada rodada dura dois minutos: você cai em um labirinto escuro e coberto, e uma laranja possuída sai à sua procura.** Se ela pegar você, você volta ao lobby para esperar a próxima rodada; se aguentar até o relógio chegar a zero, você vence.
+
+Enquanto ela caça você, você colhe azahares, as flores da laranjeira, que brilham à noite. **Cada um paga uma moeda, os verdes da luz mala pagam dez, e tudo o que você colheu vale o dobro se você voltar inteiro.** Entre as rodadas, você espera em um lobby ao ar livre, onde treina sua velocidade em esteiras e gasta suas moedas nas barracas das três pessoas que ficaram dentro da fazenda.
+
+A laranja se mede pelo jogador que persegue. **Ela procura você mais devagar do que você corre; quando vê você, ela ri, a luz dela fica vermelha e ela corre mais rápido que você, mas só enquanto vê você.** Vire uma esquina e ela perde você.
+
+O jogo está em espanhol e é público no Roblox desde 1º de novembro de 2026, com jogadores de verdade. Fiz o jogo com meu filho de 9 anos.
+
+## Controles
+
+- <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> / setas: Mover-se
+- <kbd>Espaço</kbd>: Pular (também para sair de uma esteira)
+- <kbd>Clique direito</kbd> + arrastar: Girar a câmera
+- <kbd>Roda do mouse</kbd>: Aproximar e afastar
+- <kbd>E</kbd> / <kbd>Clique</kbd>: Falar com um vendedor
+- Passar por uma flor: Colhê-la
+- <kbd>Esc</kbd>: Menu do Roblox (volume, gráficos, sair)
+- Celular e tablet: o joystick da tela para se mover, o botão de pular, arrastar para girar a câmera e tocar no aviso de um vendedor para falar com ele
+- Controle: o <kbd>X</kbd> fala com um vendedor
+
+## Requisitos
+
+Uma conta gratuita no Roblox e um computador, celular ou tablet. **Todo o texto do jogo está em espanhol.** Fones de ouvido ajudam: a risada da laranja vem de onde ela está.
+
+## Uma laranja possuída em uma fazenda argentina
+
+**Para que a laranja desse medo, nós a levamos para o campo argentino e demos a ela uma história do folclore rural: a luz mala, uma luz fantasma que vaga pelos campos à noite.**
+
+Há trinta anos, na noite da geada negra, a luz mala desceu sobre um laranjal e entrou em uma laranja. De manhã, todas as laranjas estavam pretas no chão, menos aquela. Os peões começaram a desaparecer, e a fazenda foi fechada. Três ficaram lá dentro: os donos, Doña Eulogia, uma curandeira, e Don Anselmo, que cuidava do armazém e pagava as diárias, e o último peão deles, que cuidou do laranjal por tanto tempo que já não dá para distingui-lo da palha. Eles atendem as barracas do lobby e pagam a quem tiver coragem de entrar para colher as flores, porque a laranja já os conhece.
+
+Todo o resto vem do mesmo lugar: a porteira que você pula para entrar, o armazém, as alpargatas (espadrilles) que você compra para correr mais rápido. A história é contada em cinco cartões na primeira vez que você abre o jogo, com imagens feitas com o Gemini e o texto datilografado como em uma máquina de escrever antiga.
+
+<FigureGrid
+  images={[
+    { src: card1, alt: 'Cartão 1: a estrada entre as laranjeiras e o moinho contra a lua. "Uma fazenda que já não está em nenhum mapa. Há trinta anos."' },
+    { src: card2, alt: 'Cartão 2: a luz mala, uma luz verde com um rastro, descendo sobre o laranjal. "Na noite da geada negra, uma luz desceu sobre o laranjal. A luz mala."' },
+    { src: card3, alt: 'Cartão 3: a laranja acesa na sua árvore e as outras pretas no chão. "Entrou em uma laranja. De manhã, todas estavam pretas no chão. Todas menos aquela."' },
+    { src: card4, alt: 'Cartão 4: a porteira com corrente, a placa CLAUSURADO (fechado), um chapéu de palha no chão e um pontinho laranja ao fundo. "Os peões foram desaparecendo um por um. Fecharam a fazenda e ninguém voltou a entrar."' },
+    { src: card5, alt: 'Cartão 5: a porteira aberta e os três vendedores na estrada, com a lua atrás. "Os donos e o último peão deles ficaram lá dentro. Esta noite, quem entra é você."' },
+  ]}
+/>
+
+## Do feedback do lançamento a um jogo que dá para vencer
+
+Lancei o jogo em 1º de novembro de 2026, antes de terminar todas as histórias do roadmap: o Roblox só mostra um jogo novo para jogadores mais jovens depois que ele reúne jogadores engajados suficientes, e esse relógio começa a contar quando você publica. **Nove dias depois, sem mudanças, os jogadores diziam as mesmas coisas: ninguém conseguia vencer uma rodada, a arena era escura demais e não havia nada para fazer além de andar.**
+
+O jogo tinha sido balanceado para 12 jogadores por servidor e era jogado por muito poucos. Sozinha contra um jogador novo, a laranja corria a 22 studs por segundo (o stud é a unidade de distância do Roblox) e sempre sabia onde ele estava; o jogador corria a 12. Ela o alcançava em cerca de um minuto. Refiz o roadmap a partir desse feedback e, nos cinco dias seguintes, construí e publiquei sete passos, um problema de cada vez.
+
+### Uma perseguição que dá para ler
+
+- A laranja se mede pelo jogador que persegue, o mais próximo, usando a velocidade treinada dele.
+- Enquanto procura, ela sabe onde você está e anda na sua direção à metade da sua velocidade mais 4,5, em silêncio, com sua luz laranja.
+- Quando vê você (a menos de 60 studs, dos olhos dela até sua cabeça ou seu torso, sem nada no meio), ela ri, a luz dela fica vermelha, a sua música muda para a música de perseguição e, um segundo depois, ela corre a 0,75 vezes a sua velocidade mais 6. Sempre mais rápida que você, mas treinar diminui a diferença.
+- Ela só corre enquanto vê você. Vire uma esquina e ela anda; depois de 3 segundos sem ver você, volta a procurar.
+- Fome: nos últimos 20 segundos, ela procura 2 studs por segundo mais devagar que você.
+- Escombros altos escondem você. Por cima de escombros baixos, ela vê você.
+- **Antes de instalar, simulei milhares de rodadas de um jogador no labirinto real, com bots que só sabem onde a laranja está pelo que veem e ouvem.** Um jogador novo que aprende a virar esquinas vence 27% das rodadas, um mediano 35% e um treinado 47%, contra metas de 25 a 33%, 33% e no máximo 50%. Com os primeiros números do design, treinar piorava as coisas: o bot treinado vencia 9%.
+
+### O fogo marca o caminho
+
+- A luz geral subiu só o suficiente para ver onde uma parede termina, escolhida em uma audição no Studio em que a câmera percorre a arena com cada valor. O fundo e os cantos continuam escuros.
+- Uma tocha em cada passagem do labirinto, 87 no total, posicionadas a partir das paredes reais. **Onde há fogo, há caminho; o escuro é um canto.**
+- Cada tocha tremula por conta própria, só na sua tela, e só as 4 mais próximas crepitam.
+- Quando a laranja passa a menos de 20 studs de uma tocha, a tocha se apaga por um segundo em todas as telas: uma pista de onde ela está enquanto procura em silêncio.
+- Os jogadores tinham encontrado um esconderijo: subiam nos escombros, onde a laranja não alcançava. Agora cada escombro alto tem uma tampa invisível do chão ao teto, então ninguém fica a salvo parado.
+
+### Algo para fazer enquanto ela caça você
+
+- Cerca de 300 flores brancas pela arena. Cada uma vai para o ponto mais distante, a pé, das que já estão colocadas, até que nenhum ponto fique a mais de 48 studs de caminhada de uma delas.
+- Cerca de 65 cantos escuros, onde duas paredes se encontram e nenhuma tocha chega. A cada rodada, o servidor escolhe 8 deles para as flores verdes da luz mala, que valem 10.
+- **Cada jogador tem suas próprias flores: o que um colhe não tira nada de outro, e o que você ganha não depende de quantas pessoas há no servidor.**
+- Sua tela percebe o toque, e o servidor confere cada flor: que a rodada está em andamento, que a flor é desta rodada, a distância, se há paredes no meio e que você não chegou lá mais rápido do que dá para andar.
+- Don Anselmo paga a diária quando você volta: o que você colheu se a laranja pegou você, o dobro se você sobreviveu. Antes, o jogo pagava pelos minutos sobrevividos; agora paga por fazer alguma coisa.
+
+### Uma vitória que dá para sentir
+
+- Quando você sobrevive, o HUD se esconde, entra "¡Sobreviviste!" (Você sobreviveu!) e seu contador de flores voa para o centro: a conta de Don Anselmo.
+- Suas flores são contadas, o carimbo "x2" cai e as flores voam para a foto dele, que é a cabeça de verdade dele, a do lobby, renderizada em um ViewportFrame e tingida como uma foto antiga. Ele assente enquanto a caixa registradora dele toca, e as moedas saem.
+- Se a laranja pegou você, depois do susto vem a conta curta, com quanto suas flores valeriam se você tivesse voltado inteiro.
+
+## Uma história contada por três vendedores
+
+**No Roblox ninguém lê manual, então cada lição é uma fala de um personagem no momento em que você precisa dela, e uma vez só.**
+
+- Três vozes: o narrador nos cartões, você ao acordar no lobby ("Vos: Salté la tranquera. Ya es de noche.", "Você: Pulei a porteira. Já é noite.") e os vendedores para todo o resto. A laranja não fala: ela ri.
+- Cada lição é disparada por algo que você fez, não por um tempo fixo. O Espantalho manda você para uma esteira, e as livres piscam até você subir; Don Anselmo explica as flores durante a contagem regressiva do lobby; no seu primeiro "Preparate" (Prepare-se), o Espantalho ensina você a virar esquinas; Doña Eulogia chama você quando dá para comprar um rastro, e o frasco dela pisca até você falar com ela.
+- Nunca em cima do susto nem da conta, nunca mais de duas falas seguidas e nunca em cima do HUD, conferido em uma dúzia de tamanhos de tela.
+- O que você viu fica salvo, então nada se repete.
+- Um funil de onboarding de sete passos no analytics do Roblox: viu o menu, entrou no lobby, subiu em uma esteira, colheu a primeira flor, terminou a primeira rodada, recebeu e comprou o primeiro rastro.
+
+## Moedas, esteiras e o que você veste
+
+- Esteiras no lobby, no estilo de Steal an Egg: tantas quanto a metade dos jogadores, arredondando para cima. A cada 37,5 segundos correndo, você ganha um ponto de velocidade, de 12 a 20 em cinco minutos.
+- Doña Eulogia vende oito rastros, de Ceniza (50 moedas) a Luz mala (2.000). Todo mundo vê.
+- O armazém de Don Anselmo vende alpargatas (velocidade máxima de 21, 22 e 23) e varas de colheita (alcance de 8, 11 e 14 studs), com três níveis cada.
+- **O que você compra, você veste.** O servidor coloca as alpargatas nos seus pés e a vara na sua mão direita na arena, montadas com peças simples e medidas nos pés e nas mãos de cada avatar, então servem em avatares R6 e R15 de qualquer tamanho. Quando você colhe de longe, a vara se inclina na direção da flor e a flor cai na cesta dela.
+- Um placar por rodadas sobrevividas, com as abas Amigos, seu país e Global.
+- Tudo fica salvo entre as sessões.
+
+## Feito também para o celular
+
+Em telas sensíveis ao toque sem mouse, as moedas e o painel de velocidade vão para o canto superior esquerdo para que o polegar não os cubra, e nada fica embaixo do notch ou da barra inferior. No celular, o relógio fica menor e os botões do menu têm pelo menos 44 pixels de altura. No computador, nada muda.
+
+## Um instalador testado de cada vez
+
+Sou Product Design Manager, não programador, e aprendi Roblox Studio e Luau do zero para este jogo. **Não construo nada à mão: cada passo do roadmap é uma história de usuário com cenários em Gherkin, e o Claude a escreve como um instalador que eu colo na Command Bar do Studio.**
+
+<blockquote lang="es">
+  <p>Como jugador que entra por primera vez</p>
+  <p>Deseo que el menú me cuente qué pasó en el campo</p>
+  <p>Para saber de quién me escapo antes de entrar</p>
+</blockquote>
+
+(Como jogador que entra pela primeira vez, quero que o menu me conte o que aconteceu na fazenda, para saber do que estou fugindo antes de entrar.)
+
+Cada instalador:
+
+- roda um teste automático por cenário antes de instalar, escreve OK ou FALHA em cada um e, se algum falhar, cancela sem mudar nada;
+- confere o tamanho e o checksum de cada script que ele muda ou do qual depende, e não mexe em uma versão que não conhece;
+- faz backup de tudo o que substitui, anota o que vai desfazer antes de mudar qualquer coisa e desfaz tudo se a verificação final falhar;
+- reconstrói qualquer peça que esteja faltando e termina com um "LISTO. Verificado" (Pronto. Verificado) ou "INSTALACIÓN CANCELADA" (Instalação cancelada) bem visível.
+
+**Antes de chegar até mim, cada instalador passa por todos os caminhos em um simulador: um Roblox de mentira escrito em Luau que remonta o Studio a partir dos documentos do projeto**, com os 57 scripts do jogo, as 203 peças da arena, as fontes de verdade e um DataStore que, como o Roblox, recusa duas gravações na mesma chave em menos de 6 segundos. As mudanças de balanceamento são simuladas antes no labirinto real, e cada script escreve o que faz no Output do Studio, então uma rodada pode ser lida linha por linha: quem a laranja viu, quem ela perdeu e quanto cada jogador recebeu. Depois de cada passo, um dump do Studio atualiza os documentos do projeto (roadmap, economia e onboarding), então o próximo passo começa do que realmente existe.
+
+O jogo tem 28 passos feitos, do primeiro mapa às alpargatas nos seus pés.
+
+## Créditos
+
+- Juan Manuel Gelay: design do jogo, história, UX e direção de arte
+- Meu filho de 9 anos: principal criador do lore, com participação ativa em muitas decisões de estética, dinâmicas e mecânicas
+- Código escrito com o Claude (Anthropic)
+- Roblox Studio e Luau
+- Música e efeitos sonoros da biblioteca de áudio da Creator Store do Roblox, entre eles "The Chase Protocol", de Horror Music Archives, e "Ghost Giggle Breathy Creepy Possessed 10", de Pro Sound Effects
+- Special Elite, de Astigmatic, Apache License 2.0
+- Oswald, de Vernon Adams, SIL Open Font License
+- Cartões da história e ícones dos itens de Juan Manuel Gelay, feitos com o Gemini; fundos removidos com rembg, licença MIT
+- Arte da capa de Juan Manuel Gelay, feita com o ChatGPT

@@ -1,11 +1,12 @@
 ---
 import { render } from 'astro:content';
-import { getImage } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PageHead from '../../../components/PageHead.astro';
 import Figure from '../../../components/Figure.astro';
 import Button from '../../../components/Button.astro';
 import GameStage from '../../../components/GameStage.astro';
+import OpenInNewIcon from '../../../assets/icons/open_in_new.svg';
 import { getGames, type Game } from '../../../lib/games';
 import { LANGS, langParam, ui } from '../../../i18n.mjs';
 
@@ -26,6 +27,11 @@ const data = game.data;
 const t = ui[lang];
 
 const og = await getImage({ src: data.image, width: 1200, format: 'jpeg' });
+
+// A game that runs elsewhere: Play opens it there, in a new tab, and the note under it says where. Issue #19.
+const playNoteId = `game-link-note-${game.slug}`;
+// The icon is 7rem (112px) beside the text and 14rem (224px) in the head's column, at 1x to 2x. Never upscale.
+const iconWidths = data.icon ? [...new Set([112, 224, 448].map((width) => Math.min(width, data.icon!.width)))] : [];
 ---
 
 <BaseLayout title={data.title} description={data.description} ogImage={og.src} favicon={data.favicon}>
@@ -36,6 +42,25 @@ const og = await getImage({ src: data.image, width: 1200, format: 'jpeg' });
           <GameStage src={data.play} title={data.title} slug={game.slug}>
             {data.repo && <Button variant="quiet" href={data.repo} data-umami-event="game-code" data-umami-event-game={game.slug}>{t.viewCode}</Button>}
           </GameStage>
+        ) : data.playUrl ? (
+          <div class="game-link">
+            <div class="game-link-actions">
+              <Button
+                class="game-link-button"
+                href={data.playUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-describedby={data.playNote ? playNoteId : undefined}
+                data-umami-event="game-play"
+                data-umami-event-game={game.slug}
+              >
+                {data.playLabel ?? t.play}
+                <OpenInNewIcon class="game-link-icon" width="24" height="24" fill="currentColor" aria-hidden="true" />
+              </Button>
+              {data.repo && <Button variant="quiet" href={data.repo} data-umami-event="game-code" data-umami-event-game={game.slug}>{t.viewCode}</Button>}
+            </div>
+            {data.playNote && <p class="game-link-note" id={playNoteId}>{data.playNote}</p>}
+          </div>
         ) : (
           data.repo && (
             <p class="game-code">
@@ -45,6 +70,20 @@ const og = await getImage({ src: data.image, width: 1200, format: 'jpeg' });
         )
       }
       {data.logo && <img slot="aside" class="game-logo" src={data.logo} alt={data.logoAlt} width="224" height="224" />}
+      {
+        data.icon && (
+          <Fragment slot="aside">
+            <Image
+              class="game-icon"
+              src={data.icon}
+              alt={data.iconAlt ?? ''}
+              widths={iconWidths}
+              sizes="(min-width: 56rem) 14rem, 7rem"
+              loading="eager"
+            />
+          </Fragment>
+        )
+      }
     </PageHead>
 
     <div class="container container-reading game-body">
@@ -61,18 +100,50 @@ const og = await getImage({ src: data.image, width: 1200, format: 'jpeg' });
     margin-top: var(--space-8);
   }
 
-  /* Pixel art: scaled without smoothing, 7rem beside the text on small screens and 14rem in the head's column. */
-  .game-logo {
+  /* 7rem beside the text on small screens and 14rem in the head's column. The logo is pixel art, scaled without
+     smoothing; the icon of a game from another platform is not (issue #19). */
+  .game-logo,
+  .game-icon {
     width: 7rem;
     height: auto;
-    image-rendering: pixelated;
     border-radius: var(--radius-media);
   }
 
+  .game-logo {
+    image-rendering: pixelated;
+  }
+
   @media (width >= 56rem) {
-    .game-logo {
+    .game-logo,
+    .game-icon {
       width: 100%;
     }
+  }
+
+  /* The external Play: the primary button a size larger, like Play for a game that runs here, with the icon
+     of a link that opens in a new tab. The icon's 24px box has about 4px of air on its right. Issue #19. */
+  .game-link {
+    margin-top: var(--space-8);
+  }
+
+  .game-link-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .game-link :global(.game-link-button) {
+    gap: var(--space-1);
+    min-width: 8rem;
+    padding-inline: var(--space-5) var(--space-4);
+    font-size: var(--type-size-base);
+  }
+
+  .game-link-note {
+    max-width: var(--layout-prose);
+    margin-top: var(--space-3);
+    color: var(--color-text-secondary);
+    font-size: var(--type-size-sm);
   }
 
   .game-body {

@@ -1,0 +1,73 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+// Several images of the same size in a grid as wide as a large Figure (--layout-figure): three per row, with the
+// last row centered, and one column below 640px. No captions: each alt text says what its image shows. Same border,
+// corners and quality as Figure. Made for the five story cards of Escape de la Naranja. Issue #19.
+interface Props {
+  images: { src: ImageMetadata; alt: string }[];
+}
+
+const { images } = Astro.props;
+// About 267px wide from 56rem, a third of the column from 40rem and the whole column below, at 1x to 2x. Never upscale.
+const widths = (image: ImageMetadata) => [...new Set([400, 800, image.width].map((width) => Math.min(width, image.width)))];
+---
+
+<figure class="figure-grid">
+  {
+    images.map((image) => (
+      <Image
+        src={image.src}
+        alt={image.alt}
+        loading="lazy"
+        quality={80}
+        widths={widths(image.src)}
+        sizes="(min-width: 56rem) 267px, (min-width: 40rem) 33vw, 100vw"
+      />
+    ))
+  }
+</figure>
+
+<style>
+  .figure-grid {
+    display: grid;
+    gap: var(--space-4);
+    width: min(100%, var(--layout-figure));
+    margin-block: var(--space-12);
+  }
+
+  :global(.prose) > .figure-grid {
+    max-width: none;
+  }
+
+  :global(.prose) > .figure-grid + :global(*) {
+    margin-top: 0;
+  }
+
+  .figure-grid :global(img) {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-media);
+  }
+
+  /* From 640px: six tracks, two per image. When two images are left for the last row, they start at the second
+     track; when one is left, at the third. */
+  @media (width >= 40rem) {
+    .figure-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .figure-grid :global(img) {
+      grid-column: span 2;
+    }
+
+    .figure-grid :global(img:nth-child(3n + 1):nth-last-child(2)) {
+      grid-column: 2 / span 2;
+    }
+
+    .figure-grid :global(img:nth-child(3n + 1):last-child) {
+      grid-column: 3 / span 2;
+    }
+  }
+</style>

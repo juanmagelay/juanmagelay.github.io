@@ -48,19 +48,10 @@ const unavailableId = `game-play-unavailable-${slug}`;
     gap: var(--space-3);
   }
 
-  /* The game's accent, only here: its dark text on it reaches 11.6:1 in both themes. */
+  /* The primary button, a size larger: it is the page's main action. Issue #19. */
   .game-play :global(.game-play-button) {
     min-width: 8rem;
-    border-color: var(--color-game-accent);
-    background: var(--color-game-accent);
-    color: var(--color-game-surface);
     font-size: var(--type-size-base);
-  }
-
-  .game-play :global(.game-play-button:hover) {
-    border-color: var(--color-game-accent);
-    background: var(--color-game-surface);
-    color: var(--color-game-accent);
   }
 
   .game-play :global(.game-play-button:disabled),
@@ -78,14 +69,15 @@ const unavailableId = `game-play-unavailable-${slug}`;
     font-size: var(--type-size-sm);
   }
 
-  /* The stage covers the window while it shows, and fills the screen in full screen. */
+  /* The stage covers the window while it shows, and fills the screen in full screen.
+     The game is always dark, so the stage and the hint use the dark colors in both themes. Issue #19. */
   .game-stage {
     position: fixed;
     inset: 0;
     z-index: 100;
     width: 100vw;
     height: 100dvh;
-    background: var(--color-game-surface);
+    background: var(--color-surface-dark);
   }
 
   .game-stage[hidden] {
@@ -97,7 +89,7 @@ const unavailableId = `game-play-unavailable-${slug}`;
     width: 100%;
     height: 100%;
     border: 0;
-    background: var(--color-game-surface);
+    background: var(--color-surface-dark);
   }
 
   /* Over the game for 3 seconds, between the LIFE bars and the minimap, below the strip that opens the admin panel.
@@ -108,10 +100,10 @@ const unavailableId = `game-play-unavailable-${slug}`;
     left: 50%;
     max-width: calc(100% - 2 * var(--space-4));
     padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--color-game-accent);
+    border: 1px solid var(--color-accent-on-dark);
     border-radius: var(--radius-control);
-    background: var(--color-game-surface);
-    color: var(--color-game-text);
+    background: var(--color-surface-dark);
+    color: var(--color-text-on-dark);
     font-size: var(--type-size-sm);
     text-align: center;
     transform: translateX(-50%);

@@ -108,6 +108,15 @@ for (const [theme, colors] of Object.entries(PALETTE)) {
   }
 }
 
+// Issue #19: every color of the site is a primitive of the design system, in light and in dark. No game palettes.
+const PRIMITIVES = ['#14161B', '#565C68', '#2A44D4', '#D5D8DE', '#FFFFFF', '#B6BBC6', '#8A90A0', '#7D8FFF', '#2E323C'];
+
+test('tokens.css only holds the primitives of the design system', () => {
+  const css = readFileSync(tokensPath, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const others = [...css.matchAll(/#[0-9a-f]{3,8}\b/gi)].map(([hex]) => hex.toUpperCase()).filter((hex) => !PRIMITIVES.includes(hex));
+  assert.deepEqual(others, []);
+});
+
 // Scenario: el texto cumple contraste AA en los dos temas.
 const PAIRS = [
   ['ink', 'paper', 'body text'],
