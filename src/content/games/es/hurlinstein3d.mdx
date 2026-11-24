@@ -1,12 +1,22 @@
 ---
 description: Mazmorra procedural en primera persona hecha con raycasting por grilla, DDA y PixiJS 8.
-imageAlt: 'Hurlinstein3D en primera persona: un mutante de ojos amarillos bloquea un pasillo de ladrillos, la escopeta está abajo a la derecha, las barras de LIFE y AMMO arriba a la izquierda y el minimapa arriba a la derecha.'
+imageAlt: 'Arte promocional de Hurlinstein3D: el logo sobre un pasillo de ladrillos bajo un cielo violeta. Un mutante de ojos amarillos estira el brazo hacia el jugador, que dispara una escopeta de dos caños, y atrás vienen más mutantes y una figura oscura de ojos amarillos.'
 logoAlt: 'Logo de Hurlinstein3D: la cabeza en pixel art del enemigo mutante.'
 ---
+
+import Figure from '../../../components/Figure.astro';
+import logo from '../../../assets/games/hurlinstein3d/logo.png';
+import screenshot from '../../../assets/games/hurlinstein3d/screenshot.png';
 
 ## Sobre el juego
 
 El mundo es infinito: se genera en chunks de 16 por 16 celdas a medida que lo explorás, y cada zona sigue igual cuando volvés. Los enemigos patrullan y te persiguen cuando te tienen en su línea de visión. Tenés una escopeta con cargador y recarga, y un minimapa.
+
+<Figure
+  src={logo}
+  frame={false}
+  alt="Logo de Hurlinstein3D: la palabra Hurlinstein en letras cromadas que se vuelven rojas abajo, sobre una placa de metal con remaches y franjas de peligro, y 3D en dorado debajo."
+/>
 
 ## Controles
 
@@ -32,14 +42,20 @@ Una computadora con teclado. Chrome es el navegador recomendado. Cada vez que to
 - El mundo se guarda en chunks, en un Map con clave de Cantor.
 - Los sprites de los enemigos usan un z-buffer, así las paredes que tienen adelante los tapan.
 
+<Figure
+  src={screenshot}
+  alt="Hurlinstein3D en primera persona: un mutante de ojos amarillos bloquea un pasillo de ladrillos, la escopeta está abajo a la derecha, las barras de LIFE y AMMO arriba a la izquierda y el minimapa arriba a la derecha."
+/>
+
 ## Créditos
 
 - Materia: Simulación I, Licenciatura en Desarrollo de Videojuegos y Simulación, Universidad Nacional de Hurlingham (UNAHUR), 2026.
 - Profesor: Facundo Toufick Saiegh.
 - Equipo: Juan Manuel Gelay y Alejo Hutmacher.
+- Arte promocional y logo: Juan Manuel Gelay, hechos con Gemini Pro.
 
 ### De terceros
 
 - [PixiJS](https://pixijs.com) 8.21.0, licencia MIT.
 - Íconos [Lucide](https://lucide.dev), licencia ISC.
-- Sprite del enemigo [Husk Mutant](https://opengameart.org/content/husk-mutant), de HorrorMovieRei en OpenGameArt, CC0. El logo sale de ese sprite.
+- Sprite del enemigo [Husk Mutant](https://opengameart.org/content/husk-mutant), de HorrorMovieRei en OpenGameArt, CC0. El logo en pixel art sale de ese sprite.

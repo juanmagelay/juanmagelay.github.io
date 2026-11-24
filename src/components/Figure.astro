@@ -12,9 +12,11 @@ interface Props {
   maxWidth?: number;
   /** Use "eager" only for an image at the top of the page. */
   loading?: 'lazy' | 'eager';
+  /** false: no border and no rounded corners, for an image with a transparent background, like a logo. */
+  frame?: boolean;
 }
 
-const { src, alt, caption, credit, maxWidth, loading = 'lazy' } = Astro.props;
+const { src, alt, caption, credit, maxWidth, loading = 'lazy', frame = true } = Astro.props;
 const { source } = t(Astro.url.pathname);
 
 // Never upscale: small screenshots stay at their real size.
@@ -25,7 +27,7 @@ const widths = [...new Set([480, displayWidth, Math.min(src.width, displayWidth 
   .sort((a, b) => a - b);
 ---
 
-<figure class="figure" style={`--figure-width: ${displayWidth}px`}>
+<figure class:list={['figure', !frame && 'figure-frameless']} style={`--figure-width: ${displayWidth}px`}>
   <Image src={src} alt={alt} loading={loading} quality={80} widths={widths} sizes={`(min-width: 56rem) ${displayWidth}px, 100vw`} />
   {
     (caption || credit) && (
@@ -60,6 +62,11 @@ const widths = [...new Set([480, displayWidth, Math.min(src.width, displayWidth 
     width: 100%;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-media);
+  }
+
+  .figure-frameless :global(img) {
+    border: 0;
+    border-radius: 0;
   }
 
   figcaption {

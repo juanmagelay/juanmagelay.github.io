@@ -4,6 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { inflateSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { assertBuilt, isGameCopy, isRedirect, pathForFile } from './site-checks.mjs';
 import { LANGS, langFromPath, localizePath, ui } from '../src/i18n.mjs';
@@ -319,5 +320,75 @@ for (const file of pages) {
     assert.match(attributes, /\sdata-umami-event="nav-games"/);
     const expected = path === games ? 'page' : path.startsWith(games) ? 'true' : undefined;
     assert.equal(attributes.match(/\saria-current="([^"]*)"/)?.[1], expected);
+  });
+}
+
+// Issue #18: Hurlinstein3D shows its promotional art as its main image, its logo without a background and, further
+// down, a screenshot of the game.
+const HURLINSTEIN = 'hurlinstein3d';
+
+// The figures in the body of a game page: the <figure> tag and its <img>.
+const bodyFigures = (html) =>
+  [...html.slice(html.indexOf('class="prose"'), html.indexOf('</article>')).matchAll(/<figure\b[\s\S]*?<\/figure>/g)].map(
+    ([figure]) => ({ tag: figure.match(/<figure\b[^>]*>/)[0], img: figure.match(/<img\b[^>]*>/)?.[0] })
+  );
+const figureOf = (html, name) => bodyFigures(html).find((figure) => stem(attribute(figure.img, 'src')) === name);
+// Figure.astro shows an image at most 832px wide (--layout-figure), wider than the text column.
+const isLarge = (figure) => /--figure-width:\s*832px/.test(attribute(figure?.tag, 'style') ?? '');
+
+// Scenario: el logo no tiene fondo.
+test('the Hurlinstein3D logo is a PNG with an alpha channel and a transparent corner', () => {
+  const png = readFileSync(join(root, 'src/assets/games', HURLINSTEIN, 'logo.png'));
+  assert.equal(png.subarray(1, 4).toString(), 'PNG', 'Not a PNG');
+  // IHDR: bit depth at byte 24 and color type at byte 25; 8-bit color type 6 is RGBA.
+  assert.deepEqual([png[24], png[25]], [8, 6], 'Not an 8-bit RGBA PNG');
+  const chunks = [];
+  for (let at = 8; at < png.length; ) {
+    const length = png.readUInt32BE(at);
+    if (png.toString('latin1', at + 4, at + 8) === 'IDAT') chunks.push(png.subarray(at + 8, at + 8 + length));
+    at += 12 + length;
+  }
+  // The first byte of a row is its filter. On the first pixel of the first row, every filter keeps the value as it is.
+  const pixels = inflateSync(Buffer.concat(chunks));
+  assert.equal(pixels[4], 0, 'The top left corner is not transparent');
+});
+
+for (const lang of LANGS) {
+  const path = localizePath(`/games/${HURLINSTEIN}/`, lang);
+  const html = readBuilt(path);
+  const original = readBuilt(`/games/${HURLINSTEIN}/`);
+  const skip = !html;
+  const translated = (name) => {
+    if (lang === 'en') return;
+    assert.notEqual(attribute(figureOf(html, name)?.img, 'alt'), attribute(figureOf(original, name)?.img, 'alt'), `${name} alt text not translated`);
+  };
+
+  // Scenario: la promo reemplaza a la captura como imagen del juego.
+  test(`${path}: the promotional art is the main image, large, and the og:image`, { skip }, () => {
+    const [main] = bodyFigures(html);
+    assert.equal(stem(attribute(main?.img, 'src')), 'promo', 'The first figure is not the promotional art');
+    assert.ok(isLarge(main), 'The promotional art is not shown at 832px');
+    assert.equal(stem(new URL(attribute(html.match(/<meta property="og:image"[^>]*>/)?.[0], 'content')).pathname), 'promo');
+    translated('promo');
+  });
+
+  // Scenario: el logo decora la página en grande, sin fondo y sin marco.
+  test(`${path}: the logo is shown large, without a frame, in a format that keeps its transparency`, { skip }, () => {
+    const logo = figureOf(html, 'logo');
+    assert.ok(logo, 'No logo figure');
+    assert.ok(attribute(logo.img, 'alt')?.trim(), 'The logo has no alt text');
+    assert.match(attribute(logo.tag, 'class'), /\bfigure-frameless\b/);
+    assert.match(attribute(logo.img, 'src'), /\.(webp|png|avif)$/, 'The logo lost its transparency');
+    assert.ok(isLarge(logo), 'The logo is not shown at 832px');
+    assert.match(pageCss(html), /\.figure-frameless(?:\[[^\]]*\])?\s+img\s*\{[^}]*border:\s*0/);
+    translated('logo');
+  });
+
+  // Scenario: la captura sigue en la página, más abajo.
+  test(`${path}: the screenshot of the game is still on the page, after the logo`, { skip }, () => {
+    const names = bodyFigures(html).map((figure) => stem(attribute(figure.img, 'src')));
+    assert.deepEqual(names, ['promo', 'logo', 'screenshot']);
+    assert.ok(attribute(figureOf(html, 'screenshot').img, 'alt')?.trim(), 'The screenshot has no alt text');
+    translated('screenshot');
   });
 }

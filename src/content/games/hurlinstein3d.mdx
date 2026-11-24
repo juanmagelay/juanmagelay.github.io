@@ -3,8 +3,8 @@ title: Hurlinstein3D
 description: A first-person procedural dungeon built with grid raycasting, DDA and PixiJS 8.
 type: academic
 year: 2026
-image: ../../assets/games/hurlinstein3d/screenshot.png
-imageAlt: 'Hurlinstein3D in first person: a mutant with yellow eyes blocks a brick corridor, the shotgun is in the lower right corner, the LIFE and AMMO bars in the upper left and the minimap in the upper right.'
+image: ../../assets/games/hurlinstein3d/promo.jpg
+imageAlt: 'Hurlinstein3D promotional art: the logo over a brick corridor under a purple sky. A mutant with yellow eyes reaches toward the player, who fires a double-barreled shotgun, and more mutants and a dark figure with yellow eyes come up behind it.'
 logo: /games/hurlinstein3d/game/assets/logo/logomark.png
 logoAlt: 'Hurlinstein3D logo: the pixel art head of the mutant enemy.'
 favicon: /games/hurlinstein3d/game/assets/logo/favicon-32.png
@@ -12,9 +12,19 @@ play: /games/hurlinstein3d/game/index.html
 repo: https://github.com/juanmagelay/Hurlinstein3D
 ---
 
+import Figure from '../../components/Figure.astro';
+import logo from '../../assets/games/hurlinstein3d/logo.png';
+import screenshot from '../../assets/games/hurlinstein3d/screenshot.png';
+
 ## About the game
 
 The world is infinite: it is generated in 16 by 16 cell chunks as you explore it, and each area stays the same when you come back. Enemies patrol and chase you when they have you in their line of sight. You have a shotgun with a magazine and reloads, and a minimap.
+
+<Figure
+  src={logo}
+  frame={false}
+  alt="Hurlinstein3D logo: the word Hurlinstein in chrome letters that turn red at the bottom, over a riveted metal plate with hazard stripes, and 3D in gold below it."
+/>
 
 ## Controls
 
@@ -40,14 +50,20 @@ A computer with a keyboard. Chrome is the recommended browser. Each time you pre
 - The world is stored in chunks, in a Map with a Cantor key.
 - Enemy sprites use a z-buffer, so the walls in front of them hide them.
 
+<Figure
+  src={screenshot}
+  alt="Hurlinstein3D in first person: a mutant with yellow eyes blocks a brick corridor, the shotgun is in the lower right corner, the LIFE and AMMO bars in the upper left and the minimap in the upper right."
+/>
+
 ## Credits
 
 - Course: Simulación I, Licenciatura en Desarrollo de Videojuegos y Simulación, Universidad Nacional de Hurlingham (UNAHUR), 2026.
 - Professor: Facundo Toufick Saiegh.
 - Team: Juan Manuel Gelay and Alejo Hutmacher.
+- Promotional art and logo: Juan Manuel Gelay, made with Gemini Pro.
 
 ### Third parties
 
 - [PixiJS](https://pixijs.com) 8.21.0, MIT license.
 - [Lucide](https://lucide.dev) icons, ISC license.
-- [Husk Mutant](https://opengameart.org/content/husk-mutant) enemy sprite by HorrorMovieRei on OpenGameArt, CC0. The logo is cropped from it.
+- [Husk Mutant](https://opengameart.org/content/husk-mutant) enemy sprite by HorrorMovieRei on OpenGameArt, CC0. The pixel art logo is cropped from it.
