@@ -8,14 +8,20 @@ const secondRoomMinSize = 4;
 const secondRoomMaxSize = 6;
 const secondRoomAttempts = 40;
 
-function generateChunk() {
+let defaultChunkSeed = 0;
+
+function generateChunk(random) {
+  if (!random) {
+    random = createRandom(defaultChunkSeed);
+    defaultChunkSeed += 1;
+  }
   const cells = new Uint8Array(chunkSize * chunkSize);
   cells.fill(1);
 
-  const roomWidth = randomInteger(4, 8);
-  const roomHeight = randomInteger(4, 8);
-  const roomX = randomInteger(2, chunkSize - roomWidth - 2);
-  const roomY = randomInteger(2, chunkSize - roomHeight - 2);
+  const roomWidth = randomInteger(4, 8, random);
+  const roomHeight = randomInteger(4, 8, random);
+  const roomX = randomInteger(2, chunkSize - roomWidth - 2, random);
+  const roomY = randomInteger(2, chunkSize - roomHeight - 2, random);
   const room = { x: roomX, y: roomY, width: roomWidth, height: roomHeight };
   const roomCenter = {
     x: roomX + roomWidth / 2,
@@ -26,12 +32,12 @@ function generateChunk() {
 
   carveRectangle(cells, roomX, roomY, roomWidth, roomHeight);
 
-  carveNorthCorridor(cells, room, roomCenterCellX, roomCenterCellY);
-  carveSouthCorridor(cells, room, roomCenterCellX, roomCenterCellY);
-  carveWestCorridor(cells, room, roomCenterCellX, roomCenterCellY);
-  carveEastCorridor(cells, room, roomCenterCellX, roomCenterCellY);
+  carveNorthCorridor(cells, room, roomCenterCellX, roomCenterCellY, random);
+  carveSouthCorridor(cells, room, roomCenterCellX, roomCenterCellY, random);
+  carveWestCorridor(cells, room, roomCenterCellX, roomCenterCellY, random);
+  carveEastCorridor(cells, room, roomCenterCellX, roomCenterCellY, random);
 
-  const secondRoom = maybeCarveSecondRoom(cells, room);
+  const secondRoom = maybeCarveSecondRoom(cells, room, random);
   if (secondRoom) {
     connectRooms(cells, room, secondRoom);
   }
@@ -41,12 +47,12 @@ function generateChunk() {
 
 // D-11: rolls the second room, tries to place it clear of the main room and,
 // when it fits, carves it. Returns the room or null.
-function maybeCarveSecondRoom(cells, mainRoom) {
-  if (Math.random() >= secondRoomChance) {
+function maybeCarveSecondRoom(cells, mainRoom, random) {
+  if (random() >= secondRoomChance) {
     return null;
   }
 
-  const secondRoom = placeSecondRoom(mainRoom);
+  const secondRoom = placeSecondRoom(mainRoom, random);
   if (!secondRoom) {
     return null;
   }
@@ -57,12 +63,12 @@ function maybeCarveSecondRoom(cells, mainRoom) {
 
 // D-11: random 4 to 6 room, inside the two-cell margin, not sharing a cell with
 // the main room. Gives up after a few tries when a big main room leaves no gap.
-function placeSecondRoom(mainRoom) {
+function placeSecondRoom(mainRoom, random) {
   for (let attempt = 0; attempt < secondRoomAttempts; attempt += 1) {
-    const width = randomInteger(secondRoomMinSize, secondRoomMaxSize);
-    const height = randomInteger(secondRoomMinSize, secondRoomMaxSize);
-    const x = randomInteger(2, chunkSize - width - 2);
-    const y = randomInteger(2, chunkSize - height - 2);
+    const width = randomInteger(secondRoomMinSize, secondRoomMaxSize, random);
+    const height = randomInteger(secondRoomMinSize, secondRoomMaxSize, random);
+    const x = randomInteger(2, chunkSize - width - 2, random);
+    const y = randomInteger(2, chunkSize - height - 2, random);
     const candidate = { x, y, width, height };
     if (!roomsShareCells(candidate, mainRoom)) {
       return candidate;
@@ -93,8 +99,8 @@ function connectRooms(cells, firstRoom, secondRoom) {
   carveHorizontal(cells, secondCenterX, firstCenterX, firstCenterY);
 }
 
-function randomInteger(minimum, maximum) {
-  return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+function randomInteger(minimum, maximum, random = createRandom(0)) {
+  return Math.floor(random() * (maximum - minimum + 1)) + minimum;
 }
 
 function carveRectangle(cells, x, y, width, height) {
@@ -105,29 +111,29 @@ function carveRectangle(cells, x, y, width, height) {
   }
 }
 
-function carveNorthCorridor(cells, room, roomCenterX, roomCenterY) {
-  const bendY = randomInteger(1, room.y - 1);
+function carveNorthCorridor(cells, room, roomCenterX, roomCenterY, random) {
+  const bendY = randomInteger(1, room.y - 1, random);
   carveVertical(cells, doorIndex, 0, bendY);
   carveHorizontal(cells, doorIndex, roomCenterX, bendY);
   carveVertical(cells, roomCenterX, bendY, roomCenterY);
 }
 
-function carveSouthCorridor(cells, room, roomCenterX, roomCenterY) {
-  const bendY = randomInteger(room.y + room.height, chunkSize - 2);
+function carveSouthCorridor(cells, room, roomCenterX, roomCenterY, random) {
+  const bendY = randomInteger(room.y + room.height, chunkSize - 2, random);
   carveVertical(cells, doorIndex, chunkSize - 1, bendY);
   carveHorizontal(cells, doorIndex, roomCenterX, bendY);
   carveVertical(cells, roomCenterX, bendY, roomCenterY);
 }
 
-function carveWestCorridor(cells, room, roomCenterX, roomCenterY) {
-  const bendX = randomInteger(1, room.x - 1);
+function carveWestCorridor(cells, room, roomCenterX, roomCenterY, random) {
+  const bendX = randomInteger(1, room.x - 1, random);
   carveHorizontal(cells, 0, bendX, doorIndex);
   carveVertical(cells, bendX, doorIndex, roomCenterY);
   carveHorizontal(cells, bendX, roomCenterX, roomCenterY);
 }
 
-function carveEastCorridor(cells, room, roomCenterX, roomCenterY) {
-  const bendX = randomInteger(room.x + room.width, chunkSize - 2);
+function carveEastCorridor(cells, room, roomCenterX, roomCenterY, random) {
+  const bendX = randomInteger(room.x + room.width, chunkSize - 2, random);
   carveHorizontal(cells, chunkSize - 1, bendX, doorIndex);
   carveVertical(cells, bendX, doorIndex, roomCenterY);
   carveHorizontal(cells, bendX, roomCenterX, roomCenterY);

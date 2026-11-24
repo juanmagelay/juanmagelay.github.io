@@ -12,6 +12,12 @@ const settingDefinitions = {
   // enemy takes one per second of contact
   enemiesPerGame: { defaultValue: 20, min: 1, max: 100000 },
   activeAreaOnly: { defaultValue: true },
+  enemyHealth: { defaultValue: 1, min: 1, max: 10 },
+  bossHealth: { defaultValue: 5, min: 1, max: 50 },
+  useWallTextures: { defaultValue: true },
+  useLighting: { defaultValue: true },
+  flatColors: { defaultValue: false },
+  crtFilter: { defaultValue: true },
   playerHitPoints: { defaultValue: 10, min: 1, max: 100 },
   // Weapon: rounds per magazine and the reload allowance
   magazineSize: { defaultValue: 6, min: 2, max: 20 },

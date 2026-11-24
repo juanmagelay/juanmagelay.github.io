@@ -12,8 +12,8 @@ function getMinimapX() {
 }
 const minimapBackgroundColor = 0x0d1117;
 const minimapWallColor = 0x2c4a7c;
-const minimapPlayerColor = 0x4de1bd;
-const minimapProjectileRadius = 2;
+// D-37b: cyan, like the crosshair and the live values of the retro UI
+const minimapPlayerColor = 0x00e5ff;
 // D-16e3: every eighth ray of the wall pass, faint, so the fan reads clearly
 const minimapRayStep = 8;
 const minimapRayAlpha = 0.35;
@@ -30,6 +30,7 @@ function getEnemyMinimapMarker(enemy, firstMapX, firstMapY) {
     y: centerY - markerSize / 2,
     width: markerSize,
     height: markerSize,
+    color: enemy.color ?? enemyColor,
   };
 }
 
@@ -158,28 +159,20 @@ function drawMinimap(graphics, player) {
     drawMinimapRays(graphics, player, minimapX, firstMapX, firstMapY);
   }
 
+  const markersByColor = new Map();
   for (const marker of enemyMarkers) {
-    graphics.rect(marker.x, marker.y, marker.width, marker.height);
-  }
-  if (enemyMarkers.length > 0) {
-    graphics.fill(enemyColor);
-  }
-
-  // D-13d: each projectile in flight is a small dot, only inside the window
-  let projectileDots = 0;
-  for (const projectile of projectiles) {
-    if (!isInsideMinimapWindow(projectile.posX, projectile.posY, firstMapX, firstMapY)) {
-      continue;
+    let markers = markersByColor.get(marker.color);
+    if (markers === undefined) {
+      markers = [];
+      markersByColor.set(marker.color, markers);
     }
-    graphics.circle(
-      minimapX + (projectile.posX - firstMapX) * minimapCellSize,
-      minimapY + (projectile.posY - firstMapY) * minimapCellSize,
-      minimapProjectileRadius,
-    );
-    projectileDots += 1;
+    markers.push(marker);
   }
-  if (projectileDots > 0) {
-    graphics.fill(projectileColor);
+  for (const [color, markers] of markersByColor) {
+    for (const marker of markers) {
+      graphics.rect(marker.x, marker.y, marker.width, marker.height);
+    }
+    graphics.fill(color);
   }
 
   const playerX = minimapX + (player.posX - firstMapX) * minimapCellSize;

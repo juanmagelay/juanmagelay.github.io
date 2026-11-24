@@ -1,9 +1,28 @@
 // TDD 2.3.3 and 6.4: static center crosshair, drawn once outside the ticker and
-// again only when the canvas width changes (D-16a)
-const crosshairColor = 0x4de1bd;
+// again only when the canvas width changes (D-16a). D-37b: cyan, the color of
+// the live values in the retro UI.
+const crosshairColor = 0x00e5ff;
 const crosshairArmLength = 8;
 const crosshairGap = 4;
 const crosshairThickness = 2;
+
+// D-37b: retro bevel frames in the same Graphics as the crosshair, so they cost
+// nothing per frame: a steel plate behind LIFE, AMMO and KILLS and a ring around
+// the minimap. This Graphics sits above the minimap and under the bars and the
+// labels, so the plate shows behind them and the ring leaves the map uncovered.
+const hudFrameShadowColor = 0x050608;
+const hudFrameShadowAlpha = 0.7;
+const hudFrameLightColor = 0x6b7587;
+const hudFrameDarkColor = 0x0b0d11;
+const hudPlateColor = 0x14171c;
+const hudPlateAlpha = 0.82;
+const minimapRingColor = 0x2c323d;
+const hudBevelWidth = 2;
+const hudShadowOffset = 4;
+const hudPlatePadding = 10;
+// Wide enough for the bars plus a reload counter of up to x99 (D-16c1)
+const hudPlateWidth = 208;
+const minimapRingWidth = 4;
 
 function drawHud(graphics) {
   const centerX = screenWidth / 2;
@@ -11,6 +30,7 @@ function drawHud(graphics) {
   const halfGap = crosshairGap / 2;
 
   graphics.clear();
+  drawHudFrames(graphics);
   graphics.rect(
     centerX - halfGap - crosshairArmLength,
     centerY - crosshairThickness / 2,
@@ -38,6 +58,85 @@ function drawHud(graphics) {
   graphics.fill(crosshairColor);
 }
 
+// D-37b: the plate around the three HUD rows, from LIFE to KILLS
+function getHudPlateRect() {
+  const top = getHudRowY(0) - hudPlatePadding;
+  const bottom = getHudRowY(2) + barBandHeight + hudPlatePadding;
+  return { x: hudMargin - hudPlatePadding, y: top, width: hudPlateWidth, height: bottom - top };
+}
+
+// D-37b: the ring around the 21 by 21 minimap window, outside it
+function getMinimapRingRect() {
+  const windowSize = minimapCellsPerSide * minimapCellSize;
+  return {
+    x: getMinimapX() - minimapRingWidth,
+    y: minimapY - minimapRingWidth,
+    width: windowSize + 2 * minimapRingWidth,
+    height: windowSize + 2 * minimapRingWidth,
+  };
+}
+
+// One frame as rectangles grouped by color: light edges top and left, dark
+// edges bottom and right, and a hard shadow down and to the right, drawn as an
+// L so it never covers what is inside the frame
+function getBevelFrameRects(frame) {
+  const { x, y, width, height } = frame;
+  return {
+    shadow: [
+      { x: x + width, y: y + hudShadowOffset, width: hudShadowOffset, height },
+      { x: x + hudShadowOffset, y: y + height, width: width - hudShadowOffset, height: hudShadowOffset },
+    ],
+    light: [
+      { x, y, width, height: hudBevelWidth },
+      { x, y, width: hudBevelWidth, height },
+    ],
+    dark: [
+      { x, y: y + height - hudBevelWidth, width, height: hudBevelWidth },
+      { x: x + width - hudBevelWidth, y, width: hudBevelWidth, height },
+    ],
+  };
+}
+
+// The four sides of a ring of the given thickness, inside the frame
+function getRingRects(frame, thickness) {
+  const { x, y, width, height } = frame;
+  return [
+    { x, y, width, height: thickness },
+    { x, y: y + height - thickness, width, height: thickness },
+    { x, y: y + thickness, width: thickness, height: height - 2 * thickness },
+    { x: x + width - thickness, y: y + thickness, width: thickness, height: height - 2 * thickness },
+  ];
+}
+
+// CLAUDE.md 8.4: every rectangle of one color, then a single fill
+function fillRects(graphics, rects, fillStyle) {
+  for (const rect of rects) {
+    graphics.rect(rect.x, rect.y, rect.width, rect.height);
+  }
+  graphics.fill(fillStyle);
+}
+
+function drawHudFrames(graphics) {
+  const plate = getHudPlateRect();
+  const ring = getMinimapRingRect();
+  const frames = [getBevelFrameRects(plate), getBevelFrameRects(ring)];
+  const plateInside = {
+    x: plate.x + hudBevelWidth,
+    y: plate.y + hudBevelWidth,
+    width: plate.width - 2 * hudBevelWidth,
+    height: plate.height - 2 * hudBevelWidth,
+  };
+
+  fillRects(graphics, frames.flatMap((frame) => frame.shadow), {
+    color: hudFrameShadowColor,
+    alpha: hudFrameShadowAlpha,
+  });
+  fillRects(graphics, [plateInside], { color: hudPlateColor, alpha: hudPlateAlpha });
+  fillRects(graphics, getRingRects(ring, minimapRingWidth), minimapRingColor);
+  fillRects(graphics, frames.flatMap((frame) => frame.light), hudFrameLightColor);
+  fillRects(graphics, frames.flatMap((frame) => frame.dark), hudFrameDarkColor);
+}
+
 // D-06c: the health bar uses the embedded UI sheet, cropped to its middle bar
 // band (rows 20 to 35). Data URIs keep file:// working without network access.
 const barSheetWidth = 98;
@@ -56,12 +155,13 @@ const ammoBarBandY = 0;
 const hudMargin = 16;
 const hudLabelWidth = 56;
 const hudRowSpacing = 24;
+// D-37b: amber labels with the monospace stack of the HTML screens
 const hudLabelStyle = {
-  fontFamily: "monospace",
+  fontFamily: ["Consolas", "Menlo", "DejaVu Sans Mono", "Courier New", "monospace"],
   fontSize: 14,
   fontWeight: "bold",
-  fill: 0xe6edf3,
-  stroke: { color: 0x000000, width: 3 },
+  fill: 0xffd166,
+  stroke: { color: 0x050608, width: 3 },
 };
 
 function getHudRowY(row) {
@@ -108,6 +208,35 @@ function updateReloadCounter(counter, reloadsLeft) {
   if (counter.visible) {
     counter.text = formatReloadCounter(reloadsLeft);
   }
+}
+
+// D-19a / TDD 2.3.3: the kill count under AMMO, as "KILLS 3 / 20".
+function formatKillsLabel(killCount, total) {
+  return `KILLS ${killCount} / ${total}`;
+}
+
+// Created once, outside the ticker (TDD 6.4)
+function createKillsLabel() {
+  const label = new PIXI.Text({
+    text: formatKillsLabel(0, gameSettings.enemiesPerGame),
+    style: hudLabelStyle,
+  });
+  label.anchor.set(0, 0.5);
+  label.position.set(hudMargin, getHudRowY(2) + barBandHeight / 2);
+  return label;
+}
+
+// Called every frame; PixiJS only redraws the Text when the text changes
+function updateKillsLabel(label, killCount) {
+  label.text = formatKillsLabel(killCount, gameSettings.enemiesPerGame);
+}
+
+// D-19d / TDD 2.3.4: the game time as "m:ss", for the victory screen.
+function formatGameTime(seconds) {
+  const total = Math.floor(seconds);
+  const minutes = Math.floor(total / 60);
+  const rest = total % 60;
+  return `${minutes}:${String(rest).padStart(2, "0")}`;
 }
 
 // D-06c: the fill width follows the health fraction, clamped to the bar.
@@ -187,15 +316,6 @@ async function createAmmoBar() {
   return { background, fill, mask, x: barX, y: barY };
 }
 
-// D-06c: dark overlay with a red frame, hidden until the player is defeated.
-function createDefeatOverlay() {
-  const overlay = new PIXI.Graphics();
-  drawDefeatOverlay(overlay);
-  overlay.alpha = 0.65;
-  overlay.visible = false;
-  return overlay;
-}
-
 // D-27d / TDD 2.3.3: non diegetic damage flash. Red at the screen edges and
 // transparent toward the center, one pulse per hit that fades in 0.4 s.
 const damageFlashDuration = 0.4; // seconds
@@ -254,13 +374,4 @@ function updateDamageFlash(flash, deltaTime) {
   }
   flash.time += deltaTime / 60;
   flash.sprite.alpha = getDamageFlashAlpha(flash.time);
-}
-
-// D-16a: drawn again, not created again, when the canvas width changes
-function drawDefeatOverlay(overlay) {
-  overlay.clear();
-  overlay.rect(0, 0, screenWidth, screenHeight).fill(0x000000);
-  overlay
-    .rect(screenWidth / 2 - 220, screenHeight / 2 - 50, 440, 100)
-    .stroke({ color: 0xff3b3b, width: 6 });
 }

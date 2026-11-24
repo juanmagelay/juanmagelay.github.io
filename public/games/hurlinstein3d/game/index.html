@@ -7,15 +7,39 @@
        Mutant head, CC0) as a data URI, so file:// loads no external file -->
   <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABjUlEQVR42u2XoVLDQBCGz52IYJiICGaoiEBUHDMVFYiIiIiKioiKiorKCASiAlGBQCAqkJVIJBKBQCKQFQgegIc4Zv7hg2Fn0OEYxCcud3v7Z/d2L3H7h8exT9y/gOQE3HSVuD2tBeO/K2DdBrFdnggcP62ngjGwLn0Bi7oUm8VYEOq7s0Y8X7Ti4XwieM467NIV0DVHgo0IMY5fr5didzUXP6UkXQGkgJASahwhwD4nFZezkSj2vEhPAIaUFSkZFJnw3osqFILnlC2pYz49Ac45sZoORVsNRIyleNwG8fYyE7v7WiCcQ4hdugIIPRtnWSbyPBeMQwiiLEuB3WR8INITwCEjBTE2gpDjEJiPsROUIS+SngCgnGg0OPhyuPkGjct+qLCP5fcKIHSjYS7sJxiXEpcRY+ax4zCSEhzT4PoXwAJaKIeO8kIIrZb1NtS2VVO2tjXblPYvwE7YaxQhbNw4JxDGfOu9qJ0T2PNC7Mt1/ZmC3gXYHw2E4NAKwAEO5x8gjHX2egabst4FvANjZ/FTd+yyfgAAAABJRU5ErkJggg==">
   <style>
+    /* D-37a: retro military look, steel plates with hard bevels and shadows.
+       Blood red marks the selected action, amber the headings and labels and
+       cyan the text fields and the live values. System fonts only (TDD 6.2). */
     :root {
-      --page-color: #08111d;
-      --panel-color: rgba(8, 17, 29, 0.92);
-      --text-color: #e6edf3;
-      --muted-color: #8b9bb0;
-      --accent-color: #4de1bd;
-      --accent-soft: rgba(77, 225, 189, 0.12);
-      --accent-hover: rgba(77, 225, 189, 0.24);
-      --border-color: rgba(77, 225, 189, 0.35);
+      --steel-950: #050608;
+      --steel-900: #0b0d11;
+      --steel-850: #14171c;
+      --steel-800: #1e232b;
+      --steel-700: #2c323d;
+      --steel-500: #4a5363;
+      --steel-400: #6b7587;
+      --blood: #c81e1e;
+      --blood-hot: #ff2e2e;
+      --blood-dark: #8f1414;
+      --blood-light: #ff6b5b;
+      --blood-deep: #4a0808;
+      --amber: #f5b700;
+      --amber-soft: #ffd166;
+      --cyan: #00e5ff;
+      --text-color: #e8e4d8;
+      --muted-color: #8a93a3;
+      --page-color: var(--steel-950);
+
+      --font-display: Impact, "Arial Black", "Haettenschweiler", sans-serif;
+      --font-heavy: "Arial Black", "Arial Bold", Gadget, sans-serif;
+      --font-mono: Consolas, Menlo, "DejaVu Sans Mono", "Courier New", monospace;
+
+      /* border-color order: top, right, bottom, left */
+      --bevel-raised: var(--steel-400) var(--steel-950) var(--steel-950) var(--steel-400);
+      --bevel-sunken: var(--steel-950) var(--steel-500) var(--steel-500) var(--steel-950);
+      --bevel-red: var(--blood-light) var(--blood-deep) var(--blood-deep) var(--blood-light);
+      --hard-shadow: 4px 4px 0 var(--steel-950);
+      --scanlines: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, 0.22) 2px 3px);
       --slide-time: 200ms;
     }
 
@@ -27,24 +51,449 @@
       background: var(--page-color);
     }
 
+    /* D-37a: hidden always wins. Without it a class with display: flex (the
+       score form) stayed visible after main.js set hidden on it. */
+    [hidden] {
+      display: none !important;
+    }
+
     body {
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-family: var(--font-mono);
       color: var(--text-color);
     }
 
     /* D-16a / TDD 2.3.5: the frame holds the canvas, and later the menus, and
-       main.js gives it the CSS size that fills the window */
+       main.js gives it the CSS size that fills the window. D-37a: it is also a
+       size container, so titles scale with the frame (cqh), even in an iframe. */
     #game-frame {
       position: fixed;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
+      container-type: size;
     }
 
     #game-frame canvas {
       display: block;
       width: 100%;
       height: 100%;
+    }
+
+    /* D-18a / TDD 2.3.4: the screens are HTML over the canvas, inside #game-frame.
+       D-37a: scanlines over a dark vignette; safe center keeps a tall screen
+       scrollable from its top. */
+    .screen {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      justify-content: safe center;
+      gap: 18px;
+      padding: clamp(12px, 3cqh, 24px);
+      overflow-y: auto;
+      background:
+        var(--scanlines),
+        radial-gradient(ellipse at center, rgba(30, 35, 43, 0.84) 0%, rgba(5, 6, 8, 0.97) 78%);
+      scrollbar-width: thin;
+      scrollbar-color: var(--steel-500) var(--steel-900);
+    }
+
+    .screen[hidden] {
+      display: none;
+    }
+
+    .menu-title {
+      margin: 0;
+      font: 400 clamp(34px, 8cqh, 60px)/1 var(--font-display);
+      letter-spacing: 3px;
+      text-align: center;
+      text-transform: uppercase;
+      color: var(--amber-soft);
+      text-shadow: 3px 3px 0 var(--blood), 6px 6px 0 var(--steel-950);
+    }
+
+    /* D-37d: the logotype on the main menu, sized by the frame height */
+    .menu-logo {
+      margin: 0;
+      line-height: 0;
+    }
+
+    .menu-logo img {
+      display: block;
+      width: auto;
+      height: clamp(110px, 40cqh, 400px);
+      max-width: 92cqw;
+      object-fit: contain;
+    }
+
+    /* until main.js sets the src, the box keeps its space and shows nothing */
+    .menu-logo img:not([src]) {
+      visibility: hidden;
+    }
+
+    /* D-37a: a raised steel plate that groups a screen's content */
+    .screen-card {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      max-width: 100%;
+      padding: 20px 32px 22px;
+      background: linear-gradient(var(--steel-800), var(--steel-850));
+      border: 3px solid;
+      border-color: var(--bevel-raised);
+      box-shadow: var(--hard-shadow);
+    }
+
+    /* D-37a: retro bevel buttons. Focus is the selected item (red plate and an
+       amber cursor), so keyboard navigation always shows where it is (D-34d). */
+    .menu-button {
+      position: relative;
+      min-width: 240px;
+      padding: 12px 22px;
+      font: 400 15px/1 var(--font-heavy);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-color);
+      text-shadow: 2px 2px 0 var(--steel-950);
+      background: linear-gradient(var(--steel-700), var(--steel-800));
+      border: 3px solid;
+      border-color: var(--bevel-raised);
+      border-radius: 0;
+      box-shadow: var(--hard-shadow);
+      cursor: pointer;
+    }
+
+    .menu-button:hover {
+      color: var(--amber-soft);
+      background: linear-gradient(#39404c, var(--steel-700));
+    }
+
+    .menu-button:focus {
+      /* transparent, so forced colors mode still draws an outline */
+      outline: 2px solid transparent;
+      color: #fff;
+      background: linear-gradient(var(--blood), var(--blood-dark));
+      border-color: var(--bevel-red);
+    }
+
+    .menu-button:focus::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: -24px;
+      border-style: solid;
+      border-width: 8px 0 8px 12px;
+      border-color: transparent transparent transparent var(--amber);
+      transform: translateY(-50%);
+      filter: drop-shadow(2px 2px 0 var(--steel-950));
+    }
+
+    .menu-button:active {
+      border-color: var(--bevel-sunken);
+      box-shadow: 1px 1px 0 var(--steel-950);
+      transform: translate(3px, 3px);
+    }
+
+    .menu-button:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+
+    /* D-36b / TDD 2.2: hint over the view while playing with the mouse free.
+       It lets clicks through to the game frame. */
+    .game-hint {
+      position: absolute;
+      top: 64px;
+      left: 50%;
+      z-index: 4;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px 8px 10px;
+      font: 700 12px/1 var(--font-mono);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-color);
+      white-space: nowrap;
+      background: rgba(11, 13, 17, 0.9);
+      border: 2px solid;
+      border-color: var(--bevel-raised);
+      box-shadow: var(--hard-shadow);
+      transform: translateX(-50%);
+      pointer-events: none;
+      user-select: none;
+      animation: game-hint-in 240ms ease-out;
+    }
+
+    .game-hint[hidden] {
+      display: none;
+    }
+
+    .game-hint .icon {
+      color: var(--cyan);
+    }
+
+    .game-hint-key {
+      padding: 3px 6px;
+      color: var(--steel-950);
+      background: var(--cyan);
+      box-shadow: 2px 2px 0 var(--steel-950);
+    }
+
+    @keyframes game-hint-in {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -6px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    /* D-18b: key/action rows for Controls, plain centered lines for Credits */
+    .screen-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font: 700 14px/1.3 var(--font-mono);
+      color: var(--text-color);
+    }
+
+    .screen-list li {
+      display: flex;
+      gap: 16px;
+    }
+
+    /* D-37a: keys as keycaps on the left, actions on the right */
+    .controls-list {
+      min-width: min(420px, 100%);
+    }
+
+    .controls-list li {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      align-items: center;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed rgba(107, 117, 135, 0.35);
+    }
+
+    .controls-list li:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .screen-list .key {
+      justify-self: start;
+      padding: 4px 8px;
+      font: 700 12px/1 var(--font-mono);
+      text-transform: uppercase;
+      color: var(--amber-soft);
+      background: var(--steel-900);
+      border: 2px solid;
+      border-color: var(--bevel-raised);
+      box-shadow: 2px 2px 0 var(--steel-950);
+    }
+
+    .credits-list li {
+      justify-content: center;
+      text-align: center;
+      font-weight: 400;
+    }
+
+    .credits-list .credits-team {
+      font: 400 18px/1.2 var(--font-heavy);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--amber-soft);
+      text-shadow: 2px 2px 0 var(--steel-950);
+    }
+
+    /* D-37a: the asset credits, apart from the team and the course */
+    .credits-list .credits-assets {
+      margin-top: 8px;
+      padding-top: 12px;
+      color: var(--muted-color);
+      border-top: 2px solid var(--steel-700);
+    }
+
+    .credits-list .credits-assets ~ li {
+      color: var(--muted-color);
+    }
+
+    /* D-37a: end screens. YOU DIED in blood red over a red vignette. */
+    .screen-defeat {
+      background:
+        var(--scanlines),
+        radial-gradient(ellipse at center, rgba(74, 8, 8, 0.8) 0%, rgba(22, 3, 3, 0.94) 55%, rgba(5, 6, 8, 0.98) 100%);
+    }
+
+    .end-title {
+      font-size: clamp(48px, 14cqh, 108px);
+      letter-spacing: 6px;
+    }
+
+    .screen-defeat .end-title {
+      color: var(--blood-hot);
+      text-shadow: 4px 4px 0 var(--blood-deep), 8px 8px 0 var(--steel-950);
+    }
+
+    .end-card {
+      min-width: min(380px, 100%);
+    }
+
+    /* D-37a: Kills, Time and Score as three display cells */
+    .end-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(96px, 1fr));
+      gap: 8px;
+      width: 100%;
+      margin: 0;
+    }
+
+    .end-stat {
+      padding: 8px 10px 10px;
+      text-align: center;
+      background: var(--steel-900);
+      border: 2px solid;
+      border-color: var(--bevel-sunken);
+    }
+
+    .end-stat dt {
+      font: 400 11px/1 var(--font-heavy);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted-color);
+    }
+
+    .end-stat dd {
+      margin: 8px 0 0;
+      font: 700 26px/1 var(--font-mono);
+      color: var(--text-color);
+      font-variant-numeric: tabular-nums;
+      text-shadow: 2px 2px 0 var(--steel-950);
+    }
+
+    .end-stat-score dd {
+      color: var(--amber-soft);
+    }
+
+    .end-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    /* D-32: the score submit form and the top 5 on the end screens */
+    .score-submit {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .score-submit .menu-button {
+      min-width: 0;
+    }
+
+    /* the cursor would cover the initials field */
+    .score-submit .menu-button:focus::before {
+      display: none;
+    }
+
+    .score-input {
+      width: 4.2em;
+      padding: 8px 10px;
+      font: 700 22px/1 var(--font-mono);
+      letter-spacing: 6px;
+      /* evens out the space letter-spacing leaves after the last letter */
+      text-indent: 6px;
+      text-align: center;
+      text-transform: uppercase;
+      color: var(--amber-soft);
+      caret-color: var(--amber);
+      background: var(--steel-900);
+      border: 3px solid;
+      border-color: var(--bevel-sunken);
+      border-radius: 0;
+    }
+
+    .score-input::placeholder {
+      color: rgba(138, 147, 163, 0.45);
+    }
+
+    .score-input:focus {
+      outline: 2px solid var(--cyan);
+      outline-offset: 2px;
+    }
+
+    .score-error {
+      margin: 0;
+      font: 700 13px/1.3 var(--font-mono);
+      color: var(--blood-hot);
+    }
+
+    .score-error::before {
+      content: "! ";
+    }
+
+    .score-ranking {
+      width: 100%;
+    }
+
+    .ranking-title {
+      margin: 0 0 8px;
+      font: 400 12px/1 var(--font-heavy);
+      letter-spacing: 2px;
+      text-align: center;
+      text-transform: uppercase;
+      color: var(--amber);
+    }
+
+    /* D-37a: the top 5 as a high score table; main.js writes one span per column */
+    .ranking-list {
+      counter-reset: rank;
+      gap: 2px;
+    }
+
+    .ranking-list li {
+      counter-increment: rank;
+      display: grid;
+      grid-template-columns: 3ch 5ch 1fr auto;
+      gap: 12px;
+      padding: 5px 10px;
+      font-variant-numeric: tabular-nums;
+      background: rgba(11, 13, 17, 0.7);
+    }
+
+    .ranking-list li::before {
+      content: counter(rank) ".";
+      color: var(--muted-color);
+    }
+
+    .ranking-list li span:nth-child(2) {
+      text-align: right;
+      color: var(--amber-soft);
+    }
+
+    .ranking-list li span:nth-child(3) {
+      text-align: right;
+      color: var(--muted-color);
+    }
+
+    .ranking-list li:first-child {
+      color: var(--amber-soft);
+      background: rgba(245, 183, 0, 0.12);
     }
 
     /* Lucide icons: 24 px grid, 2 px stroke, color from the text */
@@ -59,26 +508,60 @@
       stroke-linejoin: round;
     }
 
+    /* D-37c: the admin panel as a 90s technical console */
     .admin-button {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 14px;
-      font: 600 13px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+      padding: 7px 12px;
+      font: 400 11px/1 var(--font-heavy);
+      letter-spacing: 1px;
+      text-transform: uppercase;
       color: var(--text-color);
-      background: var(--accent-soft);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
+      background: linear-gradient(var(--steel-700), var(--steel-800));
+      border: 2px solid;
+      border-color: var(--bevel-raised);
+      border-radius: 0;
+      box-shadow: 2px 2px 0 var(--steel-950);
       cursor: pointer;
     }
 
-    .admin-button:hover {
-      background: var(--accent-hover);
+    .admin-button .icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .admin-button:not(:disabled):hover {
+      color: var(--amber-soft);
+      background: linear-gradient(#39404c, var(--steel-700));
+    }
+
+    .admin-button:not(:disabled):active,
+    .admin-icon-button:active {
+      border-color: var(--bevel-sunken);
+      box-shadow: none;
+      transform: translate(2px, 2px);
+    }
+
+    .admin-button:disabled {
+      cursor: not-allowed;
+    }
+
+    /* Reset settings throws every change away, so it stands apart in red */
+    .admin-button-danger {
+      color: #fff;
+      background: linear-gradient(var(--blood), var(--blood-dark));
+      border-color: var(--bevel-red);
+    }
+
+    .admin-button-danger:not(:disabled):hover {
+      color: #fff;
+      background: linear-gradient(var(--blood-hot), var(--blood));
     }
 
     .admin-button:focus-visible,
     .admin-icon-button:focus-visible {
-      outline: 2px solid var(--accent-color);
+      outline: 2px solid var(--cyan);
       outline-offset: 2px;
     }
 
@@ -96,12 +579,8 @@
     #admin-panel {
       position: fixed;
       top: 0;
-      background: var(--panel-color);
-      -webkit-backdrop-filter: blur(6px);
-      backdrop-filter: blur(6px);
-      border: 1px solid var(--border-color);
-      border-top: none;
       box-sizing: border-box;
+      background-color: var(--steel-850);
       visibility: hidden;
       /* visibility waits for the slide, so a hidden panel cannot take the focus */
       transition: transform var(--slide-time) ease, visibility 0s linear var(--slide-time);
@@ -110,20 +589,36 @@
     #admin-peek {
       left: 50%;
       z-index: 11;
-      padding: 8px 16px 10px;
-      border-radius: 0 0 10px 10px;
+      padding: 6px 12px 8px;
+      border: 2px solid;
+      border-top: none;
+      border-color: var(--bevel-raised);
+      box-shadow: var(--hard-shadow);
       transform: translate(-50%, -100%);
     }
 
+    /* A faint grid on the plate and a hazard stripe along the bottom edge. The
+       panel is opaque and unblurred, so the game under it costs nothing extra. */
     #admin-panel {
       left: 0;
       right: 0;
       z-index: 12;
-      max-height: 70vh;
+      /* D-37e: as tall as its content; it scrolls only in a window shorter than that */
+      max-height: 100vh;
+      max-height: 100dvh;
       overflow-y: auto;
-      padding: 12px 24px 14px;
-      border-left: none;
-      border-right: none;
+      padding: 12px 24px 16px;
+      background-color: var(--steel-850);
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 24px 24px;
+      border-style: solid;
+      border-width: 0 0 6px;
+      border-image: repeating-linear-gradient(-45deg, var(--amber) 0 10px, var(--steel-950) 10px 20px) 6;
+      box-shadow: 0 6px 0 rgba(5, 6, 8, 0.6);
+      scrollbar-width: thin;
+      scrollbar-color: var(--steel-500) var(--steel-900);
       transform: translateY(-100%);
     }
 
@@ -147,88 +642,145 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--steel-700);
     }
 
     .admin-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       margin: 0;
-      font-size: 15px;
-      font-weight: 700;
+      font: 400 20px/1 var(--font-display);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--amber-soft);
+      text-shadow: 2px 2px 0 var(--blood-deep);
+    }
+
+    /* a red pilot lamp: the panel shows live values */
+    .admin-title::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      background: var(--blood-hot);
+      box-shadow: 0 0 6px var(--blood-hot), 2px 2px 0 var(--steel-950);
     }
 
     .admin-icon-button {
       display: inline-flex;
       padding: 4px;
-      color: var(--muted-color);
-      background: none;
-      border: none;
-      border-radius: 6px;
+      color: var(--text-color);
+      background: linear-gradient(var(--steel-700), var(--steel-800));
+      border: 2px solid;
+      border-color: var(--bevel-raised);
+      border-radius: 0;
+      box-shadow: 2px 2px 0 var(--steel-950);
       cursor: pointer;
     }
 
     .admin-icon-button:hover {
-      color: var(--text-color);
-      background: var(--accent-soft);
+      color: #fff;
+      background: linear-gradient(var(--blood), var(--blood-dark));
+      border-color: var(--bevel-red);
     }
 
     .admin-section-title {
-      margin: 12px 0 8px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 16px 0 10px;
+      font: 400 11px/1 var(--font-heavy);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--amber);
     }
 
+    .admin-section-title::after {
+      content: "";
+      flex: 1;
+      height: 2px;
+      background: var(--steel-700);
+    }
+
+    /* D-37c: each live value as a small display, label on top, value below */
     .admin-stats {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 10px 16px;
+      /* auto-fit: the cells stretch over the empty tracks of a wide window */
+      grid-template-columns: repeat(auto-fit, minmax(124px, 1fr));
+      gap: 8px;
       margin: 0;
     }
 
+    .admin-stats > div {
+      min-width: 0;
+      padding: 6px 8px 7px;
+      background: var(--steel-900);
+      border: 2px solid;
+      border-color: var(--bevel-sunken);
+    }
+
     .admin-stats dt {
-      font-size: 12px;
+      font: 400 9px/1 var(--font-heavy);
+      letter-spacing: 1px;
+      text-transform: uppercase;
       color: var(--muted-color);
     }
 
     .admin-stats dd {
-      margin: 2px 0 0;
-      font: 600 16px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      margin: 5px 0 0;
+      font: 700 15px/1.15 var(--font-mono);
+      color: var(--cyan);
       font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
     }
 
     /* D-16c1: settings, one box per group, each field with its range */
     .admin-section-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin: 16px 0 8px;
+      gap: 12px;
+      margin: 22px 0 16px;
     }
 
     .admin-section-header .admin-section-title {
+      flex: 1;
       margin: 0;
     }
 
     .admin-groups {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 12px 16px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      /* the legend chip rises over the box border, so rows need the larger gap */
+      gap: 26px 16px;
     }
 
     .admin-group {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
       min-width: 0;
       margin: 0;
-      padding: 8px 12px 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
+      padding: 10px 12px 12px;
+      background: rgba(11, 13, 17, 0.55);
+      border: 2px solid;
+      border-color: var(--bevel-sunken);
+    }
+
+    /* admin.js locks the Game group outside a game */
+    .admin-group:disabled {
+      opacity: 0.5;
     }
 
     .admin-group legend {
-      padding: 0 6px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted-color);
+      padding: 4px 8px;
+      font: 400 10px/1 var(--font-heavy);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--steel-950);
+      background: var(--amber);
+      box-shadow: 2px 2px 0 var(--steel-950);
     }
 
     .admin-field,
@@ -236,7 +788,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 13px;
+      font: 13px/1.25 var(--font-mono);
     }
 
     .admin-field span {
@@ -245,18 +797,30 @@
 
     .admin-field input,
     .admin-field select {
-      width: 76px;
+      box-sizing: border-box;
+      width: 84px;
       padding: 4px 6px;
-      font: 600 13px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      color: var(--text-color);
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
+      font: 700 13px/1.2 var(--font-mono);
+      color: var(--cyan);
+      background-color: var(--steel-900);
+      border: 2px solid;
+      border-color: var(--bevel-sunken);
+      border-radius: 0;
       color-scheme: dark;
+    }
+
+    .admin-field select {
+      appearance: none;
+      padding-right: 22px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0h10L5 6z' fill='%23f5b700'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      cursor: pointer;
     }
 
     .admin-field input:disabled {
       opacity: 0.4;
+      cursor: not-allowed;
     }
 
     .admin-field small {
@@ -271,17 +835,29 @@
       cursor: pointer;
     }
 
+    /* D-37c: checkboxes as square lamps, amber when on */
     .admin-check input {
+      appearance: none;
+      flex: none;
       width: 16px;
       height: 16px;
       margin: 0;
-      accent-color: var(--accent-color);
+      background: var(--steel-900);
+      border: 2px solid;
+      border-color: var(--bevel-sunken);
+      border-radius: 0;
+      cursor: pointer;
+    }
+
+    .admin-check input:checked {
+      background: var(--amber);
+      box-shadow: inset 0 0 0 2px var(--steel-900), 0 0 6px rgba(245, 183, 0, 0.55);
     }
 
     .admin-field input:focus-visible,
     .admin-field select:focus-visible,
     .admin-check input:focus-visible {
-      outline: 2px solid var(--accent-color);
+      outline: 2px solid var(--cyan);
       outline-offset: 1px;
     }
 
@@ -292,13 +868,17 @@
     .admin-footer {
       display: flex;
       justify-content: center;
-      margin-top: 14px;
+      margin-top: 16px;
     }
 
     @media (prefers-reduced-motion: reduce) {
       #admin-peek,
       #admin-panel {
         transition: none !important;
+      }
+
+      .game-hint {
+        animation: none;
       }
     }
   </style>
@@ -315,9 +895,108 @@
     <symbol id="icon-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol>
     <symbol id="icon-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol>
     <symbol id="icon-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></symbol>
+    <symbol id="icon-mouse" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="7" /><path d="M12 6v4" /></symbol>
   </svg>
 
-  <div id="game-frame"></div>
+  <div id="game-frame">
+    <!-- D-36b: shown by js/screens.js while playing with the mouse free -->
+    <div id="mouse-hint" class="game-hint" role="status" hidden>
+      <svg class="icon" aria-hidden="true"><use href="#icon-mouse"></use></svg>
+      <span><span class="game-hint-key">Click</span> to turn with the mouse</span>
+    </div>
+    <!-- D-37a: each screen is a title over a raised steel plate (.screen-card).
+         The ids main.js and screens.js use are unchanged. -->
+    <div id="menu-screen" class="screen">
+      <!-- D-37d: main.js sets the src from js/logo-sheet.js -->
+      <h1 class="menu-logo"><img id="menu-logo" width="1341" height="743" alt="Hurlinstein3D"></h1>
+      <div class="screen-card">
+        <button id="start-game" class="menu-button" type="button">Start game</button>
+        <button id="show-controls" class="menu-button" type="button">Controls</button>
+        <button id="show-credits" class="menu-button" type="button">Credits</button>
+      </div>
+    </div>
+    <div id="defeat-screen" class="screen screen-defeat" hidden>
+      <h1 class="menu-title end-title">You died</h1>
+      <div class="screen-card end-card">
+        <dl class="end-stats">
+          <div class="end-stat"><dt>Kills</dt><dd id="defeat-kills">0</dd></div>
+          <div class="end-stat"><dt>Time</dt><dd id="defeat-time">0:00</dd></div>
+          <div class="end-stat end-stat-score"><dt>Score</dt><dd id="defeat-score">0</dd></div>
+        </dl>
+        <div id="defeat-submit" class="score-submit">
+          <input id="defeat-initials" class="score-input" type="text" maxlength="3" placeholder="ABC" autocomplete="off" aria-label="Your initials">
+          <button id="defeat-submit-button" class="menu-button" type="button">Submit score</button>
+        </div>
+        <p id="defeat-error" class="score-error" hidden></p>
+        <div id="defeat-ranking" class="score-ranking" hidden>
+          <h2 class="ranking-title">Top scores</h2>
+          <ol id="defeat-ranking-list" class="screen-list ranking-list"></ol>
+        </div>
+        <div class="end-actions">
+          <button id="play-again" class="menu-button" type="button">Play again</button>
+          <button id="main-menu" class="menu-button" type="button">Main menu</button>
+        </div>
+      </div>
+    </div>
+    <div id="victory-screen" class="screen" hidden>
+      <h1 class="menu-title end-title">You won</h1>
+      <div class="screen-card end-card">
+        <dl class="end-stats">
+          <div class="end-stat"><dt>Kills</dt><dd id="victory-kills">0</dd></div>
+          <div class="end-stat"><dt>Time</dt><dd id="victory-time">0:00</dd></div>
+          <div class="end-stat end-stat-score"><dt>Score</dt><dd id="victory-score">0</dd></div>
+        </dl>
+        <div id="victory-submit" class="score-submit">
+          <input id="victory-initials" class="score-input" type="text" maxlength="3" placeholder="ABC" autocomplete="off" aria-label="Your initials">
+          <button id="victory-submit-button" class="menu-button" type="button">Submit score</button>
+        </div>
+        <p id="victory-error" class="score-error" hidden></p>
+        <div id="victory-ranking" class="score-ranking" hidden>
+          <h2 class="ranking-title">Top scores</h2>
+          <ol id="victory-ranking-list" class="screen-list ranking-list"></ol>
+        </div>
+        <div class="end-actions">
+          <button id="victory-play-again" class="menu-button" type="button">Play again</button>
+          <button id="victory-main-menu" class="menu-button" type="button">Main menu</button>
+        </div>
+      </div>
+    </div>
+    <div id="controls-screen" class="screen" hidden>
+      <h1 class="menu-title">Controls</h1>
+      <div class="screen-card">
+        <ul class="screen-list controls-list">
+          <li><span class="key">W / Up</span>Move forward</li>
+          <li><span class="key">S / Down</span>Move backward</li>
+          <li><span class="key">A / D</span>Strafe left / right</li>
+          <li><span class="key">Left / Right</span>Turn</li>
+          <li><span class="key">Mouse</span>Turn</li>
+          <li><span class="key">Space / Click</span>Fire</li>
+          <li><span class="key">R / Right click</span>Reload</li>
+          <li><span class="key">Esc</span>Release the mouse</li>
+          <li><span class="key">P</span>Admin panel</li>
+        </ul>
+        <button id="controls-back" class="menu-button" type="button">Back</button>
+      </div>
+    </div>
+    <div id="credits-screen" class="screen" hidden>
+      <h1 class="menu-title">Credits</h1>
+      <div class="screen-card">
+        <ul class="screen-list credits-list">
+          <li class="credits-team">Juan Manuel Gelay and Alejo Hutmacher</li>
+          <li>Simulación I · Licenciatura en Desarrollo de Videojuegos y Simulación</li>
+          <li>Universidad Nacional de Hurlingham (UNAHUR)</li>
+          <li>Professor: Facundo Toufick Saiegh</li>
+          <li class="credits-assets">PixiJS 8.21.0, MIT license</li>
+          <li>Lucide icons 1.77.0, ISC license</li>
+          <li>Husk Mutant by HorrorMovieRei, CC0</li>
+          <li>FPS Gun Sprites by Rekkimaru, free for any use</li>
+          <li>UI BARS by guilemus, free for commercial use</li>
+          <li>Hurlinstein3D logo by Juan Manuel Gelay, made with Gemini Pro</li>
+        </ul>
+        <button id="credits-back" class="menu-button" type="button">Back</button>
+      </div>
+    </div>
+  </div>
 
   <!-- TDD 2.3.5 / D-16b: admin panel, opened from the top strip or with P -->
   <div id="admin-hover-zone"></div>
@@ -344,11 +1023,12 @@
       <div><dt>Enemies alive</dt><dd data-admin-value="enemies">0</dd></div>
       <div><dt>Enemies active</dt><dd data-admin-value="active">0</dd></div>
       <div><dt>Chunks loaded</dt><dd data-admin-value="chunks">0</dd></div>
+      <div><dt>World seed</dt><dd data-admin-value="seed">0</dd></div>
     </dl>
     <!-- D-16c1: js/admin.js fills each field and its range from js/settings.js -->
     <div class="admin-section-header">
       <h3 class="admin-section-title">Settings</h3>
-      <button class="admin-button" type="button" data-admin-action="reset-settings">Reset settings</button>
+      <button class="admin-button admin-button-danger" type="button" data-admin-action="reset-settings">Reset settings</button>
     </div>
     <div class="admin-groups">
       <fieldset class="admin-group">
@@ -367,6 +1047,16 @@
           <input type="number" inputmode="numeric" data-setting="playerHitPoints">
           <small data-setting-range="playerHitPoints"></small>
         </label>
+        <button class="admin-button" type="button" data-admin-action="spawn-boss">Spawn boss</button>
+        <label class="admin-field"><span>Enemy hit points</span><input type="number" data-setting="enemyHealth"><small data-setting-range="enemyHealth"></small></label>
+        <label class="admin-field"><span>Boss hit points</span><input type="number" data-setting="bossHealth"><small data-setting-range="bossHealth"></small></label>
+      </fieldset>
+      <fieldset class="admin-group">
+        <legend>Render</legend>
+        <label class="admin-check"><input type="checkbox" data-setting="useWallTextures"> Wall textures</label>
+        <label class="admin-check"><input type="checkbox" data-setting="useLighting"> Lighting</label>
+        <label class="admin-check"><input type="checkbox" data-setting="flatColors"> Flat colors</label>
+        <label class="admin-check"><input type="checkbox" data-setting="crtFilter"> CRT filter</label>
       </fieldset>
       <fieldset class="admin-group">
         <legend>Weapon</legend>
@@ -426,6 +1116,8 @@
       </fieldset>
       <fieldset class="admin-group">
         <legend>Procedural generation</legend>
+        <label class="admin-field"><span>World seed</span><input type="number" data-world-seed></label>
+        <button class="admin-button" type="button" data-admin-action="new-world">New world</button>
         <label class="admin-check">
           <input type="checkbox" data-setting="chunkBorders">
           Chunk borders on the minimap
@@ -442,8 +1134,10 @@
 
   <!-- TDD 6.1 and 6.2: classic scripts in dependency order, main.js last -->
   <script src="lib/pixi.min.js"></script>
+  <script src="lib/pixi-filters.js"></script>
   <script src="js/config.js"></script>
   <script src="js/settings.js"></script>
+  <script src="js/random.js"></script>
   <script src="js/mapgen.js"></script>
   <script src="js/world.js"></script>
   <script src="js/player.js"></script>
@@ -451,12 +1145,15 @@
   <script src="js/enemy-sheet.js"></script>
   <script src="js/renderer.js"></script>
   <script src="js/enemies.js"></script>
-  <script src="js/projectiles.js"></script>
   <script src="js/minimap.js"></script>
   <script src="js/hud.js"></script>
   <script src="js/weapon-sheet.js"></script>
   <script src="js/weapon.js"></script>
   <script src="js/admin.js"></script>
+  <script src="js/game-state.js"></script>
+  <script src="js/screens.js"></script>
+  <script src="js/logo-sheet.js"></script>
+  <script src="js/ranking.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

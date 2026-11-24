@@ -146,7 +146,7 @@ function getWallLight(hitX, hitY, normalX, normalY, lights) {
 
 // D-10: color of one wall strip, lit or distance-shaded depending on the flag.
 function getWallStripColor(player, stripX, ray) {
-  if (!useLighting) {
+  if (!useLighting || gameSettings.flatColors) {
     return getWallColor(ray.mapX, ray.mapY, ray.side, ray.perpWallDist);
   }
 
@@ -167,7 +167,7 @@ function drawCeilingAndFloor(graphics) {
 
 // D-09: a procedural masonry texture on a hidden canvas. It is grayscale, so
 // the chunk color and the shading tint it through the sprite tint.
-function createWallTextureCanvas() {
+function createWallTextureCanvas(variant = 0) {
   const brickWidth = 16;
   const brickHeight = 8;
   const mortar = 2;
@@ -177,26 +177,134 @@ function createWallTextureCanvas() {
   canvas.height = wallTextureSize;
   const context = canvas.getContext("2d");
 
-  // The mortar fills the gaps left between the bricks
-  context.fillStyle = "rgb(70,70,70)";
+  context.fillStyle = variant === 2 ? "#263743" : "#9aa9ae";
   context.fillRect(0, 0, wallTextureSize, wallTextureSize);
-
-  const rows = wallTextureSize / brickHeight;
-  const columns = wallTextureSize / brickWidth;
-  for (let row = 0; row < rows; row++) {
-    // Every other row is nudged half a brick, like a real bond
-    const rowOffset = (row % 2) * (brickWidth / 2);
-    for (let column = -1; column <= columns; column++) {
-      const x = column * brickWidth + rowOffset;
-      const y = row * brickHeight;
-      // Deterministic shade per brick, so the same wall looks the same every run
-      const shade = 190 + ((row * 31 + column * 17) % 45);
-      context.fillStyle = `rgb(${shade},${shade},${shade})`;
-      context.fillRect(x + mortar / 2, y + mortar / 2, brickWidth - mortar, brickHeight - mortar);
-    }
+  if (variant === 0) {
+    context.fillStyle = "#b7c5c5";
+    context.fillRect(0, 0, wallTextureSize, 48);
+    context.fillStyle = "#42695e";
+    context.fillRect(0, 48, wallTextureSize, 5);
+    context.fillStyle = "#77a1a5";
+    context.fillRect(0, 53, wallTextureSize, 3);
+  } else if (variant === 1) {
+    context.fillStyle = "#435866";
+    context.fillRect(0, 0, wallTextureSize, wallTextureSize);
+    context.fillStyle = "#090d12";
+    for (let y = 4; y < wallTextureSize; y += 8) context.fillRect(0, y, wallTextureSize, 4);
+    context.fillStyle = "#637a83";
+    for (let y = 5; y < wallTextureSize; y += 8) context.fillRect(0, y, wallTextureSize, 1);
+  } else {
+    context.fillStyle = "#647b80";
+    context.fillRect(4, 0, 3, wallTextureSize);
+    context.fillRect(32, 0, 2, wallTextureSize);
+    context.fillRect(58, 0, 3, wallTextureSize);
+    context.fillStyle = "#9bb5b8";
+    context.fillRect(7, 0, 1, wallTextureSize);
   }
 
   return canvas;
+}
+
+// D-28c: Lode's floor-casting projection, with the eye at half wall height.
+function getRowDistance(y) {
+  return 0.5 * screenHeight / Math.abs(y - screenHeight / 2);
+}
+
+function getFloorWorldPoint(player, cameraX, rowDistance) {
+  return {
+    x: player.posX + rowDistance * (player.dirX + player.planeX * cameraX),
+    y: player.posY + rowDistance * (player.dirY + player.planeY * cameraX),
+  };
+}
+
+function getFloorTextureColor(worldX, worldY, isCeiling, rowDistance, lights) {
+  const tileSize = 1;
+  const u = worldX - Math.floor(worldX);
+  const v = worldY - Math.floor(worldY);
+  const joint = u < 0.035 || v < 0.035;
+  let value = isCeiling ? (joint ? 82 : 177) : (joint ? 36 : 166);
+  const brightness = getDistanceBrightness(rowDistance);
+  value = Math.floor(value * brightness);
+
+  if (isCeiling) {
+    for (const light of lights) {
+      const dx = worldX - light.x;
+      const dy = worldY - light.y;
+      if (Math.abs(dx) < 0.48 && Math.abs(dy) < 0.16) {
+        value = Math.min(255, value + 65);
+        break;
+      }
+    }
+  }
+  return isCeiling ? [value, Math.floor(value * 1.03), Math.floor(value * 1.08)] :
+    [Math.floor(value * 0.94), value, Math.floor(value * 1.02)];
+}
+
+function createFloorCastingSurface() {
+  const canvas = document.createElement("canvas");
+  canvas.width = maxWallStripCount;
+  canvas.height = screenHeight;
+  const context = canvas.getContext("2d");
+  const imageData = context.createImageData(canvas.width, canvas.height);
+  const sprite = new PIXI.Sprite(PIXI.Texture.from(canvas));
+  return { canvas, context, imageData, sprite };
+}
+
+function drawFloorCasting(surface, player) {
+  const { width, height } = surface.canvas;
+  const data = surface.imageData.data;
+  const stripCount = getWallStripCount();
+  const horizon = screenHeight / 2;
+  for (let sampleX = 0; sampleX < stripCount; sampleX += 1) {
+    const cameraX = 2 * (sampleX + 0.5) / stripCount - 1;
+    for (let y = 0; y < height; y += 1) {
+      const sampleY = y + 0.5;
+      const firstPixelX = Math.ceil(sampleX * width / stripCount);
+      const endPixelX = Math.ceil((sampleX + 1) * width / stripCount);
+      if (sampleY === horizon) {
+        const red = (backgroundColor >> 16) & 0xff;
+        const green = (backgroundColor >> 8) & 0xff;
+        const blue = backgroundColor & 0xff;
+        for (let pixelX = firstPixelX; pixelX < endPixelX; pixelX += 1) {
+          const index = (y * width + pixelX) * 4;
+          data[index] = red;
+          data[index + 1] = green;
+          data[index + 2] = blue;
+          data[index + 3] = 255;
+        }
+        continue;
+      }
+      const isCeiling = sampleY < horizon;
+      const rowDistance = getRowDistance(sampleY);
+      const point = getFloorWorldPoint(player, cameraX, rowDistance);
+      const lights = getLightsAtCell(Math.floor(point.x), Math.floor(point.y));
+      const color = getFloorTextureColor(point.x, point.y, isCeiling, rowDistance, lights);
+      for (let pixelX = firstPixelX; pixelX < endPixelX; pixelX += 1) {
+        const index = (y * width + pixelX) * 4;
+        data[index] = color[0];
+        data[index + 1] = color[1];
+        data[index + 2] = color[2];
+        data[index + 3] = 255;
+      }
+    }
+  }
+  surface.context.putImageData(surface.imageData, 0, 0);
+  surface.sprite.width = screenWidth;
+  surface.sprite.height = screenHeight;
+  surface.sprite.texture.source.update();
+}
+
+// D-16d / D-28c: flat mode hides the casting sprite; texture mode redraws it
+// before showing it, so returning to textures never exposes stale pixels.
+function updateFloorCasting(surface, player, enabled) {
+  surface.sprite.visible = enabled;
+  if (enabled) drawFloorCasting(surface, player);
+}
+
+// D-28b: variants are stable for positive and negative cell coordinates.
+function getWallVariant(mapX, mapY) {
+  const hash = (Math.imul(mapX, 73856093) ^ Math.imul(mapY, 19349663)) >>> 0;
+  return hash % 3;
 }
 
 // D-09: one texture per texture column, sliced out of the hidden canvas so a
@@ -207,7 +315,8 @@ function initWallTextures() {
   if (wallTextureColumns) {
     return;
   }
-  wallTextureColumns = sliceTextureColumns(createWallTextureCanvas(), wallTextureSize, wallTextureSize);
+  wallTextureColumns = [0, 1, 2].map((variant) =>
+    sliceTextureColumns(createWallTextureCanvas(variant), wallTextureSize, wallTextureSize));
 }
 
 // D-09 / D-21b: cuts an image or canvas into 1 px wide textures, one per
@@ -312,7 +421,10 @@ function getWallTextureX(player, stripX, ray) {
 function drawWalls(graphics, player, wallStrips) {
   graphics.clear();
 
-  if (useWallTextures && wallStrips) {
+  if (wallStrips?.container) {
+    wallStrips.container.visible = useWallTextures && !gameSettings.flatColors;
+  }
+  if (useWallTextures && !gameSettings.flatColors && wallStrips) {
     drawTexturedWalls(graphics, player, wallStrips);
     return;
   }
@@ -371,7 +483,7 @@ function drawTexturedWalls(graphics, player, wallStrips) {
     wallDepthBuffer[index] = ray.perpWallDist;
     const distance = getProjectionDistance(player, x, ray.perpWallDist);
     const lineHeight = Math.min(screenHeight / distance, wallSpriteMaxHeight);
-    sprite.texture = wallTextureColumns[getWallTextureX(player, x, ray)];
+    sprite.texture = wallTextureColumns[getWallVariant(ray.mapX, ray.mapY)][getWallTextureX(player, x, ray)];
     sprite.position.set(x, screenHeight / 2 - lineHeight / 2);
     sprite.width = stripWidth;
     sprite.height = lineHeight;
@@ -507,12 +619,15 @@ function getVisibleEnemies(player) {
 function drawEnemies(graphics, player, enemyStrips) {
   graphics.clear();
 
-  if (useEnemySprites && enemyStrips) {
+  if (enemyStrips?.container) {
+    enemyStrips.container.visible = useEnemySprites && !gameSettings.flatColors;
+  }
+  if (useEnemySprites && !gameSettings.flatColors && enemyStrips) {
     drawTexturedEnemies(player, enemyStrips);
     return;
   }
 
-  const rects = [];
+  const rectsByColor = new Map();
   for (const { enemy, transformX, depth } of getVisibleEnemies(player)) {
     const box = getStandingSpriteBox(transformX, depth, enemy.width, enemy.height);
     const drawStart = Math.max(0, box.top);
@@ -520,12 +635,20 @@ function drawEnemies(graphics, player, enemyStrips) {
     if (drawEnd <= drawStart) {
       continue;
     }
+    const color = enemy.color ?? enemyColor;
+    let rects = rectsByColor.get(color);
+    if (rects === undefined) {
+      rects = [];
+      rectsByColor.set(color, rects);
+    }
     for (const x of getVisibleStripXs(box, depth)) {
       rects.push({ x, drawStart, drawEnd });
     }
   }
 
-  fillStrips(graphics, rects, enemyColor);
+  for (const [color, rects] of rectsByColor) {
+    fillStrips(graphics, rects, color);
+  }
 }
 
 // D-21b (Lode part 3): each visible strip of an enemy is one pool sprite showing
@@ -541,7 +664,8 @@ function drawTexturedEnemies(player, enemyStrips) {
 
   for (const { enemy, transformX, depth } of getVisibleEnemies(player)) {
     const box = getStandingSpriteBox(transformX, depth, getEnemySpriteWorldWidth(enemy), enemy.height);
-    const tint = shadeColor(0xffffff, getDistanceBrightness(depth));
+    const baseTint = enemy.isBoss ? bossColor : 0xffffff;
+    const tint = shadeColor(baseTint, getDistanceBrightness(depth));
     for (const x of getVisibleStripXs(box, depth)) {
       if (nextSprite < 0) {
         break;
@@ -563,46 +687,4 @@ function drawTexturedEnemies(player, enemyStrips) {
   }
 }
 
-// D-13c: look of a projectile, a small red-orange square, like the muzzle flash
-// and easy to tell apart from the amber enemies. It is not drawn closer than
-// projectileMinDepth, where it would be a big square over the crosshair.
-const projectileSize = 0.05;
-const projectileColor = 0xff5a1f;
-const projectileMinDepth = 0.75;
 
-// D-13c: each projectile is a small square centered on the horizon (it flies
-// at eye height), projected like the enemies (Lode part 3) and hidden strip by
-// strip behind nearer walls (D-04c1). getEnemyProjection only reads posX and
-// posY, so it projects a projectile too.
-function drawProjectiles(graphics, player) {
-  graphics.clear();
-
-  const stripWidth = gameSettings.stripWidth;
-  const projectileStrips = [];
-  for (const projectile of projectiles) {
-    const { transformX, depth } = getEnemyProjection(projectile, player);
-    if (depth < projectileMinDepth || depth > maxRayDistance) {
-      continue;
-    }
-
-    // One cell at this depth is screenHeight / depth pixels tall
-    const size = screenHeight * projectileSize / depth;
-    const screenX = (screenWidth / 2) * (1 + transformX / depth);
-    const top = Math.max(0, screenHeight / 2 - size / 2);
-    const bottom = Math.min(screenHeight, screenHeight / 2 + size / 2);
-
-    const firstColumn = Math.max(0, screenX - size / 2);
-    const lastColumn = Math.min(screenWidth - 1, screenX + size / 2);
-    for (
-      let x = Math.floor(firstColumn / stripWidth) * stripWidth;
-      x <= lastColumn;
-      x += stripWidth
-    ) {
-      if (depth < wallDepthBuffer[x / stripWidth]) {
-        projectileStrips.push({ x, drawStart: top, drawEnd: bottom });
-      }
-    }
-  }
-
-  fillStrips(graphics, projectileStrips, projectileColor);
-}

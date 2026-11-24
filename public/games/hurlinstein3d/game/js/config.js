@@ -7,7 +7,7 @@
 let screenWidth = 1280;
 const screenHeight = 720;
 
-const backgroundColor = 0x111e30;
+const backgroundColor = 0x050b13;
 
 // TDD 5.2: a ray gives up past this many cells and its column shows the background.
 // Measured like perpWallDist, along dir.
@@ -58,33 +58,43 @@ function getGameFrameSize(windowWidth, windowHeight, canvasWidth) {
 }
 
 // TDD 1.3: flat colors, from the demo palette
-const ceilingColor = 0x1a1a2e;
-const floorColor = 0x2d2d44;
+const ceilingColor = 0x111b28;
+const floorColor = 0x172333;
 // D-02: muted wall colors are assigned deterministically by chunk coordinate
 const wallPalette = [0x4a6fa5, 0x4d8b84, 0xa77845, 0x7b5b98];
 const side1Brightness = 0.65;
-const distanceBrightnessBands = [1, 0.8, 0.6, 0.4];
+const distanceBrightnessBands = [1, 0.75, 0.4, 0.08];
 
 // D-09: procedural wall texture, drawn on a hidden canvas (no external files).
 // Set to false to fall back to the flat color mode of TDD 1.3.
-const useWallTextures = true;
+let useWallTextures = true;
 const wallTextureSize = 64;
 // A very close wall would need an enormous sprite; clamp it to keep it sane
 const wallSpriteMaxHeight = screenHeight * 8;
 
 // D-10: one light per room center, with a radial falloff and a shadow ray.
 // When on, the light factor replaces the distance brightness bands.
-const useLighting = true;
+let useLighting = true;
 const lightRadius = 3.75;
 const lightIntensity = 0.85;
-const ambientLight = 0.22;
+const ambientLight = 0.12;
 const shadowRayEpsilon = 0.05;
 
 // D-04: the enemy is a thin standing rectangle (cells), not a wide square.
-// enemyWidth is also its footprint for collisions and projectile hits.
+// enemyWidth is also its footprint for collisions and shot hits.
 const enemyWidth = 0.3;
 const enemyHeight = 0.6;
 const enemyColor = 0xffc857;
+// D-19b: a regular enemy dies with one shot; D-16c2 turns this into a setting.
+const enemyHealth = 1;
+// D-19c / TDD 2.3.2: the boss is 1.5x the regular enemy (0.45 by 0.9 cells),
+// crimson, with five hit points and double the contact damage.
+const bossWidth = enemyWidth * 1.5;
+const bossHeight = enemyHeight * 1.5;
+const bossColor = 0xe63946;
+const bossHealth = 5;
+const bossContactDamage = 2;
+const enemyContactDamage = 1;
 
 // D-27b / TDD 2.3.2 and 6.6: an enemy and the player never get closer than this,
 // center to center. Their bodies measure 0.35 together (0.15 + 0.2), so some
@@ -95,6 +105,6 @@ const enemyStopDistance = 0.5;
 // 57 px. It is drawn enemyHeight tall and as wide as its proportions give (about
 // 0.35 cells), so the art is not squeezed. Set to false to draw the amber
 // rectangles again (flat color mode, TDD 1.3).
-const useEnemySprites = true;
+let useEnemySprites = true;
 const enemyTextureWidth = 33;
 const enemyTextureHeight = 57;

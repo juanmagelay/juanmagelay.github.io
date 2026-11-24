@@ -10,7 +10,11 @@ import screenshot from '../../../assets/games/hurlinstein3d/screenshot.png';
 
 ## Sobre o jogo
 
-O mundo é infinito: ele é gerado em chunks de 16 por 16 células conforme você explora, e cada área continua igual quando você volta. Os inimigos patrulham e perseguem você quando têm você na linha de visão. Você tem uma espingarda com carregador e recarga, e um minimapa.
+Hurlinstein3D é um jogo em primeira pessoa em uma masmorra infinita, que é gerada conforme você explora. **Para o chefe aparecer, você precisa matar os 20 inimigos da partida.** Se você o matar, vence; se sua vida chegar a zero, perde.
+
+Os inimigos patrulham e perseguem você quando o veem, e tiram sua vida por contato. **O chefe é o mesmo mutante, tingido de vermelho e maior.** Ele aguenta cinco tiros e, por contato, tira o dobro de vida.
+
+No fim, ganhando ou perdendo, você vê quantos inimigos eliminou, quanto tempo jogou e sua pontuação: 100 pontos por inimigo e 1000 pelo chefe. **Com três iniciais, sua pontuação entra em um ranking online dos cinco melhores.**
 
 <Figure
   src={logo}
@@ -20,42 +24,86 @@ O mundo é infinito: ele é gerado em chunks de 16 por 16 células conforme voc�
 
 ## Controles
 
-- <kbd>W</kbd> ou seta para cima: avançar.
-- <kbd>S</kbd> ou seta para baixo: recuar.
-- <kbd>A</kbd> e <kbd>D</kbd>: andar de lado.
-- Setas para a esquerda e para a direita: girar.
-- Mouse: girar. O primeiro clique no jogo captura o mouse.
-- <kbd>Espaço</kbd> ou clique esquerdo: atirar.
-- <kbd>R</kbd> ou clique direito: recarregar.
-- <kbd>P</kbd>: painel de admin, com FPS, modo olho de peixe, raios no minimapa e teste de estresse.
-- <kbd>Esc</kbd>: voltar para esta página.
+- <kbd>W / Up</kbd>: Move forward
+- <kbd>S / Down</kbd>: Move backward
+- <kbd>A / D</kbd>: Strafe left / right
+- <kbd>Left / Right</kbd>: Turn
+- <kbd>Mouse</kbd>: Turn
+- <kbd>Space / Click</kbd>: Fire
+- <kbd>R / Right click</kbd>: Reload
+- <kbd>Esc</kbd>: Release the mouse
+- <kbd>P</kbd>: Admin panel
 
 ## Requisitos
 
-Um computador com teclado. O navegador recomendado é o Chrome. Cada vez que você clica em Jogar, começa uma partida nova.
+Um computador com teclado. O navegador recomendado é o Chrome. Cada vez que você clica em Jogar, o jogo abre no menu principal, e cada partida começa em um mundo novo. Nesta página, Esc sai da tela cheia e traz você de volta para cá.
 
-## Como funciona
+## Uma demo para aprender raycasting
 
-- A câmera usa os vetores dir e plane do [tutorial de raycasting de Lode Vandevenne](https://lodev.org/cgtutor/raycasting.html).
-- Cada raio percorre a grade com DDA.
+Antes deste jogo, eu e o Alejo Hutmacher passamos dois meses fazendo uma demo de raycasting. Queríamos entender como implementar todo o [tutorial de raycasting de Lode Vandevenne](https://lodev.org/cgtutor/raycasting.html) em um jogo que simula ser 3D. **O cálculo é *top down*, sobre uma grade 2D, e o usamos como minimapa.** No jogo, o minimapa mostra 21 por 21 células ao redor do jogador e serve para conferir que o DDA coincide com a visão.
+
+## Os shooters dos anos 90 como referência
+
+Analisamos muitos shooters dos anos 90, como Wolfenstein 3D, Doom e Quake. **O jogo tem dois esquemas de controle que convivem.** As setas sozinhas andam e giram como nos jogos de raycasting daquela época, e W, A, S e D com o mouse é o esquema dos jogos em primeira pessoa que vieram depois. A imagem passa por um filtro CRT, e o painel de admin parece um console técnico daquela época.
+
+Para as texturas, **tomamos como referência os prédios da Universidad Nacional de Hurlingham (UNAHUR) à noite**. Elas são desenhadas por código em um canvas oculto ao iniciar, em três variantes.
+
+## Dois algoritmos de simulação que precisam um do outro
+
+A proposta pedia implementar dois algoritmos de simulação. **Escolhemos raycasting e geração procedural de mapas, porque um precisa do outro.** O raycasting transforma um mapa em grade em uma visão em primeira pessoa, e o gerador monta esse mapa conforme você o percorre.
+
+### Raycasting com DDA
+
+- A câmera usa os vetores dir e plane do tutorial de Lode.
+- Não há uma variável de FOV: ele sai do comprimento de plane, que se ajusta à tela.
+- Um raio é lançado para cada faixa da tela, e cada raio avança célula por célula com DDA até bater em uma parede.
 - As paredes são desenhadas com a distância perpendicular, que evita o efeito olho de peixe.
-- O mundo é guardado em chunks, em um Map com chave de Cantor.
+- O chão e o teto usam o floor casting do mesmo tutorial.
 - Os sprites dos inimigos usam um z-buffer, então as paredes na frente deles os escondem.
+- O custo não depende do tamanho do mundo, por isso o render funciona com uma masmorra infinita.
+- Seus limites: paredes verticais da mesma altura, alinhadas à grade, chão e teto planos, e não dá para olhar para cima nem para baixo.
+
+**O mesmo DDA serve para o tiro, a visão dos inimigos e as sombras.** O tiro é instantâneo e acerta o inimigo mais próximo que cruza o raio central antes da parede. Os inimigos só perseguem você se um raio saindo deles chega até você sem bater em uma parede, a 24 células ou menos. Cada sala tem uma luz no centro, e um ponto da parede só é iluminado se um raio chega até a luz.
+
+### Masmorra procedural por chunks
+
+- O mundo é dividido em chunks de 16 por 16 células, e cada um só é gerado quando algo o consulta: um raio, uma colisão ou o minimapa.
+- Cada chunk tem uma sala de 4 a 8 células de lado e quatro portas no meio de cada borda, ligadas à sala por corredores. Metade dos chunks ganha uma segunda sala.
+- Como cada porta fica colada à do chunk vizinho, de qualquer sala se chega a qualquer outra, sem validar o mapa depois.
+- Os chunks são guardados em um Map com chave de Cantor, então uma área continua igual quando você volta.
+- Cada partida sorteia uma semente nova, e cada chunk mistura essa semente com sua chave, então ele sai igual seja qual for o caminho por onde você chegou.
+- Os inimigos nascem nas salas dos quatro chunks que compartilham uma porta com o chunk do jogador, a mais de 10 células e atrás de uma parede, então você nunca os vê aparecer.
+
+### Um painel para conferir os dois algoritmos
+
+O painel de admin mostra o FPS, a posição, o chunk e a semente do mundo enquanto você joga. **Com a semente e New world, o mapa e os inimigos saem idênticos.** Ele também tem um modo olho de peixe que desenha as paredes com a distância euclidiana, desenha os raios e as bordas dos chunks no minimapa, e aceita até 100.000 inimigos para testes de estresse.
 
 <Figure
   src={screenshot}
   alt="Hurlinstein3D em primeira pessoa: um mutante de olhos amarelos bloqueia um corredor de tijolos, a espingarda está no canto inferior direito, as barras de LIFE e AMMO no canto superior esquerdo e o minimapa no canto superior direito."
 />
 
+## Do escopo mínimo à apresentação
+
+Eu e o Alejo fomos dando forma ao jogo, com o feedback do professor, Facundo Toufick Saiegh. **Dividimos o trabalho em um escopo mínimo e um desejável.** O mínimo era percorrer uma masmorra procedural infinita, com colisões e minimapa, em cores chapadas. O desejável somava combate, inimigos que patrulham e perseguem você, um chefe que define a vitória, texturas, iluminação, menus com ranking e um painel de admin. Hoje, Flat colors no painel de admin leva o jogo de volta ao mínimo: sem texturas, sem luzes e com os inimigos como retângulos.
+
+**Trabalhamos com histórias de usuário a partir do documento de design técnico (TDD).** O Claude implementava cada história, e nós a validávamos, fazíamos o commit em develop e a passávamos para main. O jogo tem 262 testes com o test runner nativo do Node, e o render nós testamos à mão.
+
+**Em 22 de novembro, o professor nos pediu uma semente para o mundo.** O pedido era para que a mesma semente gerasse o mesmo mundo, como no Minecraft, e os testes fossem repetíveis.
+
+**Apresentamos o jogo em 24 de novembro de 2026, com todo o escopo desejável dentro.** Foi a primeira avaliação parcial de Simulación I.
+
 ## Créditos
 
-- Disciplina: Simulación I, Licenciatura en Desarrollo de Videojuegos y Simulación, Universidad Nacional de Hurlingham (UNAHUR), 2026.
-- Professor: Facundo Toufick Saiegh.
-- Equipe: Juan Manuel Gelay e Alejo Hutmacher.
-- Arte promocional e logo: Juan Manuel Gelay, feitos com o Gemini Pro.
+- Juan Manuel Gelay and Alejo Hutmacher
+- Simulación I · Licenciatura en Desarrollo de Videojuegos y Simulación
+- Universidad Nacional de Hurlingham (UNAHUR)
+- Professor: Facundo Toufick Saiegh
+- [PixiJS](https://pixijs.com) 8.21.0, MIT license
+- [Lucide](https://lucide.dev) icons 1.77.0, ISC license
+- [Husk Mutant](https://opengameart.org/content/husk-mutant) by HorrorMovieRei, CC0
+- [FPS Gun Sprites](https://rekkimaru.itch.io/fps-gun-sprites) by Rekkimaru, free for any use
+- [UI BARS](https://guilemus.itch.io/ui-bars) by guilemus, free for commercial use
+- Hurlinstein3D logo by Juan Manuel Gelay, made with Gemini Pro
 
-### De terceiros
-
-- [PixiJS](https://pixijs.com) 8.21.0, licença MIT.
-- Ícones [Lucide](https://lucide.dev), licença ISC.
-- Sprite do inimigo [Husk Mutant](https://opengameart.org/content/husk-mutant), de HorrorMovieRei no OpenGameArt, CC0. O logo em pixel art vem desse sprite.
+A arte promocional desta página também é de Juan Manuel Gelay, feita com o Gemini Pro.

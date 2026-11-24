@@ -4,6 +4,8 @@
 // TDD 6.6: the camera keeps a small radius, so it never sits flush against a
 // wall face and does not clip a corner. Under 0.5, so a one-cell door still fits.
 const playerRadius = 0.2;
+// One second between successful shots (D-35)
+const shotCooldownDuration = 1;
 // Seconds (D-08c). D-08d: the ten reload frames share it, about 0.096 s each.
 const reloadDuration = 0.96;
 
@@ -26,6 +28,7 @@ const player = {
   reloadsLeft: getReloadAllowance(gameSettings),
   reloading: false,
   reloadTime: 0,
+  shotCooldown: 0,
 };
 
 // H-10c / TDD 3.2: a wall is drawn screenHeight / perpWallDist pixels tall, so
@@ -44,6 +47,26 @@ function setCameraPlaneLength(player, length) {
   player.planeY = player.dirX * length;
 }
 
+// D-17a / TDD 2.3.4: a new game sends the player back to the spawn of a newly
+// generated chunk (0, 0), facing east, with full health and a full magazine,
+// and no reload in progress.
+function resetPlayer() {
+  const spawn = getSpawnPosition();
+  player.posX = spawn.x;
+  player.posY = spawn.y;
+  player.dirX = 1;
+  player.dirY = 0;
+  player.planeX = 0;
+  player.planeY = getCameraPlaneLength();
+  player.maxHealth = gameSettings.playerHitPoints;
+  player.health = gameSettings.playerHitPoints;
+  player.ammo = gameSettings.magazineSize;
+  player.reloadsLeft = getReloadAllowance(gameSettings);
+  player.reloading = false;
+  player.reloadTime = 0;
+  player.shotCooldown = 0;
+}
+
 // D-06b: health never goes below zero, and zero health means defeat.
 // D-16c1: god mode, from the admin panel, ignores every damage.
 // D-27c: returns true when the health dropped, so the damage flash starts in
@@ -60,9 +83,9 @@ function isPlayerDefeated(player) {
   return player.health <= 0;
 }
 
-// D-08: firing spends one round and is blocked while reloading or empty
+// D-08 / D-35: firing spends one round and is blocked while reloading, empty or cooling down
 function canFireShot(player) {
-  return !player.reloading && player.ammo > 0;
+  return !player.reloading && player.ammo > 0 && player.shotCooldown <= 0;
 }
 
 function tryFire(player) {
@@ -70,7 +93,13 @@ function tryFire(player) {
     return false;
   }
   player.ammo -= 1;
+  player.shotCooldown = shotCooldownDuration;
   return true;
+}
+
+function updateShotCooldown(player, deltaTime) {
+  const remaining = player.shotCooldown - deltaTime / 60;
+  player.shotCooldown = remaining <= 1e-9 ? 0 : remaining;
 }
 
 // D-08: reload only tops up an incomplete magazine. D-16c1: it spends one
@@ -132,6 +161,17 @@ function isTypingInField(event) {
   return tag === "input" || tag === "textarea" || tag === "select" || Boolean(target.isContentEditable);
 }
 
+// D-36a / TDD 2.2: the menu and end screens are HTML inside #game-frame
+// (TDD 2.3.4). Their clicks and keys belong to their buttons, so they never
+// capture the mouse, fire or reload.
+function isOnGameScreen(event) {
+  const target = event.target;
+  if (!target || typeof target.closest !== "function") {
+    return false;
+  }
+  return target.closest("#game-frame .screen") !== null;
+}
+
 // TDD 2.2 / 6.6: each movement key and the control it presses. D-12b: the up
 // and down arrows act as W and S, and the left and right arrows turn. D-12e:
 // A and D strafe, so the keyboard turns only with the arrows.
@@ -186,11 +226,15 @@ function requestMouseCapture(target) {
 // D-12c / TDD 2.2: a click on the game captures the mouse. While it is
 // captured, the horizontal movement of every mouse event adds up, and the
 // ticker spends the sum once per frame with consumeTurn(). The listeners go on
-// the game frame, so clicks on the admin panel never reach them.
+// the game frame, so clicks on the admin panel never reach them. D-36a: clicks
+// on the menu screens do not capture, so the browser shows no capture notice.
 function createMouseTurnInput(page, gameTarget) {
   let turnPixels = 0;
 
-  gameTarget.addEventListener("mousedown", () => {
+  gameTarget.addEventListener("mousedown", (event) => {
+    if (isOnGameScreen(event)) {
+      return;
+    }
     if (page.pointerLockElement !== gameTarget) {
       requestMouseCapture(gameTarget);
     }
@@ -219,12 +263,15 @@ function createFireInput(keyTarget, gameTarget) {
   let pendingShot = false;
   keyTarget.addEventListener("keydown", (event) => {
     if (event.key === " " && !event.repeat && !isTypingInField(event)) {
+      if (isOnGameScreen(event)) {
+        return;
+      }
       event.preventDefault();
       pendingShot = true;
     }
   });
   gameTarget.addEventListener("mousedown", (event) => {
-    if (event.button === leftMouseButton) {
+    if (event.button === leftMouseButton && !isOnGameScreen(event)) {
       pendingShot = true;
     }
   });
@@ -250,7 +297,7 @@ function createReloadInput(keyTarget, gameTarget) {
     }
   });
   gameTarget.addEventListener("mousedown", (event) => {
-    if (event.button === rightMouseButton) {
+    if (event.button === rightMouseButton && !isOnGameScreen(event)) {
       pendingReload = true;
     }
   });

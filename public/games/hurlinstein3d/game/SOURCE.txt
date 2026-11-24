@@ -1,1 +1,1 @@
-231f2fe5548f6d171de536e25c8ddc8b8996f88d 2026-11-22 D-12a to D-12e: Arrow keys, mouse turn and buttons, strafing with A and D
+2ab5d84b60f8c446e33f9c92947f18b7127cc9aa 2026-11-24 Remove the GitHub Pages workflow

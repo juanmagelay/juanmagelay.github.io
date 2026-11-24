@@ -75,6 +75,7 @@ function getAdminInfo(player, framesPerSecond) {
     enemies: formatAdminEnemiesAlive(countLoadedEnemies(), gameSettings.enemiesPerGame),
     active: String(countActiveEnemies(player)),
     chunks: String(generatedChunks.size),
+    seed: String(worldSeed),
   };
 }
 
@@ -90,7 +91,23 @@ function applySetting(player, name) {
   } else if (name === "enemiesPerGame") {
     // D-24: a new total replaces the live enemies with new ones around the player
     placeGameEnemies(player, gameSettings.enemiesPerGame);
+  } else if (name === "useWallTextures") {
+    useWallTextures = gameSettings.useWallTextures;
+  } else if (name === "useLighting") {
+    useLighting = gameSettings.useLighting;
+  } else if (name === "enemyHealth" || name === "bossHealth") {
+    // Existing enemies receive the new configured maximum immediately.
+    for (const enemies of enemiesByChunk.values()) {
+      for (const enemy of enemies) {
+        if (name === "enemyHealth" && !enemy.isBoss) enemy.health = gameSettings.enemyHealth;
+        if (name === "bossHealth" && enemy.isBoss) enemy.health = gameSettings.bossHealth;
+      }
+    }
   }
+}
+
+function canEditGameSettings(state) {
+  return state === gameStatePlaying;
 }
 
 // D-16c1: a field value (text or checkbox) becomes the setting in use, is
@@ -127,6 +144,8 @@ function onAdminButton(button, action) {
 function createAdminSettings(page, player, onApplied) {
   const storage = getBrowserStorage();
   const fields = {};
+  const gameFieldset = Array.from(page.querySelectorAll(".admin-group"))
+    .find((fieldset) => fieldset.querySelector("legend")?.textContent === "Game");
   for (const field of page.querySelectorAll("[data-setting]")) {
     fields[field.dataset.setting] = field;
   }
@@ -181,8 +200,24 @@ function createAdminSettings(page, player, onApplied) {
     writeFields();
     onApplied();
   });
+  onAdminButton(page.querySelector("[data-admin-action='spawn-boss']"), () => {
+    spawnBoss(player);
+    onApplied();
+  });
+  onAdminButton(page.querySelector("[data-admin-action='new-world']"), () => {
+    const seed = page.querySelector("[data-world-seed]").value;
+    resetGame(seed);
+    placeGameEnemies(player, gameSettings.enemiesPerGame);
+    page.querySelector("[data-world-seed]").value = String(worldSeed);
+    onApplied();
+  });
 
   writeFields();
+  return {
+    setEnabled() {
+      if (gameFieldset) gameFieldset.disabled = !canEditGameSettings(gameState);
+    },
+  };
 }
 
 function createAdminPanel(page, player) {
@@ -266,7 +301,7 @@ function createAdminPanel(page, player) {
   for (const button of closeButtons) {
     onAdminButton(button, close);
   }
-  createAdminSettings(page, player, writeInfo);
+  const adminSettings = createAdminSettings(page, player, writeInfo);
 
   page.defaultView.addEventListener("keydown", (event) => {
     if (event.repeat || isTypingInField(event)) {
@@ -284,6 +319,7 @@ function createAdminPanel(page, player) {
     // DOM is written four times per second, and only while the panel is open.
     update(deltaMS) {
       frames += 1;
+      adminSettings.setEnabled(gameState === gameStatePlaying);
       elapsedMS += deltaMS;
       if (elapsedMS < adminRefreshInterval) {
         return;

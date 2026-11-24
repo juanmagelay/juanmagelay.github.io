@@ -18,7 +18,11 @@ import screenshot from '../../assets/games/hurlinstein3d/screenshot.png';
 
 ## About the game
 
-The world is infinite: it is generated in 16 by 16 cell chunks as you explore it, and each area stays the same when you come back. Enemies patrol and chase you when they have you in their line of sight. You have a shotgun with a magazine and reloads, and a minimap.
+Hurlinstein3D is a first-person game in an infinite dungeon that is generated as you explore it. **To make the boss appear, you have to kill all 20 enemies in the game.** If you kill it, you win; if your life reaches zero, you lose.
+
+Enemies patrol and chase you when they see you, and they take your life on contact. **The boss is the same mutant, tinted red and bigger.** It takes five shots and does twice the damage on contact.
+
+When the game ends, win or lose, you see how many enemies you killed, how long you played and your score: 100 points per enemy and 1000 for the boss. **With three initials, your score goes into an online ranking of the top five.**
 
 <Figure
   src={logo}
@@ -28,42 +32,86 @@ The world is infinite: it is generated in 16 by 16 cell chunks as you explore it
 
 ## Controls
 
-- <kbd>W</kbd> or up arrow: move forward.
-- <kbd>S</kbd> or down arrow: move backward.
-- <kbd>A</kbd> and <kbd>D</kbd>: strafe left and right.
-- Left and right arrows: turn.
-- Mouse: turn. The first click on the game captures the mouse.
-- <kbd>Space</kbd> or left click: fire.
-- <kbd>R</kbd> or right click: reload.
-- <kbd>P</kbd>: admin panel, with FPS, fisheye mode, rays on the minimap and a stress test.
-- <kbd>Esc</kbd>: back to this page.
+- <kbd>W / Up</kbd>: Move forward
+- <kbd>S / Down</kbd>: Move backward
+- <kbd>A / D</kbd>: Strafe left / right
+- <kbd>Left / Right</kbd>: Turn
+- <kbd>Mouse</kbd>: Turn
+- <kbd>Space / Click</kbd>: Fire
+- <kbd>R / Right click</kbd>: Reload
+- <kbd>Esc</kbd>: Release the mouse
+- <kbd>P</kbd>: Admin panel
 
 ## Requirements
 
-A computer with a keyboard. Chrome is the recommended browser. Each time you press Play, a new game starts.
+A computer with a keyboard. Chrome is the recommended browser. Each time you press Play, the game opens on its main menu, and each game starts in a new world. On this page, Esc exits full screen and brings you back here.
 
-## How it works
+## A demo to learn raycasting
 
-- The camera uses the dir and plane vectors from [Lode Vandevenne's raycasting tutorial](https://lodev.org/cgtutor/raycasting.html).
-- Each ray walks the grid with DDA.
+Before this game, Alejo Hutmacher and I spent two months on a raycasting demo. We wanted to understand how to implement the whole [raycasting tutorial by Lode Vandevenne](https://lodev.org/cgtutor/raycasting.html) in a game that simulates 3D. **The calculation is top-down, on a 2D grid, and we used it as the minimap.** In the game, the minimap shows 21 by 21 cells around the player and lets us check that the DDA matches the view.
+
+## Shooters from the nineties as references
+
+We reviewed many shooters from the nineties, such as Wolfenstein 3D, Doom and Quake. **The game has two control schemes that live side by side.** The arrows alone move and turn like the raycasting games of that time, and W, A, S and D with the mouse is the scheme of the first-person games that came later. The image goes through a CRT filter, and the admin panel looks like a technical console from that time.
+
+For the textures, **we took the buildings of the Universidad Nacional de Hurlingham (UNAHUR) at night as reference**. They are drawn in code on a hidden canvas at startup, in three variants.
+
+## Two simulation algorithms that need each other
+
+The assignment asked us to implement two simulation algorithms. **We chose raycasting and procedural map generation because they need each other.** Raycasting turns a grid map into a first-person view, and the generator builds that map as you walk through it.
+
+### Raycasting with DDA
+
+- The camera uses the dir and plane vectors from Lode's tutorial.
+- There is no FOV variable: it comes from the length of plane, which adjusts to the screen.
+- One ray is cast for each strip of the screen, and each ray moves cell by cell with DDA until it hits a wall.
 - Walls are drawn with the perpendicular distance, which avoids the fisheye effect.
-- The world is stored in chunks, in a Map with a Cantor key.
+- The floor and the ceiling use the floor casting from the same tutorial.
 - Enemy sprites use a z-buffer, so the walls in front of them hide them.
+- The cost does not depend on the size of the world, which is why the render works with an infinite dungeon.
+- Its limits: vertical walls of the same height, aligned to the grid, a flat floor and ceiling, and you cannot look up or down.
+
+**The same DDA is used for shooting, enemy sight and shadows.** The shot is instant and hits the closest enemy that crosses the center ray before the wall. Enemies chase you only if a ray from them reaches you without hitting a wall, within 24 cells. Each room has a light in its center, and a point on a wall is lit only if a ray reaches the light.
+
+### Procedural dungeon by chunks
+
+- The world is split into 16 by 16 cell chunks, and each one is generated only when something asks for it: a ray, a collision or the minimap.
+- Each chunk has a room of 4 to 8 cells per side and four doors in the middle of each edge, joined to the room by corridors. Half of the chunks add a second room.
+- Since each door touches the neighboring chunk's door, any room leads to any other, without validating the map afterwards.
+- Chunks are stored in a Map with a Cantor key, so an area stays the same when you come back.
+- Each game draws a new seed, and each chunk mixes that seed with its key, so it comes out the same whichever way you reached it.
+- Enemies are born in the rooms of the four chunks that share a door with the player's chunk, more than 10 cells away and behind a wall, so you never see them appear.
+
+### A panel to check both algorithms
+
+The admin panel shows the FPS, position, chunk and world seed while you play. **With the seed and New world, the map and the enemies come out identical.** It also has a fisheye mode that draws walls with the Euclidean distance, draws the rays and the chunk borders on the minimap, and takes up to 100,000 enemies for stress tests.
 
 <Figure
   src={screenshot}
   alt="Hurlinstein3D in first person: a mutant with yellow eyes blocks a brick corridor, the shotgun is in the lower right corner, the LIFE and AMMO bars in the upper left and the minimap in the upper right."
 />
 
+## From the minimum scope to the presentation
+
+Alejo and I shaped the game step by step, with feedback from our professor, Facundo Toufick Saiegh. **We split the work into a minimum scope and a desired one.** The minimum was walking through an infinite procedural dungeon, with collisions and a minimap, in flat colors. The desired scope added combat, enemies that patrol and chase you, a boss that defines victory, textures, lighting, menus with a ranking and an admin panel. Today, Flat colors in the admin panel takes the game back to the minimum: no textures, no lights and enemies as rectangles.
+
+**We worked in user stories based on the technical design document (TDD).** Claude implemented each story, and we validated it, committed it to develop and moved it to main. The game has 262 tests with Node's built-in test runner, and we tested the render by hand.
+
+**On November 22, our professor asked us for a world seed.** The goal was that the same seed gives the same world, as in Minecraft, and that the tests are repeatable.
+
+**We presented it on November 24, 2026, with the whole desired scope in the game.** It was the first midterm project of Simulación I.
+
 ## Credits
 
-- Course: Simulación I, Licenciatura en Desarrollo de Videojuegos y Simulación, Universidad Nacional de Hurlingham (UNAHUR), 2026.
-- Professor: Facundo Toufick Saiegh.
-- Team: Juan Manuel Gelay and Alejo Hutmacher.
-- Promotional art and logo: Juan Manuel Gelay, made with Gemini Pro.
+- Juan Manuel Gelay and Alejo Hutmacher
+- Simulación I · Licenciatura en Desarrollo de Videojuegos y Simulación
+- Universidad Nacional de Hurlingham (UNAHUR)
+- Professor: Facundo Toufick Saiegh
+- [PixiJS](https://pixijs.com) 8.21.0, MIT license
+- [Lucide](https://lucide.dev) icons 1.77.0, ISC license
+- [Husk Mutant](https://opengameart.org/content/husk-mutant) by HorrorMovieRei, CC0
+- [FPS Gun Sprites](https://rekkimaru.itch.io/fps-gun-sprites) by Rekkimaru, free for any use
+- [UI BARS](https://guilemus.itch.io/ui-bars) by guilemus, free for commercial use
+- Hurlinstein3D logo by Juan Manuel Gelay, made with Gemini Pro
 
-### Third parties
-
-- [PixiJS](https://pixijs.com) 8.21.0, MIT license.
-- [Lucide](https://lucide.dev) icons, ISC license.
-- [Husk Mutant](https://opengameart.org/content/husk-mutant) enemy sprite by HorrorMovieRei on OpenGameArt, CC0. The pixel art logo is cropped from it.
+The promotional art on this page is also by Juan Manuel Gelay, made with Gemini Pro.
