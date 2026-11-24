@@ -72,7 +72,7 @@ La consigna pedía implementar dos algoritmos de simulación. **Elegimos raycast
 - Como cada puerta queda pegada a la del chunk vecino, desde cualquier sala se llega a cualquier otra, sin validar el mapa después.
 - Los chunks se guardan en un Map con clave de Cantor, así una zona sigue igual cuando volvés.
 - Cada partida sortea una semilla nueva, y cada chunk mezcla esa semilla con su clave, así sale igual sin importar por dónde llegaste.
-- Los enemigos nacen en las salas de los cuatro chunks que comparten una puerta con el del jugador, a más de 10 celdas y detrás de una pared, así nunca los ves aparecer.
+- Los enemigos nacen en las salas de los cuatro chunks que comparten una puerta con el del jugador, a más de 10 celdas, fuera del minimapa, y detrás de una pared, así nunca los ves aparecer.
 
 ### Un panel para revisar los dos algoritmos
 

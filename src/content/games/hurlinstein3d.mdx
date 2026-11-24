@@ -80,7 +80,7 @@ The assignment asked us to implement two simulation algorithms. **We chose rayca
 - Since each door touches the neighboring chunk's door, any room leads to any other, without validating the map afterwards.
 - Chunks are stored in a Map with a Cantor key, so an area stays the same when you come back.
 - Each game draws a new seed, and each chunk mixes that seed with its key, so it comes out the same whichever way you reached it.
-- Enemies are born in the rooms of the four chunks that share a door with the player's chunk, more than 10 cells away and behind a wall, so you never see them appear.
+- Enemies are born in the rooms of the four chunks that share a door with the player's chunk, more than 10 cells away, outside the minimap, and behind a wall, so you never see them appear.
 
 ### A panel to check both algorithms
 
