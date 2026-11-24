@@ -8,17 +8,20 @@ const settingsStorageKey = "hurlinstein3d.settings";
 
 const settingDefinitions = {
   // Game: regular enemies created in the whole game (D-16c1e), enemies only
-  // updated near the player (D-23), and the player's hit points; a regular
-  // enemy takes one per second of contact
+  // updated near the player (D-23), and the hit points of the enemy and the
+  // boss (D-16c2) and of the player; a regular enemy takes one per second of
+  // contact, the boss two
   enemiesPerGame: { defaultValue: 20, min: 1, max: 100000 },
   activeAreaOnly: { defaultValue: true },
   enemyHealth: { defaultValue: 1, min: 1, max: 10 },
   bossHealth: { defaultValue: 5, min: 1, max: 50 },
+  playerHitPoints: { defaultValue: 10, min: 1, max: 100 },
+  // Render (D-16d, D-29b): textures on the walls, floor and ceiling, point
+  // lights, the flat color mode of TDD 1.3 and the CRT filter
   useWallTextures: { defaultValue: true },
   useLighting: { defaultValue: true },
   flatColors: { defaultValue: false },
   crtFilter: { defaultValue: true },
-  playerHitPoints: { defaultValue: 10, min: 1, max: 100 },
   // Weapon: rounds per magazine and the reload allowance
   magazineSize: { defaultValue: 6, min: 2, max: 20 },
   unlimitedReloads: { defaultValue: true },

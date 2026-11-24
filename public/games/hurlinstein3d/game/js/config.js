@@ -77,8 +77,15 @@ const wallSpriteMaxHeight = screenHeight * 8;
 let useLighting = true;
 const lightRadius = 3.75;
 const lightIntensity = 0.85;
-const ambientLight = 0.12;
+// D-28d: 0.12 left corridor walls far from every lamp near black; 0.22 keeps
+// them dim but readable (Juanma, 2026-11-24)
+const ambientLight = 0.22;
 const shadowRayEpsilon = 0.05;
+// D-28d: one lamp in five flickers. Every lampFlickerPeriod seconds it blinks
+// twice at lampFlickerDim of its brightness.
+const lampFlickerShare = 5;
+const lampFlickerPeriod = 4;
+const lampFlickerDim = 0.2;
 
 // D-04: the enemy is a thin standing rectangle (cells), not a wide square.
 // enemyWidth is also its footprint for collisions and shot hits.

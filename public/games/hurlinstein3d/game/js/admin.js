@@ -204,18 +204,27 @@ function createAdminSettings(page, player, onApplied) {
     spawnBoss(player);
     onApplied();
   });
+  // D-30d: the typed seed, or a random one when the field is empty, starts a
+  // new world; the field then shows the seed in use, so it can be shared
   onAdminButton(page.querySelector("[data-admin-action='new-world']"), () => {
-    const seed = page.querySelector("[data-world-seed]").value;
-    resetGame(seed);
+    const seedField = page.querySelector("[data-world-seed]");
+    resetGame(seedField.value);
     placeGameEnemies(player, gameSettings.enemiesPerGame);
-    page.querySelector("[data-world-seed]").value = String(worldSeed);
+    seedField.value = String(worldSeed);
     onApplied();
   });
 
   writeFields();
+  // D-30d: a new world is a new game, so like the Game box it only works while
+  // playing. From an end screen, Play again or the menu start the next game.
+  const seedField = page.querySelector("[data-world-seed]");
+  const newWorldButton = page.querySelector("[data-admin-action='new-world']");
   return {
     setEnabled() {
-      if (gameFieldset) gameFieldset.disabled = !canEditGameSettings(gameState);
+      const enabled = canEditGameSettings(gameState);
+      if (gameFieldset) gameFieldset.disabled = !enabled;
+      seedField.disabled = !enabled;
+      newWorldButton.disabled = !enabled;
     },
   };
 }

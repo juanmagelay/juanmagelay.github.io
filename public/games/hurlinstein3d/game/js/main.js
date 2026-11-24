@@ -36,6 +36,9 @@ async function startGame() {
     height: screenHeight,
     background: backgroundColor,
   });
+  // D-29b: one CRT filter, created once, on the layer of the 3D view. The
+  // minimap, the HUD and the HTML screens stay outside it, sharp and readable.
+  // The ticker only advances its time, so the noise and the lines move.
   const crtFilter = new PIXI.filters.CRTFilter({
     curvature: 1,
     lineWidth: 1,
@@ -55,10 +58,12 @@ async function startGame() {
   createMenuNavigation(document);
 
   // TDD 6.4: Graphics objects are created once, outside the ticker.
-  // Ceiling and floor never change, so they are drawn here, once.
+  // The flat ceiling and floor never change, so they are drawn here, once.
   const ceilingAndFloor = new PIXI.Graphics();
   drawCeilingAndFloor(ceilingAndFloor);
   gameLayer.addChild(ceilingAndFloor);
+  // D-28c: the textured ceiling and floor cover the flat ones; the canvas, its
+  // texture and its sprite are created once and the ticker only writes pixels
   const floorCastingSurface = createFloorCastingSurface();
   gameLayer.addChild(floorCastingSurface.sprite);
 
@@ -338,7 +343,8 @@ async function startGame() {
       triggerDamageFlash(damageFlash);
     }
     updateHudBars();
-    updateFloorCasting(floorCastingSurface, player, !gameSettings.flatColors);
+    // D-28c: the textured floor and ceiling follow the Textures toggle (D-16d)
+    updateFloorCasting(floorCastingSurface, player, useWallTextures && !gameSettings.flatColors);
     drawWalls(walls, player, wallStrips);
     drawEnemies(enemies, player, enemyStrips);
     drawMinimap(minimap, player);

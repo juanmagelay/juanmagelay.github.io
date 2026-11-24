@@ -138,7 +138,9 @@ function getWallLight(hitX, hitY, normalX, normalY, lights) {
       continue;
     }
 
-    illumination += light.intensity * (1 - distance / light.radius);
+    // D-28d: a flickering lamp dims its light on the walls too
+    const lampBrightness = getLampBrightness(light, getGameTime());
+    illumination += light.intensity * lampBrightness * (1 - distance / light.radius);
   }
 
   return Math.min(1, illumination);
@@ -165,13 +167,12 @@ function drawCeilingAndFloor(graphics) {
   graphics.rect(0, horizonY, screenWidth, screenHeight - horizonY).fill(floorColor);
 }
 
-// D-09: a procedural masonry texture on a hidden canvas. It is grayscale, so
-// the chunk color and the shading tint it through the sprite tint.
+// D-09 / D-28b: a procedural wall texture on a hidden canvas, in light neutral
+// tones, so the chunk color and the shading tint it through the sprite tint.
+// Variant 0: white plaster with a green and light blue stripe near the floor.
+// Variant 1: a window band covered by black horizontal louvers.
+// Variant 2: tall glass panes between frames.
 function createWallTextureCanvas(variant = 0) {
-  const brickWidth = 16;
-  const brickHeight = 8;
-  const mortar = 2;
-
   const canvas = document.createElement("canvas");
   canvas.width = wallTextureSize;
   canvas.height = wallTextureSize;
@@ -205,11 +206,15 @@ function createWallTextureCanvas(variant = 0) {
   return canvas;
 }
 
-// D-28c: Lode's floor-casting projection, with the eye at half wall height.
+// D-28c (Lode's floor casting): the eye is half a wall above the floor, so a
+// floor point seen at screen row y is at this distance along dir (similar
+// triangles, like the wall height of TDD 3.4). The ceiling is the mirror image.
 function getRowDistance(y) {
   return 0.5 * screenHeight / Math.abs(y - screenHeight / 2);
 }
 
+// D-28c: the floor point under the ray of this cameraX, at that row distance.
+// It is P(t) = pos + t * rayDir with t = rowDistance, the same ray as the walls.
 function getFloorWorldPoint(player, cameraX, rowDistance) {
   return {
     x: player.posX + rowDistance * (player.dirX + player.planeX * cameraX),
@@ -217,80 +222,192 @@ function getFloorWorldPoint(player, cameraX, rowDistance) {
   };
 }
 
+// D-28b / D-28d: a stable pseudo random number for a cell, the same for the
+// same cell in every frame and every game, negative cells included.
+function getCellHash(cellX, cellY) {
+  return (Math.imul(cellX, 73856093) ^ Math.imul(cellY, 19349663)) >>> 0;
+}
+
+// D-28d: about one lamp in five flickers, picked by the hash of its cell, so
+// the same lamp always flickers.
+function isFlickeringLamp(light) {
+  return getCellHash(Math.floor(light.x), Math.floor(light.y)) % lampFlickerShare === 0;
+}
+
+// D-28d: 1 for a steady lamp. A flickering lamp blinks dim twice at the start
+// of every period; its hash shifts the period, so lamps never blink together.
+function getLampBrightness(light, time) {
+  // Same test as isFlickeringLamp, keeping the hash for the offset below
+  const hash = getCellHash(Math.floor(light.x), Math.floor(light.y));
+  if (hash % lampFlickerShare !== 0) {
+    return 1;
+  }
+  const offset = (hash % 1000) / 1000 * lampFlickerPeriod;
+  const moment = (time + offset) % lampFlickerPeriod;
+  const isBlinking = moment < 0.1 || (moment > 0.2 && moment < 0.35);
+  return isBlinking ? lampFlickerDim : 1;
+}
+
+// D-28d: the light of the rooms on a floor or ceiling point. Same falloff as
+// getWallLight (D-10), without the facing test, since every lamp faces the
+// floor, and without the shadow ray, which would cost one ray per sample.
+function getFloorLight(worldX, worldY, lights) {
+  let illumination = ambientLight;
+  for (const light of lights) {
+    const dx = light.x - worldX;
+    const dy = light.y - worldY;
+    const distanceSquared = dx * dx + dy * dy;
+    if (distanceSquared >= light.radius * light.radius) {
+      continue;
+    }
+    const lampBrightness = getLampBrightness(light, getGameTime());
+    illumination += light.intensity * lampBrightness * (1 - Math.sqrt(distanceSquared) / light.radius);
+  }
+  return Math.min(1, illumination);
+}
+
+// D-28c / D-28d: the color of one floor or ceiling sample as 0xRRGGBB, like
+// shadeColor, so drawing a pixel creates no object. Each cell is a light tile
+// with a dark joint along two of its edges. With lighting on, the room lights
+// shade it, like the walls (D-10); with lighting off, the distance bands do
+// (D-01). On the ceiling, the fluorescent lamp of each room light is a bright
+// panel; a flickering lamp dims it.
 function getFloorTextureColor(worldX, worldY, isCeiling, rowDistance, lights) {
-  const tileSize = 1;
   const u = worldX - Math.floor(worldX);
   const v = worldY - Math.floor(worldY);
-  const joint = u < 0.035 || v < 0.035;
-  let value = isCeiling ? (joint ? 82 : 177) : (joint ? 36 : 166);
-  const brightness = getDistanceBrightness(rowDistance);
-  value = Math.floor(value * brightness);
+  const isJoint = u < 0.035 || v < 0.035;
+  let value;
+  if (isCeiling) {
+    value = isJoint ? 82 : 177;
+  } else {
+    value = isJoint ? 36 : 166;
+  }
+  if (useLighting) {
+    value = Math.floor(value * getFloorLight(worldX, worldY, lights));
+  } else {
+    value = Math.floor(value * getDistanceBrightness(rowDistance));
+  }
 
   if (isCeiling) {
     for (const light of lights) {
-      const dx = worldX - light.x;
-      const dy = worldY - light.y;
-      if (Math.abs(dx) < 0.48 && Math.abs(dy) < 0.16) {
-        value = Math.min(255, value + 65);
+      if (Math.abs(worldX - light.x) < 0.48 && Math.abs(worldY - light.y) < 0.16) {
+        value += Math.floor(65 * getLampBrightness(light, getGameTime()));
         break;
       }
     }
   }
-  return isCeiling ? [value, Math.floor(value * 1.03), Math.floor(value * 1.08)] :
-    [Math.floor(value * 0.94), value, Math.floor(value * 1.02)];
+
+  // A cold blue tint on the ceiling, a faint green one on the floor tiles
+  let red;
+  let green;
+  let blue;
+  if (isCeiling) {
+    red = value;
+    green = value * 1.03;
+    blue = value * 1.08;
+  } else {
+    red = value * 0.94;
+    green = value;
+    blue = value * 1.02;
+  }
+  return (toColorByte(red) << 16) | (toColorByte(green) << 8) | toColorByte(blue);
 }
 
+function toColorByte(value) {
+  return Math.min(255, Math.floor(value));
+}
+
+// D-28c / TDD 6.4: created once, for the widest canvas with 1 px strips, so
+// neither a resize nor a new strip width creates anything. Each frame only
+// uses its top left corner: one pixel per sample.
 function createFloorCastingSurface() {
   const canvas = document.createElement("canvas");
   canvas.width = maxWallStripCount;
   canvas.height = screenHeight;
   const context = canvas.getContext("2d");
   const imageData = context.createImageData(canvas.width, canvas.height);
-  const sprite = new PIXI.Sprite(PIXI.Texture.from(canvas));
+  const texture = PIXI.Texture.from(canvas);
+  texture.source.scaleMode = "nearest";
+  const sprite = new PIXI.Sprite(texture);
   return { canvas, context, imageData, sprite };
 }
 
+function writeColorPixel(data, index, color) {
+  data[index] = (color >> 16) & 0xff;
+  data[index + 1] = (color >> 8) & 0xff;
+  data[index + 2] = color & 0xff;
+  data[index + 3] = 255;
+}
+
+// D-28c (Lode's floor casting), every frame. The screen is sampled in squares
+// of stripWidth by stripWidth pixels, one canvas pixel each, and the sprite is
+// stretched stripWidth times: sample column i lands under wall strip i, and
+// the strip width lowers the floor resolution like it lowers the rays.
+// Per row there is one rowDistance. The floor points of the row lie on a
+// straight line, from the ray of the left edge (cameraX -1) to the ray of the
+// right edge (cameraX +1), so after the first one each sample only adds a step.
+// Past maxRayDistance the row is the background color, like a ray without a
+// hit (TDD 5.2).
 function drawFloorCasting(surface, player) {
-  const { width, height } = surface.canvas;
+  const stripWidth = gameSettings.stripWidth;
+  const columns = getWallStripCount();
+  const rows = Math.min(surface.canvas.height, screenHeight / stripWidth);
+  const canvasWidth = surface.canvas.width;
   const data = surface.imageData.data;
-  const stripCount = getWallStripCount();
-  const horizon = screenHeight / 2;
-  for (let sampleX = 0; sampleX < stripCount; sampleX += 1) {
-    const cameraX = 2 * (sampleX + 0.5) / stripCount - 1;
-    for (let y = 0; y < height; y += 1) {
-      const sampleY = y + 0.5;
-      const firstPixelX = Math.ceil(sampleX * width / stripCount);
-      const endPixelX = Math.ceil((sampleX + 1) * width / stripCount);
-      if (sampleY === horizon) {
-        const red = (backgroundColor >> 16) & 0xff;
-        const green = (backgroundColor >> 8) & 0xff;
-        const blue = backgroundColor & 0xff;
-        for (let pixelX = firstPixelX; pixelX < endPixelX; pixelX += 1) {
-          const index = (y * width + pixelX) * 4;
-          data[index] = red;
-          data[index + 1] = green;
-          data[index + 2] = blue;
-          data[index + 3] = 255;
+  const noLights = [];
+  // Neighbor samples usually fall in the same chunk, so the lights of a chunk
+  // are looked up again only when the samples cross into another one
+  let lights = noLights;
+  let lightsChunkX = NaN;
+  let lightsChunkY = NaN;
+
+  for (let row = 0; row < rows; row++) {
+    const y = (row + 0.5) * stripWidth;
+    const isCeiling = y < screenHeight / 2;
+    const rowDistance = getRowDistance(y);
+    let index = row * canvasWidth * 4;
+
+    if (rowDistance > maxRayDistance) {
+      for (let column = 0; column < columns; column++) {
+        writeColorPixel(data, index, backgroundColor);
+        index += 4;
+      }
+      continue;
+    }
+
+    // The center of the first sample, and the step from one sample to the next
+    const firstCameraX = 1 / columns - 1;
+    const first = getFloorWorldPoint(player, firstCameraX, rowDistance);
+    const stepX = rowDistance * 2 * player.planeX / columns;
+    const stepY = rowDistance * 2 * player.planeY / columns;
+    let floorX = first.x;
+    let floorY = first.y;
+
+    // The lights matter for the lamps on the ceiling and, with lighting on,
+    // for the light on the floor
+    const needsLights = isCeiling || useLighting;
+    for (let column = 0; column < columns; column++) {
+      let sampleLights = noLights;
+      if (needsLights) {
+        const chunkX = Math.floor(floorX / chunkSize);
+        const chunkY = Math.floor(floorY / chunkSize);
+        if (chunkX !== lightsChunkX || chunkY !== lightsChunkY) {
+          lights = getLightsAtCell(Math.floor(floorX), Math.floor(floorY));
+          lightsChunkX = chunkX;
+          lightsChunkY = chunkY;
         }
-        continue;
+        sampleLights = lights;
       }
-      const isCeiling = sampleY < horizon;
-      const rowDistance = getRowDistance(sampleY);
-      const point = getFloorWorldPoint(player, cameraX, rowDistance);
-      const lights = getLightsAtCell(Math.floor(point.x), Math.floor(point.y));
-      const color = getFloorTextureColor(point.x, point.y, isCeiling, rowDistance, lights);
-      for (let pixelX = firstPixelX; pixelX < endPixelX; pixelX += 1) {
-        const index = (y * width + pixelX) * 4;
-        data[index] = color[0];
-        data[index + 1] = color[1];
-        data[index + 2] = color[2];
-        data[index + 3] = 255;
-      }
+      writeColorPixel(data, index, getFloorTextureColor(floorX, floorY, isCeiling, rowDistance, sampleLights));
+      index += 4;
+      floorX += stepX;
+      floorY += stepY;
     }
   }
-  surface.context.putImageData(surface.imageData, 0, 0);
-  surface.sprite.width = screenWidth;
-  surface.sprite.height = screenHeight;
+
+  // Only the samples drawn this frame go to the canvas
+  surface.context.putImageData(surface.imageData, 0, 0, 0, 0, columns, rows);
+  surface.sprite.scale.set(stripWidth, stripWidth);
   surface.sprite.texture.source.update();
 }
 
@@ -301,10 +418,9 @@ function updateFloorCasting(surface, player, enabled) {
   if (enabled) drawFloorCasting(surface, player);
 }
 
-// D-28b: variants are stable for positive and negative cell coordinates.
+// D-28b: the texture variant of a wall cell, stable for any cell
 function getWallVariant(mapX, mapY) {
-  const hash = (Math.imul(mapX, 73856093) ^ Math.imul(mapY, 19349663)) >>> 0;
-  return hash % 3;
+  return getCellHash(mapX, mapY) % 3;
 }
 
 // D-09: one texture per texture column, sliced out of the hidden canvas so a
