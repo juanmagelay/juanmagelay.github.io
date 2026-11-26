@@ -95,6 +95,12 @@ function applySetting(player, name) {
     useWallTextures = gameSettings.useWallTextures;
   } else if (name === "useLighting") {
     useLighting = gameSettings.useLighting;
+  } else if (name === "verticalLook") {
+    // D-40b: turned on or off, the view starts level
+    player.lookAngle = 0;
+  } else if (soundSettingNames.includes(name)) {
+    // D-41c: the gain nodes take the new volumes
+    applyAudioVolumes();
   } else if (name === "enemyHealth" || name === "bossHealth") {
     // Existing enemies receive the new configured maximum immediately.
     for (const enemies of enemiesByChunk.values()) {
@@ -152,6 +158,8 @@ function createAdminSettings(page, player, onApplied) {
   for (const element of page.querySelectorAll("[data-setting-range]")) {
     element.textContent = formatSettingRange(element.dataset.settingRange);
   }
+  // D-41c: a slider shows its value next to it instead of its range
+  const valueLabels = page.querySelectorAll("[data-setting-value]");
 
   function writeFields() {
     for (const name in fields) {
@@ -161,16 +169,26 @@ function createAdminSettings(page, player, onApplied) {
         fields[name].value = String(gameSettings[name]);
       }
     }
+    for (const label of valueLabels) {
+      label.textContent = String(gameSettings[label.dataset.settingValue]);
+    }
     // The limit only matters while reloads are limited
     fields.reloadLimit.disabled = gameSettings.unlimitedReloads;
   }
 
   for (const name in fields) {
     const field = fields[name];
-    if (field.type === "number") {
+    if (field.type === "number" || field.type === "range") {
       field.min = String(settingDefinitions[name].min);
       field.max = String(settingDefinitions[name].max);
       field.step = "1";
+    }
+    // D-41c: a volume slider applies while it is dragged, so the change is heard
+    if (field.type === "range") {
+      field.addEventListener("input", () => {
+        changeSetting(player, storage, name, field.value);
+        writeFields();
+      });
     }
     // A number field changes when it loses the focus or on Enter, so a value
     // half typed (1 on the way to 15) is never applied
@@ -225,6 +243,11 @@ function createAdminSettings(page, player, onApplied) {
       if (gameFieldset) gameFieldset.disabled = !enabled;
       seedField.disabled = !enabled;
       newWorldButton.disabled = !enabled;
+    },
+    // D-41c: the M key flips the mute like its checkbox, saved the same way
+    toggleMute() {
+      changeSetting(player, storage, "soundMuted", !gameSettings.soundMuted);
+      writeFields();
     },
   };
 }
@@ -316,8 +339,11 @@ function createAdminPanel(page, player) {
     if (event.repeat || isTypingInField(event)) {
       return;
     }
-    if (event.key.toLowerCase() === adminToggleKey) {
+    const key = event.key.toLowerCase();
+    if (key === adminToggleKey) {
       toggle();
+    } else if (key === muteKey) {
+      adminSettings.toggleMute();
     }
   });
 

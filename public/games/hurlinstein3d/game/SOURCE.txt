@@ -1,1 +1,1 @@
-8ca670f5cb76f37e5d2f6bc62e75d7bedbcf784a 2026-11-24 Review 77aff04: TDD sections, faster lit floor casting, flickering lamps
+a739e762dcc17655c40549203617958502262cfa 2026-11-26 D-43: Sync docs with the finished game

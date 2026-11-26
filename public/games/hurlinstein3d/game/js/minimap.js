@@ -14,6 +14,12 @@ const minimapBackgroundColor = 0x0d1117;
 const minimapWallColor = 0x2c4a7c;
 // D-37b: cyan, like the crosshair and the live values of the retro UI
 const minimapPlayerColor = 0x00e5ff;
+// D-13d: radius in pixels of a projectile dot
+const minimapProjectileRadius = 2;
+// D-39e: a dark red dot at the center of every stained cell, a little bigger
+// than a projectile dot and darker than the crimson boss
+const minimapStainRadius = 2.5;
+const minimapStainColor = 0x8a1010;
 // D-16e3: every eighth ray of the wall pass, faint, so the fan reads clearly
 const minimapRayStep = 8;
 const minimapRayAlpha = 0.35;
@@ -131,6 +137,7 @@ function drawMinimap(graphics, player) {
   const firstMapY = Math.floor(player.posY) - Math.floor(minimapCellsPerSide / 2);
 
   const enemyMarkers = [];
+  const stainedCells = [];
   for (let y = 0; y < minimapCellsPerSide; y += 1) {
     for (let x = 0; x < minimapCellsPerSide; x += 1) {
       const mapX = firstMapX + x;
@@ -146,9 +153,25 @@ function drawMinimap(graphics, player) {
       for (const enemy of getEnemiesAtCell(mapX, mapY)) {
         enemyMarkers.push(getEnemyMinimapMarker(enemy, firstMapX, firstMapY));
       }
+      if (getStain(mapX, mapY) !== 0) {
+        stainedCells.push(x, y);
+      }
     }
   }
   graphics.fill(minimapWallColor);
+
+  // D-39e: the stained cells, all in one fill, under every other layer. The
+  // dot shows the cell was stored: walking away and back finds it again.
+  for (let index = 0; index < stainedCells.length; index += 2) {
+    graphics.circle(
+      minimapX + (stainedCells[index] + 0.5) * minimapCellSize,
+      minimapY + (stainedCells[index + 1] + 0.5) * minimapCellSize,
+      minimapStainRadius,
+    );
+  }
+  if (stainedCells.length > 0) {
+    graphics.fill(minimapStainColor);
+  }
 
   // D-16e and D-16f: optional layers for the defense, over the walls and under
   // the enemies and the player
@@ -173,6 +196,24 @@ function drawMinimap(graphics, player) {
       graphics.rect(marker.x, marker.y, marker.width, marker.height);
     }
     graphics.fill(color);
+  }
+
+  // D-13d / D-42b: each projectile in flight is a small dot, only inside the
+  // window, in the same red-orange as in the 3D view
+  let projectileDots = 0;
+  for (const projectile of projectiles) {
+    if (!isInsideMinimapWindow(projectile.posX, projectile.posY, firstMapX, firstMapY)) {
+      continue;
+    }
+    graphics.circle(
+      minimapX + (projectile.posX - firstMapX) * minimapCellSize,
+      minimapY + (projectile.posY - firstMapY) * minimapCellSize,
+      minimapProjectileRadius,
+    );
+    projectileDots += 1;
+  }
+  if (projectileDots > 0) {
+    graphics.fill(projectileColor);
   }
 
   const playerX = minimapX + (player.posX - firstMapX) * minimapCellSize;

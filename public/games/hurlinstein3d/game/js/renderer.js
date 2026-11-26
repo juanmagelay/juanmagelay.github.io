@@ -19,14 +19,27 @@ function getWallStripCount() {
   return screenWidth / gameSettings.stripWidth;
 }
 
+// D-40 / TDD 3.4 (Lode's floor casting, with pitch and posZ): the screen row
+// of a point z cells above the floor, depth cells away along dir. The horizon
+// sits at screenHeight / 2 + pitch. The point is eyeHeight - z cells under the
+// eye, plus posZ pixels when the eye is higher, and one cell at this depth is
+// screenHeight / depth pixels (similar triangles). Walls (z 1 and 0), enemies
+// (z 0), blood drops and projectiles are all placed with it.
+function getScreenYAtHeight(z, depth, camera) {
+  return screenHeight / 2 + camera.pitch + (camera.posZ + screenHeight * (eyeHeight - z)) / depth;
+}
+
 // TDD 3.4: a strip is the rect drawn for one ray, x is its left edge in pixels.
 // A wall at perpWallDist is screenHeight / perpWallDist pixels tall (similar
-// triangles), centered on the horizon and clipped to the screen.
-// perpWallDist 0 gives Infinity, and the clip turns it into the full column.
-function getWallStrip(x, perpWallDist) {
+// triangles), from its top (z 1) to its foot (z 0), clipped to the screen.
+// It is Lode's drawStart = -lineHeight / 2 + screenHeight / 2 + pitch +
+// posZ / perpWallDist, and the same for drawEnd with + lineHeight / 2.
+// perpWallDist 0 gives -Infinity and Infinity, and the clip turns them into
+// the full column.
+function getWallStrip(x, perpWallDist, camera) {
   const lineHeight = screenHeight / perpWallDist;
-  const drawStart = Math.max(0, -lineHeight / 2 + screenHeight / 2);
-  const drawEnd = Math.min(screenHeight, lineHeight / 2 + screenHeight / 2);
+  const drawStart = Math.max(0, getScreenYAtHeight(1, perpWallDist, camera));
+  const drawEnd = Math.min(screenHeight, getScreenYAtHeight(0, perpWallDist, camera));
   return { x, lineHeight, drawStart, drawEnd };
 }
 
@@ -160,11 +173,15 @@ function getWallStripColor(player, stripX, ray) {
 
 // TDD 6.4 and 6.5: runs once, outside the ticker, and again only when the
 // canvas width changes (D-16a). Ceiling above the horizon, floor below it.
+// D-40b: both reach maxPitchShare of the screen height past the screen edges,
+// so the ticker only moves the Graphics pitch pixels down to move the horizon,
+// and the edge never shows.
 function drawCeilingAndFloor(graphics) {
   const horizonY = screenHeight / 2;
+  const margin = maxPitchShare * screenHeight;
   graphics.clear();
-  graphics.rect(0, 0, screenWidth, horizonY).fill(ceilingColor);
-  graphics.rect(0, horizonY, screenWidth, screenHeight - horizonY).fill(floorColor);
+  graphics.rect(0, -margin, screenWidth, horizonY + margin).fill(ceilingColor);
+  graphics.rect(0, horizonY, screenWidth, screenHeight - horizonY + margin).fill(floorColor);
 }
 
 // D-09 / D-28b: a procedural wall texture on a hidden canvas, in light neutral
@@ -209,8 +226,15 @@ function createWallTextureCanvas(variant = 0) {
 // D-28c (Lode's floor casting): the eye is half a wall above the floor, so a
 // floor point seen at screen row y is at this distance along dir (similar
 // triangles, like the wall height of TDD 3.4). The ceiling is the mirror image.
-function getRowDistance(y) {
-  return 0.5 * screenHeight / Math.abs(y - screenHeight / 2);
+// D-40b / D-40d: rows are measured from the moved horizon, and posZ (pixels)
+// brings the eye closer to the floor when it dips and farther from the
+// ceiling, so the floor and the ceiling are no longer symmetrical.
+function getRowDistance(y, camera) {
+  const horizonY = screenHeight / 2 + camera.pitch;
+  const eyeToFloor = eyeHeight * screenHeight + camera.posZ;
+  const eyeToCeiling = (1 - eyeHeight) * screenHeight - camera.posZ;
+  const eyeToPlane = y < horizonY ? eyeToCeiling : eyeToFloor;
+  return eyeToPlane / Math.abs(y - horizonY);
 }
 
 // D-28c: the floor point under the ray of this cameraX, at that row distance.
@@ -266,6 +290,115 @@ function getFloorLight(worldX, worldY, lights) {
   return Math.min(1, illumination);
 }
 
+// D-39e / TDD 6.2: the four stain shapes, drawn by code side by side on a
+// hidden canvas, 32 by 32 px each, read back once and turned into one factor
+// per texel and color channel (TDD 6.4). The floor casting reads them with no
+// object.
+const stainTextureSize = 32;
+const stainTextureWidth = stainTextureSize * stainShapeCount;
+// A stain lets a little of the tile show through
+const stainOpacity = 0.85;
+const stainColor = "#5e0b0b";
+const stainCoreColor = "#3c0505";
+// Shape 1 a round pool, 2 a smear, 3 two lobes, 4 a splash with many drops.
+// Every size stays within 14 px of the center, so no stain is cut by the cell edge.
+const stainShapeStyles = [
+  { radiusX: 9, radiusY: 8, lobes: 1, droplets: 3 },
+  { radiusX: 11, radiusY: 5, lobes: 1, droplets: 5 },
+  { radiusX: 7, radiusY: 5.5, lobes: 2, droplets: 4 },
+  { radiusX: 5.5, radiusY: 5.5, lobes: 1, droplets: 10 },
+];
+// The unshaded floor tile of getFloorTextureColor, 166 with its green tint
+const floorTileRgb = [166 * 0.94, 166, 166 * 1.02];
+let stainFactors = null;
+
+// D-39e: each shape is a dark red ellipse, a second lobe for shape 3, small
+// drops around it and a darker core. Its own fixed seed places them, so the
+// four shapes look the same in every game.
+function drawStainShape(context, shapeIndex) {
+  const style = stainShapeStyles[shapeIndex];
+  const random = createRandom(shapeIndex + 1);
+  const centerX = shapeIndex * stainTextureSize + stainTextureSize / 2;
+  const centerY = stainTextureSize / 2;
+  const rotation = random() * Math.PI;
+
+  context.save();
+  context.beginPath();
+  context.rect(shapeIndex * stainTextureSize, 0, stainTextureSize, stainTextureSize);
+  context.clip();
+
+  context.fillStyle = stainColor;
+  context.beginPath();
+  context.ellipse(centerX, centerY, style.radiusX, style.radiusY, rotation, 0, 2 * Math.PI);
+  if (style.lobes === 2) {
+    const lobeX = centerX + Math.cos(rotation) * 6;
+    const lobeY = centerY + Math.sin(rotation) * 6;
+    context.ellipse(lobeX, lobeY, style.radiusY, style.radiusY, 0, 0, 2 * Math.PI);
+  }
+  context.fill();
+
+  for (let index = 0; index < style.droplets; index++) {
+    const angle = random() * 2 * Math.PI;
+    const distance = Math.min(style.radiusX + 1 + random() * 4, 11.5);
+    const radius = 0.8 + random() * 1.4;
+    context.beginPath();
+    context.arc(centerX + Math.cos(angle) * distance, centerY + Math.sin(angle) * distance, radius, 0, 2 * Math.PI);
+    context.fill();
+  }
+
+  context.fillStyle = stainCoreColor;
+  context.beginPath();
+  context.ellipse(centerX, centerY, style.radiusX * 0.5, style.radiusY * 0.5, rotation, 0, 2 * Math.PI);
+  context.fill();
+  context.restore();
+}
+
+// D-39e / TDD 6.4: runs once, outside the ticker
+function initStainTexture() {
+  if (stainFactors !== null) {
+    return;
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = stainTextureWidth;
+  canvas.height = stainTextureSize;
+  const context = canvas.getContext("2d");
+  for (let shapeIndex = 0; shapeIndex < stainShapeCount; shapeIndex++) {
+    drawStainShape(context, shapeIndex);
+  }
+  stainFactors = createStainFactors(context.getImageData(0, 0, stainTextureWidth, stainTextureSize).data);
+}
+
+// D-39e: what each stain texel lets through of the tile under it, per color
+// channel, and its coverage. Blending the stain over the tile by its alpha is
+// a product: where the texel is opaque the factor turns the tile into the
+// stain color, where it is transparent (coverage 0) the tile stays. Four
+// numbers per texel, like the RGBA it comes from. The tile under a stain is
+// always plain tile, never a joint, since every shape stays 2 px away from the
+// cell edge.
+function createStainFactors(texels) {
+  const texelCount = stainTextureWidth * stainTextureSize;
+  const factors = new Float64Array(texelCount * 4);
+  for (let texel = 0; texel < texelCount; texel++) {
+    const coverage = texels[texel * 4 + 3] / 255 * stainOpacity;
+    for (let channel = 0; channel < 3; channel++) {
+      const ratio = texels[texel * 4 + channel] / floorTileRgb[channel];
+      factors[texel * 4 + channel] = 1 + (ratio - 1) * coverage;
+    }
+    factors[texel * 4 + 3] = coverage;
+  }
+  return factors;
+}
+
+// D-39e / TDD 6.5: the stain texel under a floor point. u and v are the
+// fractional parts of the point, its place inside the cell, used as texture
+// coordinates, and the shape picks one of the four 32 px squares of the strip.
+// Returns the texel number, row times the strip width plus column.
+function getStainTexelIndex(shape, u, v) {
+  const texX = (shape - 1) * stainTextureSize + Math.floor(u * stainTextureSize);
+  const texY = Math.floor(v * stainTextureSize);
+  return texY * stainTextureWidth + texX;
+}
+
 // D-28c / D-28d: the color of one floor or ceiling sample as 0xRRGGBB, like
 // shadeColor, so drawing a pixel creates no object. Each cell is a light tile
 // with a dark joint along two of its edges. With lighting on, the room lights
@@ -313,6 +446,23 @@ function getFloorTextureColor(worldX, worldY, isCeiling, rowDistance, lights) {
   return (toColorByte(red) << 16) | (toColorByte(green) << 8) | toColorByte(blue);
 }
 
+// D-39e / TDD 6.5: lays the stain of a cell over a floor sample. The tile
+// color comes already shaded, by the lights or the distance bands, and is
+// multiplied by the factors of its stain texel, so the stain keeps the light
+// of the floor around it. u and v are the place of the sample inside its cell.
+// Only the samples of a stained cell come here, and a transparent texel, most
+// of the square around a blob, returns the tile as it is.
+function applyStain(tileColor, stainShape, u, v) {
+  const texel = getStainTexelIndex(stainShape, u, v) * 4;
+  if (stainFactors[texel + 3] === 0) {
+    return tileColor;
+  }
+  const red = ((tileColor >> 16) & 0xff) * stainFactors[texel];
+  const green = ((tileColor >> 8) & 0xff) * stainFactors[texel + 1];
+  const blue = (tileColor & 0xff) * stainFactors[texel + 2];
+  return (toColorByte(red) << 16) | (toColorByte(green) << 8) | toColorByte(blue);
+}
+
 function toColorByte(value) {
   return Math.min(255, Math.floor(value));
 }
@@ -348,23 +498,28 @@ function writeColorPixel(data, index, color) {
 // right edge (cameraX +1), so after the first one each sample only adds a step.
 // Past maxRayDistance the row is the background color, like a ray without a
 // hit (TDD 5.2).
-function drawFloorCasting(surface, player) {
+function drawFloorCasting(surface, camera) {
   const stripWidth = gameSettings.stripWidth;
   const columns = getWallStripCount();
   const rows = Math.min(surface.canvas.height, screenHeight / stripWidth);
   const canvasWidth = surface.canvas.width;
   const data = surface.imageData.data;
   const noLights = [];
-  // Neighbor samples usually fall in the same chunk, so the lights of a chunk
-  // are looked up again only when the samples cross into another one
+  // Neighbor samples usually fall in the same chunk, so the lights and the
+  // stains (D-39e) of a chunk are looked up again only when the samples cross
+  // into another one. The chunk is kept by its first cell, as whole numbers.
   let lights = noLights;
-  let lightsChunkX = NaN;
-  let lightsChunkY = NaN;
+  let stains = null;
+  let hasChunk = false;
+  let chunkFirstX = 0;
+  let chunkFirstY = 0;
+  // D-40b: rows above the moved horizon show the ceiling
+  const horizonY = screenHeight / 2 + camera.pitch;
 
   for (let row = 0; row < rows; row++) {
     const y = (row + 0.5) * stripWidth;
-    const isCeiling = y < screenHeight / 2;
-    const rowDistance = getRowDistance(y);
+    const isCeiling = y < horizonY;
+    const rowDistance = getRowDistance(y, camera);
     let index = row * canvasWidth * 4;
 
     if (rowDistance > maxRayDistance) {
@@ -377,28 +532,52 @@ function drawFloorCasting(surface, player) {
 
     // The center of the first sample, and the step from one sample to the next
     const firstCameraX = 1 / columns - 1;
-    const first = getFloorWorldPoint(player, firstCameraX, rowDistance);
-    const stepX = rowDistance * 2 * player.planeX / columns;
-    const stepY = rowDistance * 2 * player.planeY / columns;
+    const first = getFloorWorldPoint(camera, firstCameraX, rowDistance);
+    const stepX = rowDistance * 2 * camera.planeX / columns;
+    const stepY = rowDistance * 2 * camera.planeY / columns;
     let floorX = first.x;
     let floorY = first.y;
 
     // The lights matter for the lamps on the ceiling and, with lighting on,
-    // for the light on the floor
+    // for the light on the floor. D-39e: stains lie on the floor only, and
+    // only once some enemy has died.
     const needsLights = isCeiling || useLighting;
+    const needsStains = !isCeiling && stainsByChunk.size > 0 && stainFactors !== null;
     for (let column = 0; column < columns; column++) {
       let sampleLights = noLights;
-      if (needsLights) {
-        const chunkX = Math.floor(floorX / chunkSize);
-        const chunkY = Math.floor(floorY / chunkSize);
-        if (chunkX !== lightsChunkX || chunkY !== lightsChunkY) {
-          lights = getLightsAtCell(Math.floor(floorX), Math.floor(floorY));
-          lightsChunkX = chunkX;
-          lightsChunkY = chunkY;
+      let stainShape = 0;
+      let cellX = 0;
+      let cellY = 0;
+      if (needsLights || needsStains) {
+        // The cell of the sample; while it stays inside the same 16 by 16
+        // chunk, nothing is looked up again
+        cellX = Math.floor(floorX);
+        cellY = Math.floor(floorY);
+        const outsideX = cellX < chunkFirstX || cellX >= chunkFirstX + chunkSize;
+        const outsideY = cellY < chunkFirstY || cellY >= chunkFirstY + chunkSize;
+        if (!hasChunk || outsideX || outsideY) {
+          hasChunk = true;
+          const chunkX = Math.floor(cellX / chunkSize);
+          const chunkY = Math.floor(cellY / chunkSize);
+          lights = getLightsAtCell(cellX, cellY);
+          stains = getChunkStains(chunkX, chunkY);
+          chunkFirstX = chunkX * chunkSize;
+          chunkFirstY = chunkY * chunkSize;
         }
-        sampleLights = lights;
+        if (needsLights) {
+          sampleLights = lights;
+        }
+        // TDD 6.8: the stain of the cell is one index in the chunk array
+        if (needsStains && stains !== null) {
+          stainShape = stains[(cellY - chunkFirstY) * chunkSize + (cellX - chunkFirstX)];
+        }
       }
-      writeColorPixel(data, index, getFloorTextureColor(floorX, floorY, isCeiling, rowDistance, sampleLights));
+      let color = getFloorTextureColor(floorX, floorY, isCeiling, rowDistance, sampleLights);
+      if (stainShape > 0) {
+        // The place of the sample inside its cell is the texture coordinate
+        color = applyStain(color, stainShape, floorX - cellX, floorY - cellY);
+      }
+      writeColorPixel(data, index, color);
       index += 4;
       floorX += stepX;
       floorY += stepY;
@@ -413,9 +592,9 @@ function drawFloorCasting(surface, player) {
 
 // D-16d / D-28c: flat mode hides the casting sprite; texture mode redraws it
 // before showing it, so returning to textures never exposes stale pixels.
-function updateFloorCasting(surface, player, enabled) {
+function updateFloorCasting(surface, camera, enabled) {
   surface.sprite.visible = enabled;
-  if (enabled) drawFloorCasting(surface, player);
+  if (enabled) drawFloorCasting(surface, camera);
 }
 
 // D-28b: the texture variant of a wall cell, stable for any cell
@@ -455,16 +634,30 @@ function sliceTextureColumns(source, width, height) {
 // a data URI (js/enemy-sheet.js), so it loads under file:// and the canvas can
 // be read. Runs once, outside the ticker (TDD 6.4).
 let enemyTextureColumns = null;
+// D-39c: the death strip cut the same way, one list of columns per frame
+let enemyDeathTextureColumns = null;
 
-function loadEnemyTextureColumns() {
+function loadImage(dataUri) {
   return new Promise((resolve) => {
     const image = new Image();
-    image.onload = () => {
-      enemyTextureColumns = sliceTextureColumns(image, enemyTextureWidth, enemyTextureHeight);
-      resolve(enemyTextureColumns);
-    };
-    image.src = enemySpriteDataUri;
+    image.onload = () => resolve(image);
+    image.src = dataUri;
   });
+}
+
+async function loadEnemyTextureColumns() {
+  const image = await loadImage(enemySpriteDataUri);
+  enemyTextureColumns = sliceTextureColumns(image, enemyTextureWidth, enemyTextureHeight);
+
+  const deathImage = await loadImage(enemyDeathSheetDataUri);
+  const deathColumns = sliceTextureColumns(
+    deathImage, enemyDeathFrameCount * enemyDeathFrameWidth, enemyDeathFrameHeight);
+  enemyDeathTextureColumns = [];
+  for (let frame = 0; frame < enemyDeathFrameCount; frame++) {
+    const firstColumn = frame * enemyDeathFrameWidth;
+    enemyDeathTextureColumns.push(deathColumns.slice(firstColumn, firstColumn + enemyDeathFrameWidth));
+  }
+  return enemyTextureColumns;
 }
 
 // D-09 / D-21b: a pool of strip sprites created once and reused every frame
@@ -534,14 +727,15 @@ function getWallTextureX(player, stripX, ray) {
 // painted with a single fill(). With useWallTextures the sprites replace this
 // path, but missed strips still use the background fill. The depth buffer
 // keeps perpWallDist even in fisheye mode, for the enemies (D-16e2).
-function drawWalls(graphics, player, wallStrips) {
+// D-40: camera is the drawing camera of js/player.js, with pitch and posZ.
+function drawWalls(graphics, camera, wallStrips) {
   graphics.clear();
 
   if (wallStrips?.container) {
     wallStrips.container.visible = useWallTextures && !gameSettings.flatColors;
   }
   if (useWallTextures && !gameSettings.flatColors && wallStrips) {
-    drawTexturedWalls(graphics, player, wallStrips);
+    drawTexturedWalls(graphics, camera, wallStrips);
     return;
   }
 
@@ -552,17 +746,17 @@ function drawWalls(graphics, player, wallStrips) {
 
   for (let index = 0; index < stripCount; index++) {
     const x = index * stripWidth;
-    const ray = castRayForColumn(player, x);
+    const ray = castRayForColumn(camera, x);
     if (!ray.hit) {
       // TDD 5.2: nothing within maxRayDistance. The background color takes the
       // place a wall at maxRayDistance would have, so it reads as darkness.
       wallDepthBuffer[index] = maxRayDistance;
-      missedStrips.push(getWallStrip(x, getProjectionDistance(player, x, maxRayDistance)));
+      missedStrips.push(getWallStrip(x, getProjectionDistance(camera, x, maxRayDistance), camera));
     } else {
       wallDepthBuffer[index] = ray.perpWallDist;
-      const color = getWallStripColor(player, x, ray);
-      const distance = getProjectionDistance(player, x, ray.perpWallDist);
-      addStripToColorGroup(stripsByColor, color, getWallStrip(x, distance));
+      const color = getWallStripColor(camera, x, ray);
+      const distance = getProjectionDistance(camera, x, ray.perpWallDist);
+      addStripToColorGroup(stripsByColor, color, getWallStrip(x, distance, camera));
     }
   }
 
@@ -574,8 +768,9 @@ function drawWalls(graphics, player, wallStrips) {
 // stretched to the wall height and tinted with the same color the flat mode
 // uses, so chunk color and shading still apply. The sprite keeps its unclipped
 // height and lets the canvas edge do the clipping, which keeps the texture
-// aligned when a wall is bigger than the screen.
-function drawTexturedWalls(graphics, player, wallStrips) {
+// aligned when a wall is bigger than the screen. D-40: its middle, half a wall
+// up, is where pitch and posZ place it (TDD 3.4).
+function drawTexturedWalls(graphics, camera, wallStrips) {
   const stripWidth = gameSettings.stripWidth;
   const stripCount = getWallStripCount();
   const missedStrips = [];
@@ -588,22 +783,23 @@ function drawTexturedWalls(graphics, player, wallStrips) {
       sprite.visible = false;
       continue;
     }
-    const ray = castRayForColumn(player, x);
+    const ray = castRayForColumn(camera, x);
     if (!ray.hit) {
       wallDepthBuffer[index] = maxRayDistance;
       sprite.visible = false;
-      missedStrips.push(getWallStrip(x, getProjectionDistance(player, x, maxRayDistance)));
+      missedStrips.push(getWallStrip(x, getProjectionDistance(camera, x, maxRayDistance), camera));
       continue;
     }
 
     wallDepthBuffer[index] = ray.perpWallDist;
-    const distance = getProjectionDistance(player, x, ray.perpWallDist);
+    const distance = getProjectionDistance(camera, x, ray.perpWallDist);
     const lineHeight = Math.min(screenHeight / distance, wallSpriteMaxHeight);
-    sprite.texture = wallTextureColumns[getWallVariant(ray.mapX, ray.mapY)][getWallTextureX(player, x, ray)];
-    sprite.position.set(x, screenHeight / 2 - lineHeight / 2);
+    const wallMiddleY = getScreenYAtHeight(0.5, distance, camera);
+    sprite.texture = wallTextureColumns[getWallVariant(ray.mapX, ray.mapY)][getWallTextureX(camera, x, ray)];
+    sprite.position.set(x, wallMiddleY - lineHeight / 2);
     sprite.width = stripWidth;
     sprite.height = lineHeight;
-    sprite.tint = getWallStripColor(player, x, ray);
+    sprite.tint = getWallStripColor(camera, x, ray);
     sprite.visible = true;
   }
 
@@ -665,11 +861,12 @@ function isEnemyInViewRange(enemy, player) {
 // screenHeight / depth pixels. The eye is half a wall above the floor, so the
 // floor line is screenHeight / (2 * depth) below the horizon, where a wall strip
 // ends (Lode part 3 moves sprites down the same way, with vMove). Unclipped.
-function getStandingSpriteBox(transformX, depth, worldWidth, worldHeight) {
+// D-40: the floor line is height 0 for the drawing camera, with pitch and posZ.
+function getStandingSpriteBox(transformX, depth, worldWidth, worldHeight, camera) {
   const screenX = (screenWidth / 2) * (1 + transformX / depth);
   const width = screenHeight * worldWidth / depth;
   const height = screenHeight * worldHeight / depth;
-  const bottom = screenHeight / 2 + screenHeight / (2 * depth);
+  const bottom = getScreenYAtHeight(0, depth, camera);
   return { left: screenX - width / 2, width, top: bottom - height, height };
 }
 
@@ -695,11 +892,12 @@ function getVisibleStripXs(box, depth) {
 
 // D-21b (Lode part 3, texX): the sprite column a strip shows. The strip center
 // is measured from the sprite's left edge and scaled from screen pixels to
-// sprite pixels, then kept inside the sprite.
-function getEnemyTextureX(stripX, spriteLeft, spriteWidth) {
+// sprite pixels, then kept inside the sprite. D-39c: textureWidth is 51 for a
+// death frame.
+function getEnemyTextureX(stripX, spriteLeft, spriteWidth, textureWidth = enemyTextureWidth) {
   const stripCenter = stripX + gameSettings.stripWidth / 2;
-  const texX = Math.floor((stripCenter - spriteLeft) * enemyTextureWidth / spriteWidth);
-  return Math.min(Math.max(texX, 0), enemyTextureWidth - 1);
+  const texX = Math.floor((stripCenter - spriteLeft) * textureWidth / spriteWidth);
+  return Math.min(Math.max(texX, 0), textureWidth - 1);
 }
 
 // D-21b: the sprite keeps the proportions of its image: as tall as the enemy,
@@ -708,20 +906,54 @@ function getEnemySpriteWorldWidth(enemy) {
   return enemy.height * enemyTextureWidth / enemyTextureHeight;
 }
 
-// D-04c2 / D-23: the active enemies in view range and in front of the camera,
-// with their camera space position. D-21b: sorted near to far.
-function getVisibleEnemies(player) {
+// D-21b / D-39c: what an enemy shows in 3D. Alive, the front frame; falling,
+// the death frame for its time, fading out at the end. Both keep the scale of
+// the front frame, 57 texture pixels for enemy.height, so the boss falls larger.
+function getEnemySpriteLook(enemy, dying) {
+  if (dying === null) {
+    return {
+      columns: enemyTextureColumns,
+      textureWidth: enemyTextureWidth,
+      worldWidth: getEnemySpriteWorldWidth(enemy),
+      worldHeight: enemy.height,
+      alpha: 1,
+    };
+  }
+  const cellsPerPixel = enemy.height / enemyTextureHeight;
+  return {
+    columns: enemyDeathTextureColumns[getDeathFrame(dying.time)],
+    textureWidth: enemyDeathFrameWidth,
+    worldWidth: enemyDeathFrameWidth * cellsPerPixel,
+    worldHeight: enemyDeathFrameHeight * cellsPerPixel,
+    alpha: getCorpseAlpha(dying.time),
+  };
+}
+
+// D-04c2: adds the enemy with its camera space position when it is in view
+// range and in front of the camera. dying is its D-39c entry, or null.
+function addVisibleEnemy(visible, enemy, player, dying) {
+  if (!isEnemyInViewRange(enemy, player)) {
+    return;
+  }
+  const { transformX, depth } = getEnemyProjection(enemy, player);
+  if (depth <= 0 || depth > maxRayDistance) {
+    return;
+  }
+  visible.push({ enemy, transformX, depth, dying });
+}
+
+// D-04c2 / D-23: the active enemies in view, and with includeDying the falling
+// ones too (D-39c), sorted near to far (D-21b)
+function getVisibleEnemies(player, includeDying = false) {
   const visible = [];
   for (const enemies of getActiveEnemyLists(player)) {
     for (const enemy of enemies) {
-      if (!isEnemyInViewRange(enemy, player)) {
-        continue;
-      }
-      const { transformX, depth } = getEnemyProjection(enemy, player);
-      if (depth <= 0 || depth > maxRayDistance) {
-        continue;
-      }
-      visible.push({ enemy, transformX, depth });
+      addVisibleEnemy(visible, enemy, player, null);
+    }
+  }
+  if (includeDying) {
+    for (const dying of dyingEnemies) {
+      addVisibleEnemy(visible, dying.enemy, player, dying);
     }
   }
   visible.sort((a, b) => a.depth - b.depth);
@@ -731,21 +963,23 @@ function getVisibleEnemies(player) {
 // D-04c2: draws every enemy in view, standing on the floor (D-21b) and hidden
 // strip by strip behind nearer walls. With useEnemySprites and the sprite pool
 // it draws the Husk Mutant sprite; otherwise an amber rectangle, the flat color
-// mode, with one fill() for all of them.
-function drawEnemies(graphics, player, enemyStrips) {
+// mode, with one fill() for all of them. D-39c: the flat mode shows the bare
+// algorithm, so a killed enemy vanishes there in the frame it dies.
+// D-40: camera is the drawing camera of js/player.js, with pitch and posZ.
+function drawEnemies(graphics, camera, enemyStrips) {
   graphics.clear();
 
   if (enemyStrips?.container) {
     enemyStrips.container.visible = useEnemySprites && !gameSettings.flatColors;
   }
   if (useEnemySprites && !gameSettings.flatColors && enemyStrips) {
-    drawTexturedEnemies(player, enemyStrips);
+    drawTexturedEnemies(camera, enemyStrips);
     return;
   }
 
   const rectsByColor = new Map();
-  for (const { enemy, transformX, depth } of getVisibleEnemies(player)) {
-    const box = getStandingSpriteBox(transformX, depth, enemy.width, enemy.height);
+  for (const { enemy, transformX, depth } of getVisibleEnemies(camera)) {
+    const box = getStandingSpriteBox(transformX, depth, enemy.width, enemy.height, camera);
     const drawStart = Math.max(0, box.top);
     const drawEnd = Math.min(screenHeight, box.top + box.height);
     if (drawEnd <= drawStart) {
@@ -773,13 +1007,16 @@ function drawEnemies(graphics, player, enemyStrips) {
 // Painter's algorithm: a nearer enemy must cover a farther one. Enemies come near
 // to far and take pool sprites from the last one down, and the last children of
 // a container are drawn on top. If the pool runs out, the farthest are left out.
-function drawTexturedEnemies(player, enemyStrips) {
+// D-39c: the falling enemies join the same list, so they are hidden by walls
+// and by nearer enemies the same way, and shaded by the same distance bands.
+function drawTexturedEnemies(camera, enemyStrips) {
   const stripWidth = gameSettings.stripWidth;
   const sprites = enemyStrips.sprites;
   let nextSprite = sprites.length - 1;
 
-  for (const { enemy, transformX, depth } of getVisibleEnemies(player)) {
-    const box = getStandingSpriteBox(transformX, depth, getEnemySpriteWorldWidth(enemy), enemy.height);
+  for (const { enemy, transformX, depth, dying } of getVisibleEnemies(camera, true)) {
+    const look = getEnemySpriteLook(enemy, dying);
+    const box = getStandingSpriteBox(transformX, depth, look.worldWidth, look.worldHeight, camera);
     const baseTint = enemy.isBoss ? bossColor : 0xffffff;
     const tint = shadeColor(baseTint, getDistanceBrightness(depth));
     for (const x of getVisibleStripXs(box, depth)) {
@@ -788,11 +1025,12 @@ function drawTexturedEnemies(player, enemyStrips) {
       }
       const sprite = sprites[nextSprite];
       nextSprite -= 1;
-      sprite.texture = enemyTextureColumns[getEnemyTextureX(x, box.left, box.width)];
+      sprite.texture = look.columns[getEnemyTextureX(x, box.left, box.width, look.textureWidth)];
       sprite.position.set(x, box.top);
       sprite.width = stripWidth;
       sprite.height = box.height;
       sprite.tint = tint;
+      sprite.alpha = look.alpha;
       sprite.visible = true;
     }
   }
@@ -804,3 +1042,142 @@ function drawTexturedEnemies(player, enemyStrips) {
 }
 
 
+
+// D-13c: look of a projectile, a small red-orange square, like the muzzle flash
+// and easy to tell apart from the amber enemies. It is not drawn closer than
+// projectileMinDepth, where it would be a big square over the crosshair.
+const projectileSize = 0.05;
+const projectileColor = 0xff5a1f;
+const projectileMinDepth = 0.75;
+
+// D-13c: each projectile is a small square, projected like the enemies (Lode
+// part 3) and hidden strip by strip behind nearer walls (D-04c1).
+// getEnemyProjection only reads posX and posY, so it projects a projectile too.
+// D-40c: the square is centered on its height z, so it climbs or drops on
+// screen with the aim; a shot along the look stays on the crosshair.
+function drawProjectiles(graphics, camera) {
+  graphics.clear();
+
+  const stripWidth = gameSettings.stripWidth;
+  const projectileStrips = [];
+  for (const projectile of projectiles) {
+    const { transformX, depth } = getEnemyProjection(projectile, camera);
+    if (depth < projectileMinDepth || depth > maxRayDistance) {
+      continue;
+    }
+
+    // One cell at this depth is screenHeight / depth pixels tall
+    const size = screenHeight * projectileSize / depth;
+    const screenX = (screenWidth / 2) * (1 + transformX / depth);
+    const centerY = getScreenYAtHeight(projectile.z, depth, camera);
+    const top = Math.max(0, centerY - size / 2);
+    const bottom = Math.min(screenHeight, centerY + size / 2);
+    if (bottom <= top) {
+      continue;
+    }
+
+    const firstColumn = Math.max(0, screenX - size / 2);
+    const lastColumn = Math.min(screenWidth - 1, screenX + size / 2);
+    for (
+      let x = Math.floor(firstColumn / stripWidth) * stripWidth;
+      x <= lastColumn;
+      x += stripWidth
+    ) {
+      if (depth < wallDepthBuffer[x / stripWidth]) {
+        projectileStrips.push({ x, drawStart: top, drawEnd: bottom });
+      }
+    }
+  }
+
+  fillStrips(graphics, projectileStrips, projectileColor);
+}
+
+// D-39g: look of a blood drop, a small dark red square 0.03 cells wide, never
+// under 2 px so far drops still show. Closer than bloodDropMinDepth it would
+// be a big square over the view, so it is skipped.
+const bloodDropSize = 0.03;
+const bloodDropMinPixels = 2;
+const bloodDropColor = 0x8c0a0a;
+const bloodDropMinDepth = 0.2;
+const bloodDropTextureSize = 4;
+
+// D-39g: a 4 by 4 px rounded square, white so the tint gives its color, drawn
+// by code on a hidden canvas (TDD 6.2)
+function createBloodDropTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = bloodDropTextureSize;
+  canvas.height = bloodDropTextureSize;
+  const context = canvas.getContext("2d");
+  context.fillStyle = "#ffffff";
+  context.fillRect(1, 0, 2, 4);
+  context.fillRect(0, 1, 4, 2);
+  const texture = PIXI.Texture.from(canvas);
+  texture.source.scaleMode = "nearest";
+  return texture;
+}
+
+// D-39g / TDD 6.4: one Particle per drop of the pool, created once. A Particle
+// has no visible flag, so a hidden drop gets alpha 0. Position, size (vertex)
+// and color change every frame, so the three are dynamic. A ParticleContainer
+// reports empty bounds, so boundsArea gives the CRT filter the screen size.
+function createBloodDropParticles() {
+  const texture = createBloodDropTexture();
+  const container = new PIXI.ParticleContainer({
+    dynamicProperties: { position: true, vertex: true, color: true },
+    boundsArea: new PIXI.Rectangle(0, 0, maxScreenWidth, screenHeight),
+  });
+  const particles = [];
+  for (let index = 0; index < bloodDropPoolSize; index++) {
+    const particle = new PIXI.Particle({ texture, anchorX: 0.5, anchorY: 0.5, alpha: 0 });
+    container.addParticle(particle);
+    particles.push(particle);
+  }
+  return { container, particles };
+}
+
+// D-39g (Lode part 3): a drop is projected like an enemy, and its height
+// moves it up from the floor line. The eye is half a cell above the floor, so
+// a point z cells high is (0.5 - z) cells under eye level, screenHeight / depth
+// pixels per cell (getScreenYAtHeight, which adds pitch and posZ for D-40).
+// It is drawn only when it is nearer than the wall depth of its column
+// (D-04c1). Returns null when it is not drawn.
+function getBloodDropView(drop, camera) {
+  const { transformX, depth } = getEnemyProjection(drop, camera);
+  if (depth < bloodDropMinDepth || depth > maxRayDistance) {
+    return null;
+  }
+  const x = (screenWidth / 2) * (1 + transformX / depth);
+  if (x < 0 || x >= screenWidth) {
+    return null;
+  }
+  if (depth >= wallDepthBuffer[Math.floor(x / gameSettings.stripWidth)]) {
+    return null;
+  }
+  return {
+    x,
+    y: getScreenYAtHeight(drop.z, depth, camera),
+    size: Math.max(bloodDropMinPixels, screenHeight * bloodDropSize / depth),
+    tint: shadeColor(bloodDropColor, getDistanceBrightness(depth)),
+  };
+}
+
+// D-39g: every frame, each particle follows its drop of the pool. Like the
+// falling enemies and the stains, the flat color mode shows no drops.
+function drawBloodDrops(dropParticles, camera) {
+  const show = !gameSettings.flatColors;
+  for (let index = 0; index < bloodDrops.length; index++) {
+    const drop = bloodDrops[index];
+    const particle = dropParticles.particles[index];
+    const view = show && drop.active ? getBloodDropView(drop, camera) : null;
+    if (view === null) {
+      particle.alpha = 0;
+      continue;
+    }
+    particle.x = view.x;
+    particle.y = view.y;
+    particle.scaleX = view.size / bloodDropTextureSize;
+    particle.scaleY = view.size / bloodDropTextureSize;
+    particle.tint = view.tint;
+    particle.alpha = 1;
+  }
+}

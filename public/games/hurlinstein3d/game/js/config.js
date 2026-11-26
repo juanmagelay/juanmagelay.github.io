@@ -115,3 +115,24 @@ const enemyStopDistance = 0.5;
 let useEnemySprites = true;
 const enemyTextureWidth = 33;
 const enemyTextureHeight = 57;
+// D-39b: the death strip of the Husk Mutant (js/enemy-sheet.js), five frames of
+// 51 by 60 px. They keep the scale of the front frame (57 px are enemyHeight),
+// so a frame is 0.54 by 0.63 cells and the body keeps its size as it falls.
+const enemyDeathFrameCount = 5;
+const enemyDeathFrameWidth = 51;
+const enemyDeathFrameHeight = 60;
+
+// TDD 3.4: the eye is half a cell above the floor, half a wall high
+const eyeHeight = 0.5;
+// D-40b / TDD 3.4: the horizon moves at most 30% of the screen height either
+// way, so the vertical look stops at atan(0.3), about 16.7 degrees up or down
+const maxPitchShare = 0.3;
+const maxLookAngle = Math.atan(maxPitchShare);
+// D-40d / TDD 6.6: one step per cell walked, about 3 per second at full speed.
+// At each foot strike the eye dips footstepDip cells; between strikes the
+// camera moves up to footstepSway cells toward the foot in support. The bob
+// fades in and out in footstepEaseTime seconds.
+const footstepLength = 1;
+const footstepDip = 0.03;
+const footstepSway = 0.03;
+const footstepEaseTime = 0.2;

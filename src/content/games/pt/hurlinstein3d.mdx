@@ -6,15 +6,26 @@ logoAlt: 'Logo do Hurlinstein3D: a cabeça em pixel art do inimigo mutante.'
 
 import Figure from '../../../components/Figure.astro';
 import logo from '../../../assets/games/hurlinstein3d/logo.png';
-import screenshot from '../../../assets/games/hurlinstein3d/screenshot.png';
+import boss from '../../../assets/games/hurlinstein3d/boss.png';
+import enemy from '../../../assets/games/hurlinstein3d/enemy.png';
+import corridor from '../../../assets/games/hurlinstein3d/corridor.png';
+import adminPanel from '../../../assets/games/hurlinstein3d/admin-panel.png';
+import bloodStain from '../../../assets/games/hurlinstein3d/blood-stain.png';
 
 ## Sobre o jogo
 
 Hurlinstein3D é um jogo em primeira pessoa em uma masmorra infinita, que é gerada conforme você explora. **Para o chefe aparecer, você precisa matar os 20 inimigos da partida.** Se você o matar, vence; se sua vida chegar a zero, perde.
 
-Os inimigos patrulham e perseguem você quando o veem, e tiram sua vida por contato. **O chefe é o mesmo mutante, tingido de vermelho e maior.** Ele aguenta cinco tiros e, por contato, tira o dobro de vida.
+Os inimigos patrulham e perseguem você quando o veem, e tiram sua vida por contato. Ao morrer, eles caem onde estavam e deixam uma mancha de sangue no chão. **O chefe é o mesmo mutante, tingido de vermelho e maior.** Ele aguenta cinco tiros e, por contato, tira o dobro de vida.
+
+<Figure
+  src={boss}
+  alt="Hurlinstein3D em primeira pessoa, em uma sala escura: o chefe, um mutante tingido de vermelho, aparece atrás da quina de uma parede. LIFE, AMMO e KILLS 3 / 3 ficam no canto superior esquerdo e o minimapa no canto superior direito."
+/>
 
 No fim, ganhando ou perdendo, você vê quantos inimigos eliminou, quanto tempo jogou e sua pontuação: 100 pontos por inimigo e 1000 pelo chefe. **Com três iniciais, sua pontuação entra em um ranking online dos cinco melhores.**
+
+**O jogo tem som e música, com a estética de um shooter de monstros.** No menu toca uma faixa industrial e na partida, uma de metal. Os sons dos inimigos vêm do lado onde eles estão e ficam mais baixos com a distância.
 
 <Figure
   src={logo}
@@ -28,15 +39,16 @@ No fim, ganhando ou perdendo, você vê quantos inimigos eliminou, quanto tempo 
 - <kbd>S / Down</kbd>: Move backward
 - <kbd>A / D</kbd>: Strafe left / right
 - <kbd>Left / Right</kbd>: Turn
-- <kbd>Mouse</kbd>: Turn
+- <kbd>Mouse</kbd>: Turn and look up or down
 - <kbd>Space / Click</kbd>: Fire
 - <kbd>R / Right click</kbd>: Reload
 - <kbd>Esc</kbd>: Release the mouse
+- <kbd>M</kbd>: Mute sound
 - <kbd>P</kbd>: Admin panel
 
 ## Requisitos
 
-Um computador com teclado. O navegador recomendado é o Chrome. Cada vez que você clica em Jogar, o jogo abre no menu principal, e cada partida começa em um mundo novo. Nesta página, Esc sai da tela cheia e traz você de volta para cá.
+Um computador com teclado. O navegador recomendado é o Chrome. Cada vez que você clica em Jogar, o jogo abre no menu principal, e cada partida começa em um mundo novo. O som começa com o primeiro clique ou a primeira tecla dentro do jogo, porque o navegador não deixa tocar áudio antes disso. Nesta página, Esc sai da tela cheia e traz você de volta para cá.
 
 ## Uma demo para aprender raycasting
 
@@ -47,6 +59,11 @@ Antes deste jogo, eu e o Alejo Hutmacher passamos dois meses fazendo uma demo de
 Analisamos muitos shooters dos anos 90, como Wolfenstein 3D, Doom e Quake. **O jogo tem dois esquemas de controle que convivem.** As setas sozinhas andam e giram como nos jogos de raycasting daquela época, e W, A, S e D com o mouse é o esquema dos jogos em primeira pessoa que vieram depois. A imagem passa por um filtro CRT, e o painel de admin parece um console técnico daquela época.
 
 Para as texturas, **tomamos como referência os prédios da Universidad Nacional de Hurlingham (UNAHUR) à noite**. Elas são desenhadas por código em um canvas oculto ao iniciar, em três variantes.
+
+<Figure
+  src={enemy}
+  alt="Um mutante de olhos amarelos, de frente e bem perto, em um corredor com venezianas pretas nas paredes e painéis brancos e uma luminária no teto. A mira está sobre a cabeça dele e a espingarda, embaixo."
+/>
 
 ## Dois algoritmos de simulação que precisam um do outro
 
@@ -61,9 +78,14 @@ A proposta pedia implementar dois algoritmos de simulação. **Escolhemos raycas
 - O chão e o teto usam o floor casting do mesmo tutorial.
 - Os sprites dos inimigos usam um z-buffer, então as paredes na frente deles os escondem.
 - O custo não depende do tamanho do mundo, por isso o render funciona com uma masmorra infinita.
-- Seus limites: paredes verticais da mesma altura, alinhadas à grade, chão e teto planos, e não dá para olhar para cima nem para baixo.
+- Seus limites: paredes verticais da mesma altura, alinhadas à grade, chão e teto planos, e um olhar vertical de no máximo uns 17 graus.
 
-**O mesmo DDA serve para o tiro, a visão dos inimigos e as sombras.** O tiro é instantâneo e acerta o inimigo mais próximo que cruza o raio central antes da parede. Os inimigos só perseguem você se um raio saindo deles chega até você sem bater em uma parede, a 24 células ou menos. Cada sala tem uma luz no centro, e um ponto da parede só é iluminado se um raio chega até a luz.
+**O mesmo DDA serve para o tiro, a visão dos inimigos e as sombras.** Cada tiro lança um projétil que voa até a parede que o raio central encontrou e acerta o primeiro inimigo que cruza, então um inimigo que sai da frente a tempo desvia dele. Os inimigos só perseguem você se um raio saindo deles chega até você sem bater em uma parede, a 24 células ou menos. Cada sala tem uma luz no centro, e um ponto da parede só é iluminado se um raio chega até a luz.
+
+<Figure
+  src={corridor}
+  alt="De uma sala escura se vê um corredor iluminado, com ladrilhos claros no chão e uma luminária no teto, e um mutante aparece na esquina. No minimapa, o leque de raios chega até as paredes."
+/>
 
 ### Masmorra procedural por chunks
 
@@ -73,25 +95,42 @@ A proposta pedia implementar dois algoritmos de simulação. **Escolhemos raycas
 - Os chunks são guardados em um Map com chave de Cantor, então uma área continua igual quando você volta.
 - Cada partida sorteia uma semente nova, e cada chunk mistura essa semente com sua chave, então ele sai igual seja qual for o caminho por onde você chegou.
 - Os inimigos nascem nas salas dos quatro chunks que compartilham uma porta com o chunk do jogador, a mais de 10 células, fora do minimapa, e atrás de uma parede, então você nunca os vê aparecer.
+- Os inimigos vivos que ficam fora da sua vista reaparecem a uma porta de distância cada vez que você muda de chunk, então eles não se perdem no mapa infinito.
+- Cada inimigo que morre deixa uma mancha na sua célula, guardada em um array de 16 por 16 por chunk, como as paredes, então ela continua lá quando você volta.
 
 ### Um painel para conferir os dois algoritmos
 
-O painel de admin mostra o FPS, a posição, o chunk e a semente do mundo enquanto você joga. **Com a semente e New world, o mapa e os inimigos saem idênticos.** Ele também tem um modo olho de peixe que desenha as paredes com a distância euclidiana, desenha os raios e as bordas dos chunks no minimapa, e aceita até 100.000 inimigos para testes de estresse.
+O painel de admin mostra o FPS, a posição, o chunk e a semente do mundo enquanto você joga. **Com a semente e New world, o mapa e os inimigos saem idênticos.** Ele também tem um modo olho de peixe que desenha as paredes com a distância euclidiana, desenha os raios e as bordas dos chunks no minimapa, e aceita até 100.000 inimigos para testes de estresse. O olhar vertical e o balanço dos passos podem ser desligados para voltar à visão clássica do raycasting.
 
 <Figure
-  src={screenshot}
-  alt="Hurlinstein3D em primeira pessoa: um mutante de olhos amarelos bloqueia um corredor de tijolos, a espingarda está no canto inferior direito, as barras de LIFE e AMMO no canto superior esquerdo e o minimapa no canto superior direito."
+  src={adminPanel}
+  alt="O painel de admin do Hurlinstein3D: em cima, os dados ao vivo, como FPS, posição, chunk, vida e semente do mundo; embaixo, as configurações em grupos: Game, Render, Weapon, Player, Sound, Raycasting e Procedural generation."
 />
 
 ## Do escopo mínimo à apresentação
 
 Eu e o Alejo fomos dando forma ao jogo, com o feedback do professor, Facundo Toufick Saiegh. **Dividimos o trabalho em um escopo mínimo e um desejável.** O mínimo era percorrer uma masmorra procedural infinita, com colisões e minimapa, em cores chapadas. O desejável somava combate, inimigos que patrulham e perseguem você, um chefe que define a vitória, texturas, iluminação, menus com ranking e um painel de admin. Hoje, Flat colors no painel de admin leva o jogo de volta ao mínimo: sem texturas, sem luzes e com os inimigos como retângulos.
 
-**Trabalhamos com histórias de usuário a partir do documento de design técnico (TDD).** O Claude implementava cada história, e nós a validávamos, fazíamos o commit em develop e a passávamos para main. O jogo tem 262 testes com o test runner nativo do Node, e o render nós testamos à mão.
+**Trabalhamos com histórias de usuário a partir do documento de design técnico (TDD).** O Claude implementava cada história, e nós a validávamos, fazíamos o commit em develop e a passávamos para main. O jogo tem 358 testes com o test runner nativo do Node, e o render nós testamos à mão.
 
 **Em 22 de novembro, o professor nos pediu uma semente para o mundo.** O pedido era para que a mesma semente gerasse o mesmo mundo, como no Minecraft, e os testes fossem repetíveis.
 
 **Apresentamos o jogo em 24 de novembro de 2026, com todo o escopo desejável dentro.** Foi a primeira avaliação parcial de Simulación I.
+
+## O que adicionamos depois da apresentação
+
+**No dia da apresentação, o professor nos pediu mais seis mudanças.** Uma animação de morte para os inimigos, uma mancha de sangue, que a célula da mancha ficasse guardada, ver se partículas cabiam, olhar para cima e para baixo com um balanço dos passos como ao correr, e som e música.
+
+**O jato de sangue é um sistema de partículas com o método de Euler.** Cada impacto que não mata lança 6 gotas e cada morte, 24. A cada quadro, a gravidade é somada à velocidade e a velocidade à posição, as duas multiplicadas por deltaTime, que funciona como passo. As gotas não deixam mancha: a mancha sai da célula onde o inimigo morreu.
+
+<Figure
+  src={bloodStain}
+  alt="Uma mancha de sangue sobre os ladrilhos do chão, em um corredor com venezianas pretas nas paredes e painéis no teto. KILLS 2 / 3 fica no canto superior esquerdo."
+/>
+
+**Olhar para cima e para baixo move o horizonte, e as paredes continuam verticais.** Fizemos isso com o pitch da parte de floor casting do tutorial de Lode, uma técnica chamada *y-shearing*. Passado um ângulo pequeno, dá para perceber que a imagem desliza, por isso o olhar vai até uns 17 graus. Os passos abaixam o olho a cada pisada e deslocam a câmera para o pé de apoio, e a espingarda balança com eles. O tiro segue a altura da mira: se você mirar acima de um inimigo, o projétil passa direto.
+
+**Os sons e a música têm licença CC0 e vão embutidos no jogo.** Vêm do OpenGameArt e da Kenney, e cada efeito foi cortado e normalizado para o mesmo volume. Eles vão como data URI, igual aos sprites, porque o jogo abre com um clique duplo, sem servidor, e a partir do disco o navegador não deixa carregar arquivos. O pan estéreo de cada inimigo sai do produto escalar entre a direção até ele e o vetor plane, que aponta para a direita do jogador: 1 à direita, 0 à frente e -1 à esquerda.
 
 ## Créditos
 
@@ -99,11 +138,13 @@ Eu e o Alejo fomos dando forma ao jogo, com o feedback do professor, Facundo Tou
 - Simulación I · Licenciatura en Desarrollo de Videojuegos y Simulación
 - Universidad Nacional de Hurlingham (UNAHUR)
 - Professor: Facundo Toufick Saiegh
-- [PixiJS](https://pixijs.com) 8.21.0, MIT license
+- [PixiJS](https://pixijs.com) 8.21.0 and [pixi-filters](https://github.com/pixijs/filters) 6.1.5, MIT license
 - [Lucide](https://lucide.dev) icons 1.77.0, ISC license
 - [Husk Mutant](https://opengameart.org/content/husk-mutant) by HorrorMovieRei, CC0
 - [FPS Gun Sprites](https://rekkimaru.itch.io/fps-gun-sprites) by Rekkimaru, free for any use
 - [UI BARS](https://guilemus.itch.io/ui-bars) by guilemus, free for commercial use
+- Sounds by the [Free Firearm Sound Library](https://opengameart.org/content/the-free-firearm-sound-library), [JumboSizedFish](https://opengameart.org/content/toy-double-barrel-shotgun-sounds), [zer0_sol](https://opengameart.org/content/shotgun-reload-sound-effects), [artisticdude](https://opengameart.org/content/zombies-sound-pack), [qubodup](https://opengameart.org/content/15-vocal-male-strainhurtpainjump-sounds), [Fantozzi](https://opengameart.org/content/fantozzis-footsteps-grasssand-stone), [trazzz123](https://opengameart.org/content/cc0-deep-monster-roar) and [Kenney](https://kenney.nl/assets/ui-audio), CC0
+- Music: [Menacing Otherworld](https://opengameart.org/content/menacing-otherworld) by Ruskerdax and [Boss Battle #7](https://opengameart.org/content/boss-battle-7-metal) by nene; stings by [cynicmusic](https://opengameart.org/content/victory-fanfare-short) and [Robin Lamb](https://opengameart.org/content/game-over-dark-short-music-clips), CC0
 - Hurlinstein3D logo by Juan Manuel Gelay, made with Gemini Pro
 
 A arte promocional desta página também é de Juan Manuel Gelay, feita com o Gemini Pro.

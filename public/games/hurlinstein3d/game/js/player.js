@@ -14,6 +14,10 @@ const reloadDuration = 0.96;
 // plane points there and the image is not mirrored.
 // TDD 2.3.1 / D-16c1: health is in hit points, and the magazine and the reload
 // allowance come from the admin settings (js/settings.js).
+// D-40 / TDD 6.8: lookAngle is the vertical look in radians, positive up
+// (D-40b). stepPhase counts steps, 0 to 2 for one stride, and bobAmount is how
+// much of the footstep bob shows, 0 standing and 1 walking (D-40d). The three
+// only change the drawing.
 const spawnPosition = getSpawnPosition();
 const player = {
   posX: spawnPosition.x,
@@ -22,6 +26,9 @@ const player = {
   dirY: 0,
   planeX: 0,
   planeY: getCameraPlaneLength(),
+  lookAngle: 0,
+  stepPhase: 0,
+  bobAmount: 0,
   health: gameSettings.playerHitPoints,
   maxHealth: gameSettings.playerHitPoints,
   ammo: gameSettings.magazineSize,
@@ -49,7 +56,7 @@ function setCameraPlaneLength(player, length) {
 
 // D-17a / TDD 2.3.4: a new game sends the player back to the spawn of a newly
 // generated chunk (0, 0), facing east, with full health and a full magazine,
-// and no reload in progress.
+// and no reload in progress. D-40b: the view starts level, and standing still.
 function resetPlayer() {
   const spawn = getSpawnPosition();
   player.posX = spawn.x;
@@ -58,6 +65,9 @@ function resetPlayer() {
   player.dirY = 0;
   player.planeX = 0;
   player.planeY = getCameraPlaneLength();
+  player.lookAngle = 0;
+  player.stepPhase = 0;
+  player.bobAmount = 0;
   player.maxHealth = gameSettings.playerHitPoints;
   player.health = gameSettings.playerHitPoints;
   player.ammo = gameSettings.magazineSize;
@@ -70,12 +80,13 @@ function resetPlayer() {
 // D-06b: health never goes below zero, and zero health means defeat.
 // D-16c1: god mode, from the admin panel, ignores every damage.
 // D-27c: returns true when the health dropped, so the damage flash starts in
-// the same frame.
+// the same frame. D-41d: the player's grunt plays in that frame too.
 function damagePlayer(player, amount) {
   if (gameSettings.godMode || amount <= 0) {
     return false;
   }
   player.health = Math.max(0, player.health - amount);
+  playSound("playerHit");
   return true;
 }
 
@@ -88,12 +99,18 @@ function canFireShot(player) {
   return !player.reloading && player.ammo > 0 && player.shotCooldown <= 0;
 }
 
+// D-41d: a shot plays the blast; pulling the trigger on an empty magazine
+// plays a dry click instead (not while reloading: the reload is heard)
 function tryFire(player) {
   if (!canFireShot(player)) {
+    if (player.ammo === 0 && !player.reloading) {
+      playSound("dryFire");
+    }
     return false;
   }
   player.ammo -= 1;
   player.shotCooldown = shotCooldownDuration;
+  playSound("shot");
   return true;
 }
 
@@ -104,6 +121,7 @@ function updateShotCooldown(player, deltaTime) {
 
 // D-08: reload only tops up an incomplete magazine. D-16c1: it spends one
 // reload of the allowance, which is Infinity unless the admin panel limits it.
+// D-41d: the reload sound lasts about the 0.96 s of the reload.
 function startReload(player) {
   if (player.reloading || player.ammo >= gameSettings.magazineSize || player.reloadsLeft <= 0) {
     return false;
@@ -111,6 +129,7 @@ function startReload(player) {
   player.reloadsLeft -= 1;
   player.reloading = true;
   player.reloadTime = 0;
+  playSound("reload");
   return true;
 }
 
@@ -228,8 +247,10 @@ function requestMouseCapture(target) {
 // ticker spends the sum once per frame with consumeTurn(). The listeners go on
 // the game frame, so clicks on the admin panel never reach them. D-36a: clicks
 // on the menu screens do not capture, so the browser shows no capture notice.
+// D-40b: the vertical movement adds up the same way, spent with consumeLook().
 function createMouseTurnInput(page, gameTarget) {
   let turnPixels = 0;
+  let lookPixels = 0;
 
   gameTarget.addEventListener("mousedown", (event) => {
     if (isOnGameScreen(event)) {
@@ -243,6 +264,7 @@ function createMouseTurnInput(page, gameTarget) {
   gameTarget.addEventListener("mousemove", (event) => {
     if (page.pointerLockElement === gameTarget) {
       turnPixels += event.movementX;
+      lookPixels += event.movementY;
     }
   });
 
@@ -250,6 +272,11 @@ function createMouseTurnInput(page, gameTarget) {
     consumeTurn() {
       const pixels = turnPixels;
       turnPixels = 0;
+      return pixels;
+    },
+    consumeLook() {
+      const pixels = lookPixels;
+      lookPixels = 0;
       return pixels;
     },
   };
@@ -346,8 +373,28 @@ function turnPlayerWithMouse(player, movementX) {
   }
 }
 
+// D-40b / TDD 2.2 and 3.4: the vertical mouse movement tilts the look with the
+// same sensitivity as the turn, so one mouse pixel moves the view the same
+// angle up as sideways. Moving the mouse up (negative movementY) looks up. The
+// angle stops at maxLookAngle either way; with the setting off it stays level.
+function lookPlayerWithMouse(player, movementY) {
+  if (movementY === 0 || !gameSettings.verticalLook) {
+    return;
+  }
+  const angle = player.lookAngle - getMouseTurnAngle(movementY, gameSettings.mouseSensitivity);
+  player.lookAngle = Math.min(Math.max(angle, -maxLookAngle), maxLookAngle);
+}
+
+// D-40b / D-40c: how many cells the aimed line climbs per cell along dir, the
+// tangent of the look angle. pitch is this times screenHeight (TDD 3.4).
+function getLookSlope(player) {
+  return Math.tan(player.lookAngle);
+}
+
 // TDD 6.6: rotate the camera, move along dir and to its side, and slide along
 // walls by axis. D-16c1: the turn speed is the admin setting, in degrees per second.
+// D-40d: returns the distance actually walked, after the collisions, which
+// moves the footstep bob.
 function updatePlayer(player, pressedControls, deltaTime) {
   const turn = Number(pressedControls.has("turnRight")) - Number(pressedControls.has("turnLeft"));
   const rotation = turn * getRotationPerTick(gameSettings.turnSpeed) * deltaTime;
@@ -363,7 +410,7 @@ function updatePlayer(player, pressedControls, deltaTime) {
   // their magnitude), so W and D at once are not faster than W alone
   const inputLength = Math.sqrt(forward * forward + sideways * sideways);
   if (inputLength === 0) {
-    return;
+    return 0;
   }
   const step = moveSpeed * deltaTime / inputLength;
 
@@ -374,6 +421,8 @@ function updatePlayer(player, pressedControls, deltaTime) {
 
   // Each axis moves on its own, so a blocked axis still lets the other slide.
   // D-27b: enemies block the player like walls.
+  const startX = player.posX;
+  const startY = player.posY;
   const newX = player.posX + moveX;
   if (moveX !== 0 && canStandAt(newX, player.posY) && keepsDistanceFromEnemies(player.posX, player.posY, newX, player.posY)) {
     player.posX = newX;
@@ -382,6 +431,74 @@ function updatePlayer(player, pressedControls, deltaTime) {
   if (moveY !== 0 && canStandAt(player.posX, newY) && keepsDistanceFromEnemies(player.posX, player.posY, player.posX, newY)) {
     player.posY = newY;
   }
+  return Math.hypot(player.posX - startX, player.posY - startY);
+}
+
+// D-40d / TDD 6.6: the footstep bob. The step phase advances with the distance
+// actually walked, one step per footstepLength cells, so sliding along a wall
+// bobs less and pushing against it does not bob. It wraps at 2: one stride,
+// left step and right step. bobAmount grows to 1 while walking and drops to 0
+// standing still, both in footstepEaseTime seconds, so the bob never jumps.
+// With the setting off bobAmount stays at 0 and the view is the one without
+// bob. D-41d: a foot strikes the floor at each whole phase, and plays its
+// step; the phase keeps counting with the bob off, so the steps are still heard.
+function updateFootstepBob(player, walked, deltaTime) {
+  const phase = player.stepPhase + walked / footstepLength;
+  if (Math.floor(phase) > Math.floor(player.stepPhase)) {
+    // Phase 1 ends the first step of the stride, so the left foot lands
+    playSound(Math.floor(phase) === 1 ? "footstepLeft" : "footstepRight");
+  }
+  player.stepPhase = phase % 2;
+  if (!gameSettings.footstepBob) {
+    player.bobAmount = 0;
+    return;
+  }
+  const target = walked > 0 ? 1 : 0;
+  const change = deltaTime / 60 / footstepEaseTime;
+  if (player.bobAmount < target) {
+    player.bobAmount = Math.min(target, player.bobAmount + change);
+  } else {
+    player.bobAmount = Math.max(target, player.bobAmount - change);
+  }
+}
+
+// D-40d: how far down the step is, from 0 to 1. cos² of the phase is 1 at each
+// foot strike (whole phases) and 0 halfway between two strikes.
+function getStepDip(player) {
+  const strike = Math.cos(Math.PI * player.stepPhase);
+  return player.bobAmount * strike * strike;
+}
+
+// D-40d: how far to the side the step is, from -1 to 1. sin of the phase is
+// positive during the first step of the stride (right foot in support) and
+// negative during the second (left foot): one side to side cycle per stride.
+function getStepSway(player) {
+  return player.bobAmount * Math.sin(Math.PI * player.stepPhase);
+}
+
+// D-40 / TDD 3.4 and 6.8: the camera the 3D view is drawn with. It holds the
+// player's six numbers plus Lode's pitch (pixels the horizon moves down to look
+// up) and posZ (how far the eye is above its rest height, in pixels: cells
+// times screenHeight). Created once (TDD 6.4) and updated every frame.
+function createDrawingCamera() {
+  return { posX: 0, posY: 0, dirX: 1, dirY: 0, planeX: 0, planeY: 0, pitch: 0, posZ: 0 };
+}
+
+// D-40b / D-40d / TDD 6.6: copies the player, turns the look angle into pitch
+// and the step into posZ, and moves the ray origin sideways along the unit
+// side direction (-dirY, dirX), where plane points. Only the drawing uses this
+// camera: pos, the collisions, the minimap and the shot keep the player's.
+// footstepSway is far under playerRadius, so the camera never enters a wall.
+function updateDrawingCamera(camera, player) {
+  const sway = footstepSway * getStepSway(player);
+  camera.posX = player.posX - player.dirY * sway;
+  camera.posY = player.posY + player.dirX * sway;
+  camera.dirX = player.dirX;
+  camera.dirY = player.dirY;
+  camera.planeX = player.planeX;
+  camera.planeY = player.planeY;
+  camera.pitch = screenHeight * getLookSlope(player);
+  camera.posZ = -footstepDip * getStepDip(player) * screenHeight;
 }
 
 // D-27b / TDD 6.6: a move is refused when it ends closer than enemyStopDistance

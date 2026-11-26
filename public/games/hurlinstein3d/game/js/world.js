@@ -223,9 +223,10 @@ function removeAllEnemies() {
 }
 
 // D-17a / TDD 2.3.4: a new game discards the whole world (chunks, lights,
-// enemies and their per-cell registry), then puts the player back at a fresh
-// spawn. A new game is a new session, so the next chunk (0, 0) is generated
-// again with a brand new map.
+// enemies and their per-cell registry, the falling enemies of D-39c, the
+// stains and drops of D-39d and D-39f, and the projectiles), then puts the
+// player back at a fresh spawn. A new game is a
+// new session, so the next chunk (0, 0) is generated again with a brand new map.
 function resetGame(seed) {
   if (seed !== undefined && seed !== null && seed !== "") {
     worldSeed = Number(seed) >>> 0;
@@ -237,10 +238,14 @@ function resetGame(seed) {
   lightsByChunk.clear();
   roomsByChunk.clear();
   removeAllEnemies();
+  clearDyingEnemies();
+  clearStains();
+  clearBloodDrops();
   spawnRoomCenter = null;
   nextEnemyId = 1;
   resetKillCount();
   resetGameTime();
+  clearProjectiles();
   resetPlayer();
 }
 
@@ -319,9 +324,11 @@ function addEnemyAtCell(cellX, cellY) {
 // D-19c and D-38 / TDD 2.3.2: one boss at a time. It appears like a regular
 // enemy, in a room of a door neighbor, hidden from the player. With a boss
 // already alive (the admin button) that same boss is brought there instead.
+// D-41d: the boss announces itself with a roar heard from anywhere.
 function spawnBoss(player) {
   const cell = takeBossSpawnCell(player);
   const liveBoss = findBoss();
+  playSound("bossAppear");
   if (liveBoss !== null) {
     moveEnemyToCell(liveBoss, cell.x, cell.y);
     return liveBoss;

@@ -133,6 +133,9 @@ function moveEnemyToCell(enemy, cellX, cellY) {
 
 // D-27c: the hit points the active enemies take from the player this frame
 function getContactDamage(player, deltaTime) {
+  if (isBossFalling()) {
+    return 0;
+  }
   let damage = 0;
   for (const enemies of getActiveEnemyLists(player)) {
     for (const enemy of enemies) {
@@ -251,10 +254,12 @@ function choosePatrolNeighbour(enemy) {
   return options[Math.floor(gameRandom() * options.length)];
 }
 
+// D-41d: an enemy that spots the player growls once, as it starts the chase
 function updatePatrol(enemy, player, deltaTime) {
   if (hasLineOfSight(enemy, player)) {
     enemy.state = "chase";
     enemy.stateTime = 0;
+    playEnemySound("enemyAlert", enemy, player);
     return;
   }
   const target = enemy.patrolTargetIsB ? enemy.patrolB : enemy.patrolA;
@@ -385,56 +390,97 @@ function removeEnemyFromChunk(enemy) {
   }
 }
 
-// TDD 2.3.1 / D-07a: the shot is the center ray (cameraX 0, rayDir equal to dir).
-// The DDA gives the distance to the first wall once; the nearest enemy whose body
-// crosses the ray, closer than that wall, dies instantly. No projectile flies.
-function shootCenterRay(player) {
-  const ray = castRay(player.posX, player.posY, player.dirX, player.dirY);
-  const wallDistance = ray.hit ? ray.perpWallDist : maxRayDistance;
-
-  let target = null;
-  let targetDistance = Infinity;
-  for (const enemies of enemiesByChunk.values()) {
-    for (const enemy of enemies) {
-      const offsetX = enemy.posX - player.posX;
-      const offsetY = enemy.posY - player.posY;
-      const along = offsetX * player.dirX + offsetY * player.dirY;
-      if (along <= 0 || along >= wallDistance || along >= targetDistance) {
-        continue;
-      }
-      const lateral = Math.hypot(
-        offsetX - along * player.dirX,
-        offsetY - along * player.dirY,
-      );
-      if (lateral <= enemy.width / 2) {
-        target = enemy;
-        targetDistance = along;
-      }
-    }
+// D-13b / D-42: one projectile hit (TDD 2.3.1). The enemy loses one point of
+// health and, at zero, it leaves play, starts to fall and is counted (or wins
+// the game). D-39f: a hit sprays a few drops and a death sprays more.
+// D-41d / D-41f: each plays its sound from where the enemy is.
+function damageEnemy(target, player) {
+  target.health -= 1;
+  if (target.health > 0) {
+    sprayBlood(target, player, bloodDropsPerHit);
+    playEnemySound("enemyHit", target, player);
+    return;
   }
-
-  if (target !== null) {
-    target.health -= 1;
-    if (target.health <= 0) {
-      removeEnemy(target);
-      if (target.isBoss) {
-        // D-19d: killing the boss wins the game
-        setGameState(gameStateVictory);
-      } else {
-        addKill();
-        // D-19c: the last regular enemy spawns the boss. D-38: a live boss
-        // stays where it is; killing it ends the game, so it spawns once.
-        if (getKillCount() >= gameSettings.enemiesPerGame && findBoss() === null) {
-          spawnBoss(player);
-        }
-      }
-    }
+  removeEnemy(target);
+  startEnemyDeath(target);
+  sprayBlood(target, player, bloodDropsPerDeath);
+  playEnemySound("enemyDeath", target, player);
+  if (target.isBoss) {
+    // D-19d / D-39c: killing the boss wins the game. updateDyingEnemies shows
+    // the victory screen once the boss lies on the floor.
+    return;
   }
-  return target;
+  addKill();
+  // D-19c: the last regular enemy spawns the boss. D-38: a live boss stays
+  // where it is; killing it ends the game, so it spawns once.
+  if (getKillCount() >= gameSettings.enemiesPerGame && findBoss() === null) {
+    spawnBoss(player);
+  }
+}
+
+// D-41d / D-41f: an enemy sound placed at the enemy, quieter with distance and
+// panned to its side. The boss plays the same sounds slower, so deeper.
+function playEnemySound(name, enemy, player) {
+  playSoundAt(name, enemy.posX, enemy.posY, player, { rate: enemy.isBoss ? bossSoundRate : 1 });
 }
 
 // A hit removes the enemy from its cell and its chunk.
 function removeEnemy(enemy) {
   removeEnemyFromCell(enemy);
   removeEnemyFromChunk(enemy);
+}
+
+// D-39c / TDD 2.3.1: a killed enemy leaves its cell and its chunk in the frame
+// it dies, so it blocks nothing, hits nothing and takes no shots. It moves to
+// this list, which is only drawn: it falls where it died, one death frame
+// every 0.2 s (1 s in all), lies 2 s on the last frame, fading out in the last
+// half second, and leaves the list. Times are 60 Hz ticker units, like deltaTime.
+const enemyDeathFrameTicks = 0.2 * ticksPerSecond;
+const enemyDeathTicks = enemyDeathFrameCount * enemyDeathFrameTicks;
+const enemyCorpseTicks = 2 * ticksPerSecond;
+const enemyCorpseFadeTicks = 0.5 * ticksPerSecond;
+const dyingEnemies = [];
+
+// D-39d: the enemy leaves a stain in the cell where it dies, kept for the session
+function startEnemyDeath(enemy) {
+  dyingEnemies.push({ enemy, time: 0 });
+  addStain(Math.floor(enemy.posX), Math.floor(enemy.posY));
+}
+
+// D-39c: the death frame for the time since the kill, held on the last one
+function getDeathFrame(time) {
+  return Math.min(Math.floor(time / enemyDeathFrameTicks), enemyDeathFrameCount - 1);
+}
+
+// D-39c: 1 until the last half second of the corpse, then down to 0
+function getCorpseAlpha(time) {
+  const endTime = enemyDeathTicks + enemyCorpseTicks;
+  return Math.min(Math.max((endTime - time) / enemyCorpseFadeTicks, 0), 1);
+}
+
+// D-39c: advances every fall and drops the ones that faded out. The boss wins
+// the game when it lies on the floor, so the victory screen waits for its fall.
+// Walked backwards, so removing an entry never skips the next one.
+function updateDyingEnemies(deltaTime) {
+  for (let index = dyingEnemies.length - 1; index >= 0; index -= 1) {
+    const dying = dyingEnemies[index];
+    dying.time += deltaTime;
+    if (dying.enemy.isBoss && dying.time >= enemyDeathTicks) {
+      setGameState(gameStateVictory);
+    }
+    if (dying.time >= enemyDeathTicks + enemyCorpseTicks) {
+      dyingEnemies.splice(index, 1);
+    }
+  }
+}
+
+// D-39c: the kill already won the game, so while the boss falls no enemy
+// hits the player
+function isBossFalling() {
+  return dyingEnemies.some((dying) => dying.enemy.isBoss);
+}
+
+// D-39c / TDD 2.3.4: a new game discards the falls of the last one
+function clearDyingEnemies() {
+  dyingEnemies.length = 0;
 }

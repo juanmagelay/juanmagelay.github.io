@@ -43,6 +43,34 @@ function getAimedShotgunX() {
   return screenWidth / 2 - (horizonX - shotgunFrameWidth / 2) * scale;
 }
 
+// D-40e / TDD 2.3.3: the shotgun bobs with the steps of D-40d, in screen
+// heights: it dips 1.5% at each foot strike and swings 2% toward the foot in
+// support, one side to side cycle per stride, in step with the camera.
+const shotgunBobDip = 0.015;
+const shotgunBobSway = 0.02;
+
+// D-40e: the bob offsets in pixels, x to the right and y down. They follow
+// getStepSway and getStepDip, so they never pass their limits, they fade out
+// with bobAmount standing still and they are 0 with the bob setting off.
+function getShotgunBobX(player) {
+  return shotgunBobSway * screenHeight * getStepSway(player);
+}
+
+function getShotgunBobY(player) {
+  return shotgunBobDip * screenHeight * getStepDip(player);
+}
+
+// D-40e: every frame while playing, the gun goes back to its aimed place
+// (D-07c) plus the bob. At rest the offsets are 0 and the barrel still crosses
+// the crosshair. Only the position moves, so the fire and reload frames keep
+// playing while walking.
+function placeShotgun(shotgun, player) {
+  shotgun.sprite.position.set(
+    getAimedShotgunX() + getShotgunBobX(player),
+    screenHeight + getShotgunBobY(player)
+  );
+}
+
 // Slices the strip into one canvas per frame. The strip is a data URI, so the
 // canvas is never tainted and can be read back (TDD 6.1).
 function loadShotgunFrames(dataUri) {

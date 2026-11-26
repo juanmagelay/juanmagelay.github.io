@@ -27,7 +27,7 @@ async function requestRanking(path, options) {
   try {
     response = await fetch(rankingApiBase + path, options);
   } catch (error) {
-    throw new Error("No se pudo contactar la API");
+    throw new Error("Could not reach the ranking server");
   }
   const body = await response.json().catch(() => null);
   if (!response.ok) {

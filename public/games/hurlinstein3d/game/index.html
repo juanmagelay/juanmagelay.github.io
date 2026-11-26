@@ -818,6 +818,16 @@
       cursor: pointer;
     }
 
+    /* D-41c: the volume sliders, in the amber of the lamps */
+    .admin-field input[type="range"] {
+      height: 16px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      accent-color: var(--amber);
+      cursor: pointer;
+    }
+
     .admin-field input:disabled {
       opacity: 0.4;
       cursor: not-allowed;
@@ -969,10 +979,11 @@
           <li><span class="key">S / Down</span>Move backward</li>
           <li><span class="key">A / D</span>Strafe left / right</li>
           <li><span class="key">Left / Right</span>Turn</li>
-          <li><span class="key">Mouse</span>Turn</li>
+          <li><span class="key">Mouse</span>Turn and look up or down</li>
           <li><span class="key">Space / Click</span>Fire</li>
           <li><span class="key">R / Right click</span>Reload</li>
           <li><span class="key">Esc</span>Release the mouse</li>
+          <li><span class="key">M</span>Mute sound</li>
           <li><span class="key">P</span>Admin panel</li>
         </ul>
         <button id="controls-back" class="menu-button" type="button">Back</button>
@@ -986,11 +997,13 @@
           <li>Simulación I · Licenciatura en Desarrollo de Videojuegos y Simulación</li>
           <li>Universidad Nacional de Hurlingham (UNAHUR)</li>
           <li>Professor: Facundo Toufick Saiegh</li>
-          <li class="credits-assets">PixiJS 8.21.0, MIT license</li>
+          <li class="credits-assets">PixiJS 8.21.0 and pixi-filters 6.1.5, MIT license</li>
           <li>Lucide icons 1.77.0, ISC license</li>
           <li>Husk Mutant by HorrorMovieRei, CC0</li>
           <li>FPS Gun Sprites by Rekkimaru, free for any use</li>
           <li>UI BARS by guilemus, free for commercial use</li>
+          <li>Sounds by the Free Firearm Sound Library, JumboSizedFish, zer0_sol, artisticdude, qubodup, Fantozzi, trazzz123 and Kenney, CC0</li>
+          <li>Music: Menacing Otherworld by Ruskerdax and Boss Battle #7 by nene; stings by cynicmusic and Robin Lamb, CC0</li>
           <li>Hurlinstein3D logo by Juan Manuel Gelay, made with Gemini Pro</li>
         </ul>
         <button id="credits-back" class="menu-button" type="button">Back</button>
@@ -1092,6 +1105,36 @@
           <input type="checkbox" data-setting="godMode">
           God mode
         </label>
+        <label class="admin-check">
+          <input type="checkbox" data-setting="verticalLook">
+          Vertical look
+        </label>
+        <label class="admin-check">
+          <input type="checkbox" data-setting="footstepBob">
+          Footstep bob
+        </label>
+      </fieldset>
+      <fieldset class="admin-group">
+        <legend>Sound</legend>
+        <label class="admin-field">
+          <span>Master volume (%)</span>
+          <input type="range" data-setting="masterVolume">
+          <small data-setting-value="masterVolume"></small>
+        </label>
+        <label class="admin-field">
+          <span>Music (%)</span>
+          <input type="range" data-setting="musicVolume">
+          <small data-setting-value="musicVolume"></small>
+        </label>
+        <label class="admin-field">
+          <span>Effects (%)</span>
+          <input type="range" data-setting="effectsVolume">
+          <small data-setting-value="effectsVolume"></small>
+        </label>
+        <label class="admin-check">
+          <input type="checkbox" data-setting="soundMuted">
+          Mute (M)
+        </label>
       </fieldset>
       <fieldset class="admin-group">
         <legend>Raycasting</legend>
@@ -1140,11 +1183,14 @@
   <script src="js/random.js"></script>
   <script src="js/mapgen.js"></script>
   <script src="js/world.js"></script>
+  <script src="js/blood.js"></script>
   <script src="js/player.js"></script>
   <script src="js/raycaster.js"></script>
   <script src="js/enemy-sheet.js"></script>
   <script src="js/renderer.js"></script>
   <script src="js/enemies.js"></script>
+  <script src="js/projectiles.js"></script>
+  <script src="js/particles.js"></script>
   <script src="js/minimap.js"></script>
   <script src="js/hud.js"></script>
   <script src="js/weapon-sheet.js"></script>
@@ -1154,6 +1200,8 @@
   <script src="js/screens.js"></script>
   <script src="js/logo-sheet.js"></script>
   <script src="js/ranking.js"></script>
+  <script src="js/sound-sheet.js"></script>
+  <script src="js/audio.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

@@ -58,6 +58,38 @@ function createMenuNavigation(target) {
     const currentIndex = buttons.indexOf(target.activeElement);
     const nextIndex = getNextMenuButtonIndex(currentIndex, buttons.length, direction);
     buttons[nextIndex].focus();
+    // D-41e: the keyboard focus ticks like the mouse over a button
+    playSound("uiFocus");
+  });
+}
+
+// D-41e / TDD 2.3.7: the enabled button of a full screen under an event, or null
+function getScreenButton(eventTarget) {
+  if (!eventTarget || typeof eventTarget.closest !== "function") {
+    return null;
+  }
+  const button = eventTarget.closest("#game-frame .screen button");
+  return button !== null && !button.disabled ? button : null;
+}
+
+// D-41e: the buttons of the full screens tick when the mouse enters one and
+// click when pressed, with the mouse, Enter or Space. pointerover also fires
+// between the parts of one button, so only a new button ticks.
+function createButtonSounds(gameFrame) {
+  let hoveredButton = null;
+  gameFrame.addEventListener("pointerover", (event) => {
+    const button = getScreenButton(event.target);
+    if (button !== hoveredButton) {
+      hoveredButton = button;
+      if (button !== null) {
+        playSound("uiFocus");
+      }
+    }
+  });
+  gameFrame.addEventListener("click", (event) => {
+    if (getScreenButton(event.target) !== null) {
+      playSound("uiClick");
+    }
   });
 }
 

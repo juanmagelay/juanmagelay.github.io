@@ -27,10 +27,13 @@ const settingDefinitions = {
   unlimitedReloads: { defaultValue: true },
   reloadLimit: { defaultValue: 5, min: 0, max: 99 },
   // Player: arrow turn speed in degrees per second, mouse sensitivity in
-  // degrees per 100 px of mouse movement (D-12c, TDD 2.2), and no damage
+  // degrees per 100 px of mouse movement (D-12c, TDD 2.2), no damage, and the
+  // vertical look with the mouse (D-40b) and the footstep bob (D-40d)
   turnSpeed: { defaultValue: 120, min: 30, max: 360 },
   mouseSensitivity: { defaultValue: 20, min: 5, max: 100 },
   godMode: { defaultValue: false },
+  verticalLook: { defaultValue: true },
+  footstepBob: { defaultValue: true },
   // Raycasting (D-16e): pixels per ray (TDD 6.5), walls drawn with the
   // Euclidean distance (TDD 3.4) and the rays drawn on the minimap. The first
   // strip width option is the narrowest, the last the widest (js/config.js).
@@ -39,7 +42,16 @@ const settingDefinitions = {
   minimapRays: { defaultValue: false },
   // Procedural generation (D-16f): chunk borders on the minimap
   chunkBorders: { defaultValue: false },
+  // Sound (D-41c, TDD 2.3.7): master, music and effects volume from 0 to 100,
+  // and the mute, also on the M key, which keeps the three volumes
+  masterVolume: { defaultValue: 80, min: 0, max: 100 },
+  musicVolume: { defaultValue: 60, min: 0, max: 100 },
+  effectsVolume: { defaultValue: 80, min: 0, max: 100 },
+  soundMuted: { defaultValue: false },
 };
+
+// D-41c: the settings that change the audio volumes
+const soundSettingNames = ["masterVolume", "musicVolume", "effectsVolume", "soundMuted"];
 
 function getDefaultSettings() {
   const settings = {};

@@ -376,8 +376,10 @@ for (const file of pages) {
 }
 
 // Issue #18: Hurlinstein3D shows its promotional art as its main image, its logo without a background and, further
-// down, a screenshot of the game.
+// down, screenshots of the game (issue #20).
 const HURLINSTEIN = 'hurlinstein3d';
+// The five screenshots of the game, by file name.
+const SCREENSHOTS = ['boss', 'enemy', 'corridor', 'admin-panel', 'blood-stain'];
 
 // The figures in the body of a game page: the <figure> tag and its <img>.
 const bodyFigures = (html) =>
@@ -436,14 +438,55 @@ for (const lang of LANGS) {
     translated('logo');
   });
 
-  // Scenario: la captura sigue en la página, más abajo.
-  test(`${path}: the screenshot of the game is still on the page, after the logo`, { skip }, () => {
+  // Issue #20: the five screenshots of the finished game replace the one with brick walls, each next to the text it shows.
+  // Scenario: las capturas del juego actual acompañan el texto.
+  test(`${path}: the screenshots of the current game go along the text, large, with alt text in the page's language`, { skip }, () => {
     const names = bodyFigures(html).map((figure) => stem(attribute(figure.img, 'src')));
-    assert.deepEqual(names, ['promo', 'logo', 'screenshot']);
-    assert.ok(attribute(figureOf(html, 'screenshot').img, 'alt')?.trim(), 'The screenshot has no alt text');
-    translated('screenshot');
+    assert.deepEqual(names, ['promo', 'boss', 'logo', 'enemy', 'corridor', 'admin-panel', 'blood-stain']);
+    for (const name of SCREENSHOTS) {
+      const figure = figureOf(html, name);
+      assert.ok(attribute(figure.img, 'alt')?.trim(), `${name} has no alt text`);
+      assert.ok(isLarge(figure), `${name} is not shown at 832px`);
+      translated(name);
+    }
+  });
+
+  // Scenario: los controles de la página son los de la pantalla Controls del juego.
+  test(`${path}: the controls are the game's Controls screen, word for word`, { skip }, () => {
+    const list = pageList(html, '<kbd>');
+    const controls = [...list.matchAll(/<li>\s*<kbd>([\s\S]*?)<\/kbd>([\s\S]*?)<\/li>/g)].map(([, key, action]) => [
+      stripTags(key),
+      stripTags(action).replace(/^:\s*/, ''),
+    ]);
+    assert.deepEqual(controls, gameScreen('controls-list').map((item) => item.match(/<span class="key">([\s\S]*?)<\/span>([\s\S]*)/).slice(1).map(stripTags)));
+  });
+
+  // Scenario: los créditos de la página son los de la pantalla Credits del juego.
+  test(`${path}: the credits are the game's Credits screen, word for word`, { skip }, () => {
+    const credits = [...pageList(html, 'Universidad Nacional de Hurlingham').matchAll(/<li>([\s\S]*?)<\/li>/g)].map(([, item]) => stripTags(item));
+    assert.deepEqual(credits, gameScreen('credits-list').map(stripTags));
   });
 }
+
+// The first <ul> in the body of a built page that contains a piece of text.
+function pageList(html, text) {
+  const body = html.slice(html.indexOf('class="prose"'), html.indexOf('</article>'));
+  return [...body.matchAll(/<ul\b[^>]*>([\s\S]*?)<\/ul>/g)].map(([, list]) => list).find((list) => list.includes(text)) ?? '';
+}
+
+// The items of a list on one of the game's screens, as published in its copy.
+function gameScreen(listClass) {
+  const game = readFileSync(join(root, 'public/games', HURLINSTEIN, 'game/index.html'), 'utf8');
+  const list = game.match(new RegExp(`<ul class="[^"]*\\b${listClass}\\b[^"]*">([\\s\\S]*?)</ul>`))?.[1] ?? '';
+  return [...list.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/g)].map(([, item]) => item);
+}
+
+// Scenario: la copia no redistribuye el pack UI BARS, porque su licencia no lo permite.
+test('the copy of Hurlinstein3D does not redistribute the UI BARS pack', () => {
+  const folder = join(root, 'public/games', HURLINSTEIN, 'game/assets/ui-bars');
+  const images = existsSync(folder) ? files(folder).filter((path) => !/\.md$/i.test(path)) : [];
+  assert.deepEqual(images, []);
+});
 
 // Issue #19: Escape de la Naranja shows the five cards of its story in a grid, under the section that tells it.
 const ESCAPE = 'escape-de-la-naranja';
