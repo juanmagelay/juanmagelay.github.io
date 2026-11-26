@@ -16,7 +16,7 @@ import bloodStain from '../../../assets/games/hurlinstein3d/blood-stain.png';
 
 Hurlinstein3D es un juego en primera persona en una mazmorra infinita, que se genera a medida que la explorás. **Para que aparezca el jefe, tenés que matar a los 20 enemigos de la partida.** Si lo matás, ganás; si tu vida llega a cero, perdés.
 
-Los enemigos patrullan y te persiguen cuando te ven, y te sacan vida por contacto. Al morir, caen donde estaban y dejan una mancha de sangre en el piso. **El jefe es el mismo mutante, teñido de rojo y más grande.** Aguanta cinco disparos y por contacto te saca el doble de vida.
+Los enemigos patrullan y te persiguen cuando te ven, y te sacan vida por contacto. **El jefe es el mismo mutante, teñido de rojo y más grande.** Aguanta cinco disparos y por contacto te saca el doble de vida.
 
 <Figure
   src={boss}
@@ -24,8 +24,6 @@ Los enemigos patrullan y te persiguen cuando te ven, y te sacan vida por contact
 />
 
 Al terminar, ganes o pierdas, ves cuántos enemigos eliminaste, cuánto tiempo jugaste y tu puntaje: 100 puntos por enemigo y 1000 por el jefe. **Con tres iniciales, tu puntaje entra en un ranking online con los cinco mejores.**
-
-**El juego tiene sonido y música, con la estética de un shooter de monstruos.** En el menú suena una pista industrial y en la partida, una de metal. Los sonidos de los enemigos se oyen del lado donde están y bajan con la distancia.
 
 <Figure
   src={logo}
@@ -35,16 +33,16 @@ Al terminar, ganes o pierdas, ves cuántos enemigos eliminaste, cuánto tiempo j
 
 ## Controles
 
-- <kbd>W / Up</kbd>: Move forward
-- <kbd>S / Down</kbd>: Move backward
-- <kbd>A / D</kbd>: Strafe left / right
-- <kbd>Left / Right</kbd>: Turn
-- <kbd>Mouse</kbd>: Turn and look up or down
-- <kbd>Space / Click</kbd>: Fire
-- <kbd>R / Right click</kbd>: Reload
-- <kbd>Esc</kbd>: Release the mouse
-- <kbd>M</kbd>: Mute sound
-- <kbd>P</kbd>: Admin panel
+- <kbd>W / Flecha arriba</kbd>: Avanzar
+- <kbd>S / Flecha abajo</kbd>: Retroceder
+- <kbd>A / D</kbd>: Moverse de costado, a la izquierda / derecha
+- <kbd>Flechas izquierda / derecha</kbd>: Girar
+- <kbd>Mouse</kbd>: Girar y mirar arriba o abajo
+- <kbd>Espacio / Clic</kbd>: Disparar
+- <kbd>R / Clic derecho</kbd>: Recargar
+- <kbd>Esc</kbd>: Liberar el mouse
+- <kbd>M</kbd>: Silenciar el sonido
+- <kbd>P</kbd>: Panel de admin
 
 ## Requisitos
 
@@ -52,40 +50,24 @@ Una computadora con teclado. Chrome es el navegador recomendado. Cada vez que to
 
 ## Una demo para aprender raycasting
 
-Antes de este juego, con Alejo Hutmacher hicimos durante dos meses una demo de raycasting. Queríamos entender cómo implementar todo el [tutorial de raycasting de Lode Vandevenne](https://lodev.org/cgtutor/raycasting.html) en un juego que simula ser 3D. **El cálculo es *top down*, sobre una grilla 2D, y lo usamos como minimapa.** En el juego, el minimapa muestra 21 por 21 celdas alrededor del jugador y sirve para comprobar que el DDA coincide con la vista.
+Antes de este juego, con Alejo Hutmacher hicimos durante dos meses una demo de raycasting, y en septiembre la presentamos en clase: fue el primer parcial de Simulación I. Queríamos entender cómo implementar todo el [tutorial de raycasting de Lode Vandevenne](https://lodev.org/cgtutor/raycasting.html) en un juego que simula ser 3D. **El cálculo es *top down*, sobre una grilla 2D, y lo usamos como minimapa.** En el juego, el minimapa muestra 21 por 21 celdas alrededor del jugador y sirve para comprobar que el DDA coincide con la vista.
 
-## Los shooters de los 90 como referencia
-
-Revisamos muchos shooters de los 90, como Wolfenstein 3D, Doom y Quake. **El juego tiene dos esquemas de controles que conviven.** Las flechas solas avanzan y giran como en los juegos de raycasting de esa época, y W, A, S y D con el mouse es el esquema de los juegos en primera persona que vinieron después. La imagen pasa por un filtro CRT y el panel de admin se ve como una consola técnica de esa época.
-
-Para las texturas, **tomamos como referencia los edificios de la Universidad Nacional de Hurlingham (UNAHUR) de noche**. Se dibujan por código en un canvas oculto al arrancar, con tres variantes.
-
-<Figure
-  src={enemy}
-  alt="Un mutante de ojos amarillos, de frente y muy cerca, en un pasillo con celosías negras en las paredes y paneles blancos y una luminaria en el cielorraso. La mira está sobre su cabeza y la escopeta, abajo."
-/>
-
-## Dos algoritmos de simulación que se necesitan
+## El alcance inicial: mínimo y deseable
 
 La consigna pedía implementar dos algoritmos de simulación. **Elegimos raycasting y generación procedural de mapas, porque se necesitan mutuamente.** El raycasting convierte un mapa en grilla en una vista en primera persona, y el generador arma ese mapa a medida que lo recorrés.
 
+Con Alejo le fuimos dando forma al juego, con el feedback del profesor, Facundo Toufick Saiegh. **Dividimos el trabajo en un alcance mínimo y uno deseable.** El mínimo era recorrer una mazmorra procedural infinita, con colisiones y minimapa, en colores planos. El deseable sumaba combate, enemigos que patrullan y te persiguen, un jefe que define la victoria, texturas, iluminación, menús con ranking y un panel de admin. Hoy, Flat colors en el panel de admin vuelve el juego al mínimo: sin texturas, sin luces y con los enemigos como rectángulos.
+
+**Trabajamos por historias de usuario a partir del documento de diseño técnico (TDD).** Claude implementaba cada historia y nosotros la validábamos, la commiteábamos en develop y la pasábamos a main. El juego tiene 358 tests con el runner nativo de Node, y el render lo probamos a mano.
+
 ### Raycasting con DDA
 
-- La cámara usa los vectores dir y plane del tutorial de Lode.
-- No hay una variable de FOV: sale del largo de plane, que se ajusta a la pantalla.
+- La cámara usa los vectores dir y plane del tutorial de Lode. No hay una variable de FOV: sale del largo de plane, que se ajusta a la pantalla.
 - Se lanza un rayo por cada franja de la pantalla, y cada rayo avanza celda por celda con DDA hasta tocar una pared.
 - Las paredes se dibujan con la distancia perpendicular, que evita el efecto ojo de pez.
-- El piso y el techo usan el floor casting del mismo tutorial.
 - Los sprites de los enemigos usan un z-buffer, así las paredes que tienen adelante los tapan.
 - El costo no depende del tamaño del mundo, por eso el render funciona con una mazmorra infinita.
-- Sus límites: paredes verticales de la misma altura, alineadas a la grilla, piso y techo planos, y una mirada vertical de unos 17 grados como máximo.
-
-**El mismo DDA sirve para el disparo, la visión de los enemigos y las sombras.** Cada disparo lanza un proyectil que vuela hasta la pared que encontró el rayo central y le pega al primer enemigo que cruza, así un enemigo que se corre a tiempo lo esquiva. Los enemigos te persiguen solo si un rayo desde ellos llega hasta vos sin chocar una pared, a 24 celdas o menos. Cada sala tiene una luz en el centro, y un punto de pared se ilumina solo si un rayo llega hasta la luz.
-
-<Figure
-  src={corridor}
-  alt="Desde una sala a oscuras se ve un pasillo iluminado, con baldosas claras en el piso y una luminaria en el cielorraso, y un mutante que se asoma por la esquina. En el minimapa, el abanico de rayos llega hasta las paredes."
-/>
+- Sus límites: paredes verticales de la misma altura, alineadas a la grilla, y piso y techo planos. Al principio tampoco se podía mirar arriba ni abajo; lo sumamos después del segundo parcial.
 
 ### Mazmorra procedural por chunks
 
@@ -93,44 +75,58 @@ La consigna pedía implementar dos algoritmos de simulación. **Elegimos raycast
 - Cada chunk tiene una sala de 4 a 8 celdas por lado y cuatro puertas en el medio de cada borde, unidas a la sala por corredores. La mitad de los chunks suma una segunda sala.
 - Como cada puerta queda pegada a la del chunk vecino, desde cualquier sala se llega a cualquier otra, sin validar el mapa después.
 - Los chunks se guardan en un Map con clave de Cantor, así una zona sigue igual cuando volvés.
-- Cada partida sortea una semilla nueva, y cada chunk mezcla esa semilla con su clave, así sale igual sin importar por dónde llegaste.
-- Los enemigos nacen en las salas de los cuatro chunks que comparten una puerta con el del jugador, a más de 10 celdas, fuera del minimapa, y detrás de una pared, así nunca los ves aparecer.
-- Los enemigos vivos que quedan fuera de tu vista reaparecen a una puerta de distancia cada vez que cambiás de chunk, así no se pierden en el mapa infinito.
-- Cada enemigo que muere deja una mancha en su celda, guardada en un arreglo de 16 por 16 por chunk, como las paredes, así sigue ahí cuando volvés.
 
-### Un panel para revisar los dos algoritmos
+### Enemigos, disparo y panel de admin
 
-El panel de admin muestra los FPS, la posición, el chunk y la semilla del mundo mientras jugás. **Con la semilla y New world, el mapa y los enemigos salen idénticos.** También tiene un modo ojo de pez que dibuja las paredes con la distancia euclidiana, dibuja los rayos y los bordes de los chunks en el minimapa, y acepta hasta 100.000 enemigos para pruebas de estrés. La mirada vertical y el balanceo de los pasos se pueden apagar para volver a la vista clásica del raycasting.
+**El mismo DDA sirve para el disparo, la visión de los enemigos y las sombras.** Cada disparo lanza un proyectil que vuela hasta la pared que encontró el rayo central y le pega al primer enemigo que cruza, así un enemigo que se corre a tiempo lo esquiva. Los enemigos te persiguen solo si un rayo desde ellos llega hasta vos sin chocar una pared, a 24 celdas o menos. Cada sala tiene una luz en el centro, y un punto de pared se ilumina solo si un rayo llega hasta la luz.
+
+<Figure
+  src={corridor}
+  alt="Desde una sala a oscuras se ve un pasillo iluminado, con baldosas claras en el piso y una luminaria en el techo, y un mutante que se asoma por la esquina. En el minimapa, el abanico de rayos llega hasta las paredes."
+/>
+
+**Ningún enemigo aparece donde lo puedas ver.** Nacen en las salas de los cuatro chunks que comparten una puerta con el del jugador, a más de 10 celdas, fuera del minimapa y detrás de una pared. Los que quedan vivos y fuera de tu vista reaparecen a una puerta de distancia cada vez que cambiás de chunk, así no se pierden en el mapa infinito.
+
+**El panel de admin sirve para revisar los dos algoritmos mientras jugás.** Se ve como una consola técnica de los 90 y muestra los FPS, la posición y el chunk. Tiene un modo ojo de pez que dibuja las paredes con la distancia euclidiana, dibuja los rayos y los bordes de los chunks en el minimapa, y acepta hasta 100.000 enemigos para pruebas de estrés.
 
 <Figure
   src={adminPanel}
   alt="El panel de admin de Hurlinstein3D: arriba, los datos en vivo, como los FPS, la posición, el chunk, la vida y la semilla del mundo; abajo, las configuraciones en grupos: Game, Render, Weapon, Player, Sound, Raycasting y Procedural generation."
 />
 
-## Del alcance mínimo a la presentación
+## Primera presentación del juego, el 22 de noviembre
 
-Con Alejo le fuimos dando forma al juego, con el feedback del profesor, Facundo Toufick Saiegh. **Dividimos el trabajo en un alcance mínimo y uno deseable.** El mínimo era recorrer una mazmorra procedural infinita, con colisiones y minimapa, en colores planos. El deseable sumaba combate, enemigos que patrullan y te persiguen, un jefe que define la victoria, texturas, iluminación, menús con ranking y un panel de admin. Hoy, Flat colors en el panel de admin vuelve el juego al mínimo: sin texturas, sin luces y con los enemigos como rectángulos.
+**En la primera presentación del juego, el profesor atravesó a un enemigo.** El enemigo se le acercaba hasta ocupar su lugar, y nos pidió que dejara al menos la distancia de los cuerpos. Ahora se frena de frente a vos, a 0,5 celdas de tu centro, y vos tampoco podés atravesarlo. Te pega un punto apenas te toca y después uno por segundo, con un destello rojo desde los bordes de la pantalla.
 
-**Trabajamos por historias de usuario a partir del documento de diseño técnico (TDD).** Claude implementaba cada historia y nosotros la validábamos, la commiteábamos en develop y la pasábamos a main. El juego tiene 358 tests con el runner nativo de Node, y el render lo probamos a mano.
+**También nos pidió una semilla para el mundo, como en Minecraft.** La idea era que la misma semilla diera el mismo mundo y que los tests fueran repetibles. Como los chunks se generan en el orden en que explorás, cada uno mezcla la semilla del mundo con su clave de Cantor, así sale igual sin importar por dónde llegaste. Con la semilla y New world en el panel de admin, el mapa y los enemigos salen idénticos.
 
-**El 22 de noviembre, el profesor nos pidió una semilla para el mundo.** La pidió para que la misma semilla diera el mismo mundo, como en Minecraft, y los tests fueran repetibles.
+Por nuestra parte, sumamos ideas de los shooters de los 90 que habíamos revisado, como Wolfenstein 3D, Doom y Quake. **El juego tiene dos esquemas de controles que conviven.** Las flechas solas avanzan y giran como en los juegos de raycasting de esa época, y W, A, S y D con el mouse es el esquema de los juegos en primera persona que vinieron después. La imagen pasa por un filtro CRT.
 
-**Lo presentamos el 24 de noviembre de 2026, con todo el alcance deseable adentro.** Fue el primer parcial de Simulación I.
+Para las texturas, **tomamos como referencia los edificios de la Universidad Nacional de Hurlingham (UNAHUR) de noche**. Se dibujan por código en un canvas oculto al arrancar, con tres variantes de pared. El piso y el techo pasaron a usar el floor casting del tutorial de Lode, con baldosas y paneles alineados a la grilla, y cada luz se ve como una luminaria en el techo.
 
-## Lo que sumamos después de la presentación
+<Figure
+  src={enemy}
+  alt="Un mutante de ojos amarillos, de frente y muy cerca, en un pasillo con celosías negras en las paredes y paneles blancos y una luminaria en el techo. La mira está sobre su cabeza y la escopeta, abajo."
+/>
 
-**El mismo día de la presentación, el profesor nos pidió seis cambios más.** Una animación de muerte para los enemigos, una mancha de sangre, que la celda de la mancha quedara guardada, ver si encajaban partículas, mirar arriba y abajo con un balanceo de los pasos como al correr, y sonido y música.
+## Segunda presentación del juego, el 24 de noviembre
+
+**Lo presentamos el 24 de noviembre de 2026, con todo el alcance deseable adentro.** Fue el segundo parcial de Simulación I. Ese mismo día, el profesor nos pidió seis cambios más: una animación de muerte para los enemigos, una mancha de sangre, que la celda de la mancha quedara guardada, ver si encajaban partículas, mirar arriba y abajo con un balanceo de los pasos como al correr, y sonido y música.
+
+**Ahora cada enemigo cae donde murió y deja una mancha en el piso.** Sale del juego en el cuadro del último impacto, así ya no bloquea ni pega, y lo que queda es su imagen: cae con los cinco cuadros de muerte de su sprite, queda tendido dos segundos y se desvanece. La mancha se guarda en su celda, en un arreglo de 16 por 16 por chunk, como las paredes, así sigue ahí cuando volvés, y el minimapa la marca con un punto rojo.
 
 **El chorro de sangre es un sistema de partículas con el método de Euler.** Cada impacto que no mata lanza 6 gotas y cada muerte, 24. En cada cuadro, la gravedad se suma a la velocidad y la velocidad a la posición, las dos multiplicadas por deltaTime, que hace de paso. Las gotas no dejan mancha: la mancha sale de la celda donde murió el enemigo.
 
 <Figure
   src={bloodStain}
-  alt="Una mancha de sangre sobre las baldosas del piso, en un pasillo con celosías negras en las paredes y paneles en el cielorraso. Arriba a la izquierda, KILLS 2 / 3."
+  alt="Una mancha de sangre sobre las baldosas del piso, en un pasillo con celosías negras en las paredes y paneles en el techo. Arriba a la izquierda, KILLS 2 / 3."
 />
 
-**Para mirar arriba y abajo, el horizonte sube o baja y las paredes siguen verticales.** Lo hicimos con el pitch de la parte de floor casting del tutorial de Lode, una técnica que se llama *y-shearing*. Pasado un ángulo chico se nota que la imagen se desliza, por eso la mirada llega a unos 17 grados. Los pasos bajan el ojo en cada pisada y corren la cámara hacia el pie de apoyo, y la escopeta se balancea con ellos. El disparo sigue la altura de la mira: si apuntás por encima de un enemigo, el proyectil pasa de largo.
+**Para mirar arriba y abajo, el horizonte sube o baja y las paredes siguen verticales.** En el primer parcial, con la demo, lo habíamos mostrado como uno de los límites que Wolfenstein 3D aceptaba a cambio de velocidad. Lo resolvimos con el pitch de la parte de floor casting del tutorial de Lode, una técnica que se llama *y-shearing*. Pasado un ángulo chico se nota que la imagen se desliza, por eso la mirada llega a unos 17 grados. Los pasos bajan el ojo en cada pisada y corren la cámara hacia el pie de apoyo, y la escopeta se balancea con ellos. El disparo sigue la altura de la mira: si apuntás por encima de un enemigo, el proyectil pasa de largo. La mirada vertical y el balanceo se pueden apagar en el panel de admin para volver a la vista clásica del raycasting.
 
-**Los sonidos y la música tienen licencia CC0 y van embebidos en el juego.** Vienen de OpenGameArt y Kenney, y cada efecto se recortó y se normalizó a un mismo volumen. Van como data URI, igual que los sprites, porque el juego se abre con doble clic, sin servidor, y desde el disco el navegador no deja cargar archivos. El paneo de cada enemigo sale del producto punto entre la dirección hacia él y el vector plane, que apunta a la derecha del jugador: 1 a la derecha, 0 adelante y -1 a la izquierda.
+**Los sonidos y la música tienen licencia CC0 y van embebidos en el juego.** En el menú suena una pista industrial y en la partida, una de metal. Vienen de OpenGameArt y Kenney, y cada efecto se recortó y se normalizó a un mismo volumen. Van como data URI, igual que los sprites, porque el juego se abre con doble clic, sin servidor, y desde el disco el navegador no deja cargar archivos. Los sonidos de los enemigos se oyen del lado donde están: el paneo sale del producto punto entre la dirección hacia el enemigo y el vector plane, que apunta a tu derecha, y el volumen baja con la distancia.
+
+**Con todos estos cambios hicimos la presentación final, el martes 1 de diciembre.**
 
 ## Créditos
 

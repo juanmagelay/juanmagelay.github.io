@@ -24,7 +24,7 @@ import bloodStain from '../../assets/games/hurlinstein3d/blood-stain.png';
 
 Hurlinstein3D is a first-person game in an infinite dungeon that is generated as you explore it. **To make the boss appear, you have to kill all 20 enemies in the game.** If you kill it, you win; if your life reaches zero, you lose.
 
-Enemies patrol and chase you when they see you, and they take your life on contact. When they die, they fall where they stood and leave a blood stain on the floor. **The boss is the same mutant, tinted red and bigger.** It takes five shots and does twice the damage on contact.
+Enemies patrol and chase you when they see you, and they take your life on contact. **The boss is the same mutant, tinted red and bigger.** It takes five shots and does twice the damage on contact.
 
 <Figure
   src={boss}
@@ -32,8 +32,6 @@ Enemies patrol and chase you when they see you, and they take your life on conta
 />
 
 When the game ends, win or lose, you see how many enemies you killed, how long you played and your score: 100 points per enemy and 1000 for the boss. **With three initials, your score goes into an online ranking of the top five.**
-
-**The game has sound and music, in the style of a monster shooter.** An industrial track plays in the menu and a metal one during the game. Enemy sounds come from the side where they are and get quieter with distance.
 
 <Figure
   src={logo}
@@ -60,33 +58,33 @@ A computer with a keyboard. Chrome is the recommended browser. Each time you pre
 
 ## A demo to learn raycasting
 
-Before this game, Alejo Hutmacher and I spent two months on a raycasting demo. We wanted to understand how to implement the whole [raycasting tutorial by Lode Vandevenne](https://lodev.org/cgtutor/raycasting.html) in a game that simulates 3D. **The calculation is top-down, on a 2D grid, and we used it as the minimap.** In the game, the minimap shows 21 by 21 cells around the player and lets us check that the DDA matches the view.
+Before this game, Alejo Hutmacher and I spent two months on a raycasting demo, and in September we presented it in class: it was the first midterm of Simulación I. We wanted to understand how to implement the whole [raycasting tutorial by Lode Vandevenne](https://lodev.org/cgtutor/raycasting.html) in a game that simulates 3D. **The calculation is top-down, on a 2D grid, and we used it as the minimap.** In the game, the minimap shows 21 by 21 cells around the player and lets us check that the DDA matches the view.
 
-## Shooters from the nineties as references
-
-We reviewed many shooters from the nineties, such as Wolfenstein 3D, Doom and Quake. **The game has two control schemes that live side by side.** The arrows alone move and turn like the raycasting games of that time, and W, A, S and D with the mouse is the scheme of the first-person games that came later. The image goes through a CRT filter, and the admin panel looks like a technical console from that time.
-
-For the textures, **we took the buildings of the Universidad Nacional de Hurlingham (UNAHUR) at night as reference**. They are drawn in code on a hidden canvas at startup, in three variants.
-
-<Figure
-  src={enemy}
-  alt="A mutant with yellow eyes, facing you up close, in a corridor with black louvers on the walls and white panels and a light on the ceiling. The crosshair is on its head and the shotgun is below."
-/>
-
-## Two simulation algorithms that need each other
+## The initial scope: minimum and desired
 
 The assignment asked us to implement two simulation algorithms. **We chose raycasting and procedural map generation because they need each other.** Raycasting turns a grid map into a first-person view, and the generator builds that map as you walk through it.
 
+Alejo and I shaped the game step by step, with feedback from our professor, Facundo Toufick Saiegh. **We split the work into a minimum scope and a desired one.** The minimum was walking through an infinite procedural dungeon, with collisions and a minimap, in flat colors. The desired scope added combat, enemies that patrol and chase you, a boss that defines victory, textures, lighting, menus with a ranking and an admin panel. Today, Flat colors in the admin panel takes the game back to the minimum: no textures, no lights and enemies as rectangles.
+
+**We worked in user stories based on the technical design document (TDD).** Claude implemented each story, and we validated it, committed it to develop and moved it to main. The game has 358 tests with Node's built-in test runner, and we tested the render by hand.
+
 ### Raycasting with DDA
 
-- The camera uses the dir and plane vectors from Lode's tutorial.
-- There is no FOV variable: it comes from the length of plane, which adjusts to the screen.
+- The camera uses the dir and plane vectors from Lode's tutorial. There is no FOV variable: it comes from the length of plane, which adjusts to the screen.
 - One ray is cast for each strip of the screen, and each ray moves cell by cell with DDA until it hits a wall.
 - Walls are drawn with the perpendicular distance, which avoids the fisheye effect.
-- The floor and the ceiling use the floor casting from the same tutorial.
 - Enemy sprites use a z-buffer, so the walls in front of them hide them.
 - The cost does not depend on the size of the world, which is why the render works with an infinite dungeon.
-- Its limits: vertical walls of the same height, aligned to the grid, a flat floor and ceiling, and a vertical look of about 17 degrees at most.
+- Its limits: vertical walls of the same height, aligned to the grid, and a flat floor and ceiling. At first you couldn't look up or down either; we added it after the second midterm.
+
+### Procedural dungeon by chunks
+
+- The world is split into 16 by 16 cell chunks, and each one is generated only when something asks for it: a ray, a collision or the minimap.
+- Each chunk has a room of 4 to 8 cells per side and four doors in the middle of each edge, joined to the room by corridors. Half of the chunks add a second room.
+- Since each door touches the neighboring chunk's door, any room leads to any other, without validating the map afterwards.
+- Chunks are stored in a Map with a Cantor key, so an area stays the same when you come back.
+
+### Enemies, shooting and the admin panel
 
 **The same DDA is used for shooting, enemy sight and shadows.** Each shot launches a projectile that flies to the wall the center ray found and hits the first enemy it crosses, so an enemy that steps aside in time dodges it. Enemies chase you only if a ray from them reaches you without hitting a wall, within 24 cells. Each room has a light in its center, and a point on a wall is lit only if a ray reaches the light.
 
@@ -95,39 +93,35 @@ The assignment asked us to implement two simulation algorithms. **We chose rayca
   alt="From a dark room you see a lit corridor, with light floor tiles and a light on the ceiling, and a mutant peeking around the corner. On the minimap, the fan of rays reaches the walls."
 />
 
-### Procedural dungeon by chunks
+**No enemy appears where you can see it.** They are born in the rooms of the four chunks that share a door with the player's chunk, more than 10 cells away, outside the minimap and behind a wall. Those still alive and out of your sight reappear one door away each time you change chunks, so they don't get lost in the infinite map.
 
-- The world is split into 16 by 16 cell chunks, and each one is generated only when something asks for it: a ray, a collision or the minimap.
-- Each chunk has a room of 4 to 8 cells per side and four doors in the middle of each edge, joined to the room by corridors. Half of the chunks add a second room.
-- Since each door touches the neighboring chunk's door, any room leads to any other, without validating the map afterwards.
-- Chunks are stored in a Map with a Cantor key, so an area stays the same when you come back.
-- Each game draws a new seed, and each chunk mixes that seed with its key, so it comes out the same whichever way you reached it.
-- Enemies are born in the rooms of the four chunks that share a door with the player's chunk, more than 10 cells away, outside the minimap, and behind a wall, so you never see them appear.
-- Living enemies that are out of your sight reappear one door away each time you change chunks, so they don't get lost in the infinite map.
-- Each enemy that dies leaves a stain in its cell, stored in a 16 by 16 array per chunk, like the walls, so it is still there when you come back.
-
-### A panel to check both algorithms
-
-The admin panel shows the FPS, position, chunk and world seed while you play. **With the seed and New world, the map and the enemies come out identical.** It also has a fisheye mode that draws walls with the Euclidean distance, draws the rays and the chunk borders on the minimap, and takes up to 100,000 enemies for stress tests. The vertical look and the footstep bob can be turned off to go back to the classic raycasting view.
+**The admin panel is there to check both algorithms while you play.** It looks like a technical console from the nineties and shows the FPS, position and chunk. It has a fisheye mode that draws walls with the Euclidean distance, draws the rays and the chunk borders on the minimap, and takes up to 100,000 enemies for stress tests.
 
 <Figure
   src={adminPanel}
   alt="The Hurlinstein3D admin panel: at the top, the live info, such as FPS, position, chunk, health and world seed; below, the settings in groups: Game, Render, Weapon, Player, Sound, Raycasting and Procedural generation."
 />
 
-## From the minimum scope to the presentation
+## First presentation of the game, November 22
 
-Alejo and I shaped the game step by step, with feedback from our professor, Facundo Toufick Saiegh. **We split the work into a minimum scope and a desired one.** The minimum was walking through an infinite procedural dungeon, with collisions and a minimap, in flat colors. The desired scope added combat, enemies that patrol and chase you, a boss that defines victory, textures, lighting, menus with a ranking and an admin panel. Today, Flat colors in the admin panel takes the game back to the minimum: no textures, no lights and enemies as rectangles.
+**At the first presentation of the game, our professor walked through an enemy.** The enemy came so close that it took up the same space, and he asked us to keep at least the distance of their bodies. Now it stops in front of you, 0.5 cells from your center, and you can't walk through it either. It hits you for one point as soon as it touches you and then once per second, with a red flash from the edges of the screen.
 
-**We worked in user stories based on the technical design document (TDD).** Claude implemented each story, and we validated it, committed it to develop and moved it to main. The game has 358 tests with Node's built-in test runner, and we tested the render by hand.
+**He also asked us for a world seed, as in Minecraft.** The goal was that the same seed gives the same world and that the tests are repeatable. Since chunks are generated in the order you explore them, each one mixes the world seed with its Cantor key, so it comes out the same whichever way you reached it. With the seed and New world in the admin panel, the map and the enemies come out identical.
 
-**On November 22, our professor asked us for a world seed.** The goal was that the same seed gives the same world, as in Minecraft, and that the tests are repeatable.
+For our part, we added ideas from the shooters of the nineties we had reviewed, such as Wolfenstein 3D, Doom and Quake. **The game has two control schemes that live side by side.** The arrows alone move and turn like the raycasting games of that time, and W, A, S and D with the mouse is the scheme of the first-person games that came later. The image goes through a CRT filter.
 
-**We presented it on November 24, 2026, with the whole desired scope in the game.** It was the first midterm project of Simulación I.
+For the textures, **we took the buildings of the Universidad Nacional de Hurlingham (UNAHUR) at night as reference**. They are drawn in code on a hidden canvas at startup, with three wall variants. The floor and the ceiling switched to the floor casting from Lode's tutorial, with tiles and panels aligned to the grid, and each light shows as a lamp on the ceiling.
 
-## What we added after the presentation
+<Figure
+  src={enemy}
+  alt="A mutant with yellow eyes, facing you up close, in a corridor with black louvers on the walls and white panels and a light on the ceiling. The crosshair is on its head and the shotgun is below."
+/>
 
-**On the day of the presentation, our professor asked us for six more changes.** A death animation for the enemies, a blood stain, saving the cell of the stain, seeing whether particles fit, looking up and down with a footstep bob like running, and sound and music.
+## Second presentation of the game, November 24
+
+**We presented it on November 24, 2026, with the whole desired scope in the game.** It was the second midterm of Simulación I. That same day, our professor asked us for six more changes: a death animation for the enemies, a blood stain, saving the cell of the stain, seeing whether particles fit, looking up and down with a footstep bob like running, and sound and music.
+
+**Now each enemy falls where it died and leaves a stain on the floor.** It leaves the game in the frame of the last hit, so it no longer blocks or hits, and what remains is its image: it falls with the five death frames of its sprite, lies for two seconds and fades out. The stain is stored in its cell, in a 16 by 16 array per chunk, like the walls, so it is still there when you come back, and the minimap marks it with a red dot.
 
 **The blood spray is a particle system that uses Euler's method.** Each hit that doesn't kill throws 6 drops, and each death throws 24. In each frame, gravity is added to the velocity and the velocity to the position, both multiplied by deltaTime, which works as the step. The drops leave no stain: the stain comes from the cell where the enemy died.
 
@@ -136,9 +130,11 @@ Alejo and I shaped the game step by step, with feedback from our professor, Facu
   alt="A blood stain on the floor tiles, in a corridor with black louvers on the walls and panels on the ceiling. KILLS 2 / 3 is in the upper left."
 />
 
-**To look up and down, the horizon moves and the walls stay vertical.** We did it with the pitch from the floor casting part of Lode's tutorial, a technique called y-shearing. Past a small angle you can tell the image slides, which is why the look stops at about 17 degrees. Each step lowers the eye when the foot lands and shifts the camera toward the supporting foot, and the shotgun sways with them. The shot follows the height of the crosshair: if you aim above an enemy, the projectile goes past it.
+**To look up and down, the horizon moves and the walls stay vertical.** In the first midterm, with the demo, we had shown it as one of the limits Wolfenstein 3D accepted in exchange for speed. We solved it with the pitch from the floor casting part of Lode's tutorial, a technique called y-shearing. Past a small angle you can tell the image slides, which is why the look stops at about 17 degrees. Each step lowers the eye when the foot lands and shifts the camera toward the supporting foot, and the shotgun sways with them. The shot follows the height of the crosshair: if you aim above an enemy, the projectile goes past it. The vertical look and the bob can be turned off in the admin panel to go back to the classic raycasting view.
 
-**The sounds and the music are CC0 and embedded in the game.** They come from OpenGameArt and Kenney, and each effect was trimmed and normalized to the same loudness. They go in as data URIs, like the sprites, because the game opens with a double click, without a server, and the browser does not let it load files from the disk. The stereo pan of each enemy comes from the dot product between the direction toward it and the plane vector, which points to the player's right: 1 on the right, 0 ahead and -1 on the left.
+**The sounds and the music are CC0 and embedded in the game.** An industrial track plays in the menu and a metal one during the game. They come from OpenGameArt and Kenney, and each effect was trimmed and normalized to the same loudness. They go in as data URIs, like the sprites, because the game opens with a double click, without a server, and the browser does not let it load files from the disk. Enemy sounds come from the side where they are: the stereo pan comes from the dot product between the direction toward the enemy and the plane vector, which points to your right, and the volume drops with distance.
+
+**We showed all these changes at the final presentation, on Tuesday, December 1.**
 
 ## Credits
 

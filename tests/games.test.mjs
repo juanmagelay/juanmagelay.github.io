@@ -147,8 +147,29 @@ function gameParts(html) {
 // Keys with a name, such as Space, are named in each language. The rest are the same keys. Issue #19 adds the mouse.
 const KEY_NAMES = {
   en: {},
-  es: { Espacio: 'Space', 'Clic derecho': 'Right click', 'Rueda del mouse': 'Mouse wheel', Clic: 'Click' },
-  pt: { Espaço: 'Space', 'Clique direito': 'Right click', 'Roda do mouse': 'Mouse wheel', Clique: 'Click' },
+  es: {
+    Espacio: 'Space',
+    'Clic derecho': 'Right click',
+    'Rueda del mouse': 'Mouse wheel',
+    Clic: 'Click',
+    // Issue #20: the keys of Hurlinstein3D.
+    'W / Flecha arriba': 'W / Up',
+    'S / Flecha abajo': 'S / Down',
+    'Flechas izquierda / derecha': 'Left / Right',
+    'Espacio / Clic': 'Space / Click',
+    'R / Clic derecho': 'R / Right click',
+  },
+  pt: {
+    Espaço: 'Space',
+    'Clique direito': 'Right click',
+    'Roda do mouse': 'Mouse wheel',
+    Clique: 'Click',
+    'W / Seta para cima': 'W / Up',
+    'S / Seta para baixo': 'S / Down',
+    'Setas esquerda / direita': 'Left / Right',
+    'Espaço / Clique': 'Space / Click',
+    'R / Clique direito': 'R / Right click',
+  },
 };
 const sameKeys = (keys, lang) => keys.map((key) => KEY_NAMES[lang][key] ?? key);
 
@@ -442,7 +463,7 @@ for (const lang of LANGS) {
   // Scenario: las capturas del juego actual acompañan el texto.
   test(`${path}: the screenshots of the current game go along the text, large, with alt text in the page's language`, { skip }, () => {
     const names = bodyFigures(html).map((figure) => stem(attribute(figure.img, 'src')));
-    assert.deepEqual(names, ['promo', 'boss', 'logo', 'enemy', 'corridor', 'admin-panel', 'blood-stain']);
+    assert.deepEqual(names, ['promo', 'boss', 'logo', 'corridor', 'admin-panel', 'enemy', 'blood-stain']);
     for (const name of SCREENSHOTS) {
       const figure = figureOf(html, name);
       assert.ok(attribute(figure.img, 'alt')?.trim(), `${name} has no alt text`);
@@ -451,14 +472,21 @@ for (const lang of LANGS) {
     }
   });
 
-  // Scenario: los controles de la página son los de la pantalla Controls del juego.
-  test(`${path}: the controls are the game's Controls screen, word for word`, { skip }, () => {
+  // Scenario: los controles de la página son los de la pantalla Controls del juego, traducidos en español y portugués.
+  test(`${path}: the controls are the game's Controls screen, ${lang === 'en' ? 'word for word' : 'translated'}`, { skip }, () => {
     const list = pageList(html, '<kbd>');
     const controls = [...list.matchAll(/<li>\s*<kbd>([\s\S]*?)<\/kbd>([\s\S]*?)<\/li>/g)].map(([, key, action]) => [
       stripTags(key),
       stripTags(action).replace(/^:\s*/, ''),
     ]);
-    assert.deepEqual(controls, gameScreen('controls-list').map((item) => item.match(/<span class="key">([\s\S]*?)<\/span>([\s\S]*)/).slice(1).map(stripTags)));
+    const game = gameScreen('controls-list').map((item) => item.match(/<span class="key">([\s\S]*?)<\/span>([\s\S]*)/).slice(1).map(stripTags));
+    assert.deepEqual(sameKeys(controls.map(([key]) => key), lang), game.map(([key]) => key), 'Different keys');
+    if (lang === 'en') {
+      assert.deepEqual(controls.map(([, action]) => action), game.map(([, action]) => action));
+    } else {
+      const untranslated = controls.filter(([, action], index) => action === game[index][1]).map(([key]) => key);
+      assert.deepEqual(untranslated, [], 'Actions not translated');
+    }
   });
 
   // Scenario: los créditos de la página son los de la pantalla Credits del juego.
