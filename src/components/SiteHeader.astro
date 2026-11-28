@@ -9,11 +9,13 @@ const lang = langFromPath(path);
 const t = ui[lang];
 const cv = cvFor(lang);
 
-// Menu items. Add Work and About here once those pages exist.
+// Menu items. Add About here once that page exists. Case studies go first: they are the portfolio's main work (#21).
 // `within` lists the paths of the pages that belong to the item's section, such as posts in Writing.
+const caseStudies = localizePath('/case-studies/', lang);
 const writing = localizePath('/writing/', lang);
 const games = localizePath('/games/', lang);
 const nav = [
+  { label: t.navCaseStudies, href: caseStudies, event: 'nav-case-studies', within: [caseStudies] },
   { label: t.navWriting, href: writing, event: 'nav-writing', within: [writing] },
   { label: t.navGames, href: games, event: 'nav-games', within: [games] },
   { label: t.navContact, href: '#contact', event: 'nav-contact' },
@@ -82,9 +84,11 @@ const current = (item: (typeof nav)[number]) => {
     list-style: none;
   }
 
+  /* A label never breaks inside: "Casos de estudio" stays on one line. */
   .site-nav a {
     font-size: var(--type-size-sm);
     text-decoration: none;
+    white-space: nowrap;
   }
 
   .site-nav a[aria-current] {
@@ -96,8 +100,9 @@ const current = (item: (typeof nav)[number]) => {
     margin-left: calc(var(--space-3) - var(--space-8));
   }
 
-  /* Below 768px: name and CV on top, menu and languages underneath. */
-  @media (width < 48rem) {
+  /* Below 1024px: name and CV on top, menu and languages underneath. With four menu items, one row needs about
+     950px in Spanish, the longest language (#21); it was 768px with three. */
+  @media (width < 64rem) {
     .site-header-inner {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -124,7 +129,7 @@ const current = (item: (typeof nav)[number]) => {
       margin-left: 0;
     }
 
-    /* With three items, the menu goes to a second line when it doesn't fit beside the languages. */
+    /* The menu goes to a second line when it doesn't fit beside the languages. */
     .site-nav {
       flex-wrap: wrap;
       gap: 0 var(--space-4);

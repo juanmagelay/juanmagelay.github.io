@@ -549,7 +549,8 @@ for (const lang of LANGS) {
   test(`${path}: the grid has three cards per row with the last row centered from 640px, one column below`, { skip }, () => {
     const css = pageCss(html);
     assert.match(css, /@media\s*\(width\s*>=\s*40rem\)\s*\{[^@]*\.figure-grid[^{]*\{[^}]*grid-template-columns:\s*repeat\(6,/);
-    assert.match(css, /\.figure-grid[^{]*img:nth-child\(3n\s*\+\s*1\):nth-last-child\(2\)[^{]*\{[^}]*grid-column:\s*2\s*\/\s*span\s*2/);
+    // The grid's items are the links that open each card enlarged (#21), so the rule targets them, not the images.
+    assert.match(css, /\.figure-grid[^{]*:nth-child\(3n\s*\+\s*1\):nth-last-child\(2\)[^{]*\{[^}]*grid-column:\s*2\s*\/\s*span\s*2/);
     assert.doesNotMatch(css.replace(/@media[^{]*\{(?:[^{}]*\{[^}]*\})*[^{}]*\}/g, ''), /\.figure-grid[^{]*\{[^}]*grid-template-columns/, 'The grid has columns outside the media query');
   });
 }

@@ -6,6 +6,8 @@ import PageHead from '../../../components/PageHead.astro';
 import Figure from '../../../components/Figure.astro';
 import Button from '../../../components/Button.astro';
 import GameStage from '../../../components/GameStage.astro';
+import Zoomable from '../../../components/Zoomable.astro';
+import Lightbox from '../../../components/Lightbox.astro';
 import OpenInNewIcon from '../../../assets/icons/open_in_new.svg';
 import { getGames, type Game } from '../../../lib/games';
 import { LANGS, langParam, ui } from '../../../i18n.mjs';
@@ -73,14 +75,16 @@ const iconWidths = data.icon ? [...new Set([112, 224, 448].map((width) => Math.m
       {
         data.icon && (
           <Fragment slot="aside">
-            <Image
-              class="game-icon"
-              src={data.icon}
-              alt={data.iconAlt ?? ''}
-              widths={iconWidths}
-              sizes="(min-width: 56rem) 14rem, 7rem"
-              loading="eager"
-            />
+            <Zoomable src={data.icon}>
+              <Image
+                class="game-icon"
+                src={data.icon}
+                alt={data.iconAlt ?? ''}
+                widths={iconWidths}
+                sizes="(min-width: 56rem) 14rem, 7rem"
+                loading="eager"
+              />
+            </Zoomable>
           </Fragment>
         )
       }
@@ -93,6 +97,7 @@ const iconWidths = data.icon ? [...new Set([112, 224, 448].map((width) => Math.m
       </div>
     </div>
   </article>
+  <Lightbox />
 </BaseLayout>
 
 <style>

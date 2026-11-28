@@ -71,11 +71,22 @@ export function cvFor(lang) {
   return { ...CVS[language], language };
 }
 
+// The tags a case study can carry, in the order they are listed. Each language names them in ui.tags. Issue #21.
+export const CASE_STUDY_TAGS = /** @type {const} */ ([
+  'game-ux-design',
+  'product-design',
+  'ux-research',
+  'marketing-analytics',
+  'product-strategy',
+  'game-design',
+]);
+
 // Interface copy. Post text lives in src/content/writing/ (the original) and its es/ and pt/ folders.
 export const ui = {
   en: {
     skipLink: 'Skip to content',
     navLabel: 'Main',
+    navCaseStudies: 'Case studies',
     navWriting: 'Writing',
     navGames: 'Games',
     navContact: 'Contact',
@@ -96,6 +107,24 @@ export const ui = {
     types: { playable: 'Playable game', analysis: 'Game UX analysis', academic: 'Academic project', personal: 'Personal project' },
     meta: { type: 'Type', context: 'Context', published: 'Published', readingTime: 'Reading time' },
     aboutGame: 'About the game',
+    // The /case-studies/ list and the tags of each case. Issue #21.
+    caseStudiesTitle: 'Case studies',
+    caseStudiesIntro: "Projects I've worked on, from the problem to the result.",
+    tagsLabel: 'Topics',
+    // Read after the label of a link that opens in a new tab, for screen readers only.
+    opensInNewTab: '(opens in a new tab)',
+    // The image viewer (Lightbox.astro): read after an image that opens enlarged, its close button and its name.
+    enlargeImage: 'Enlarge image',
+    closeImage: 'Close',
+    enlargedImage: 'Enlarged image',
+    tags: {
+      'game-ux-design': 'Game UX design',
+      'product-design': 'Product design',
+      'ux-research': 'UX research',
+      'marketing-analytics': 'Marketing analytics',
+      'product-strategy': 'Product strategy',
+      'game-design': 'Game design',
+    },
     gamesTitle: 'Games',
     gamesIntro: "Games I've made and how each one works.",
     // The Play button of a game page, the notes under it and the hint over the game. Issue #17.
@@ -104,7 +133,7 @@ export const ui = {
     playNeedsKeyboard: 'To play, you need a computer with a keyboard and a mouse or trackpad.',
     playHint: 'Click to capture the mouse, Esc to exit',
     viewCode: 'View the code',
-    game: { name: 'Game', developer: 'Developer', released: 'Released', genre: 'Genre', platform: 'Platform' },
+    game: { name: 'Game', developer: 'Developer', released: 'Released', genre: 'Genre', platform: 'Platform', engine: 'Engine' },
     notFound: {
       title: 'Page not found',
       heading: "This page doesn't exist",
@@ -117,6 +146,8 @@ export const ui = {
   es: {
     skipLink: 'Saltar al contenido',
     navLabel: 'Principal',
+    // Short in the menu so it fits in two lines on a phone; the page title says "Casos de estudio".
+    navCaseStudies: 'Casos',
     navWriting: 'Artículos',
     navGames: 'Juegos',
     navContact: 'Contacto',
@@ -136,6 +167,21 @@ export const ui = {
     types: { playable: 'Juego jugable', analysis: 'Análisis de UX de videojuegos', academic: 'Proyecto académico', personal: 'Proyecto personal' },
     meta: { type: 'Tipo', context: 'Contexto', published: 'Publicado', readingTime: 'Tiempo de lectura' },
     aboutGame: 'Sobre el juego',
+    caseStudiesTitle: 'Casos de estudio',
+    caseStudiesIntro: 'Proyectos en los que trabajé, del problema al resultado.',
+    tagsLabel: 'Temas',
+    opensInNewTab: '(se abre en una pestaña nueva)',
+    enlargeImage: 'Ampliar imagen',
+    closeImage: 'Cerrar',
+    enlargedImage: 'Imagen ampliada',
+    tags: {
+      'game-ux-design': 'Diseño de UX de videojuegos',
+      'product-design': 'Diseño de producto',
+      'ux-research': 'UX research',
+      'marketing-analytics': 'Analítica de marketing',
+      'product-strategy': 'Estrategia de producto',
+      'game-design': 'Game design',
+    },
     gamesTitle: 'Juegos',
     gamesIntro: 'Juegos que hice y cómo funciona cada uno.',
     play: 'Jugar',
@@ -143,7 +189,7 @@ export const ui = {
     playNeedsKeyboard: 'Para jugar necesitás una computadora con teclado y mouse o trackpad.',
     playHint: 'Clic para capturar el mouse, Esc para salir',
     viewCode: 'Ver el código',
-    game: { name: 'Juego', developer: 'Desarrolladora', released: 'Lanzamiento', genre: 'Género', platform: 'Plataforma' },
+    game: { name: 'Juego', developer: 'Desarrolladora', released: 'Lanzamiento', genre: 'Género', platform: 'Plataforma', engine: 'Motor' },
     notFound: {
       title: 'Página no encontrada',
       heading: 'Esta página no existe',
@@ -156,6 +202,7 @@ export const ui = {
   pt: {
     skipLink: 'Pular para o conteúdo',
     navLabel: 'Principal',
+    navCaseStudies: 'Casos',
     navWriting: 'Artigos',
     navGames: 'Jogos',
     navContact: 'Contato',
@@ -175,6 +222,21 @@ export const ui = {
     types: { playable: 'Jogo jogável', analysis: 'Análise de UX de games', academic: 'Projeto acadêmico', personal: 'Projeto pessoal' },
     meta: { type: 'Tipo', context: 'Contexto', published: 'Publicado', readingTime: 'Tempo de leitura' },
     aboutGame: 'Sobre o jogo',
+    caseStudiesTitle: 'Estudos de caso',
+    caseStudiesIntro: 'Projetos em que trabalhei, do problema ao resultado.',
+    tagsLabel: 'Temas',
+    opensInNewTab: '(abre em uma nova aba)',
+    enlargeImage: 'Ampliar imagem',
+    closeImage: 'Fechar',
+    enlargedImage: 'Imagem ampliada',
+    tags: {
+      'game-ux-design': 'Design de UX de games',
+      'product-design': 'Design de produto',
+      'ux-research': 'UX research',
+      'marketing-analytics': 'Análise de marketing',
+      'product-strategy': 'Estratégia de produto',
+      'game-design': 'Game design',
+    },
     gamesTitle: 'Jogos',
     gamesIntro: 'Jogos que fiz e como cada um funciona.',
     play: 'Jogar',
@@ -182,7 +244,7 @@ export const ui = {
     playNeedsKeyboard: 'Para jogar, você precisa de um computador com teclado e mouse ou trackpad.',
     playHint: 'Clique para capturar o mouse, Esc para sair',
     viewCode: 'Ver o código',
-    game: { name: 'Jogo', developer: 'Desenvolvedora', released: 'Lançamento', genre: 'Gênero', platform: 'Plataforma' },
+    game: { name: 'Jogo', developer: 'Desenvolvedora', released: 'Lançamento', genre: 'Gênero', platform: 'Plataforma', engine: 'Motor' },
     notFound: {
       title: 'Página não encontrada',
       heading: 'Esta página não existe',

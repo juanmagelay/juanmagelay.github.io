@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { CASE_STUDY_TAGS } from './i18n.mjs';
 
 // Posts in /writing/: three kinds of work, each with a visible status. The English original of each post.
 // Every post needs at least one <Figure>: the first one is its thumbnail in /writing/ (src/lib/first-figure.mjs).
@@ -96,4 +97,57 @@ const gamesTranslations = defineCollection({
   }),
 });
 
-export const collections = { writing, writingTranslations, games, gamesTranslations };
+// Case studies in /case-studies/: the English original of each case, published at /case-studies/<file name>/.
+// Issue #21. The first <Figure> is the hero and the case's thumbnail in /case-studies/ (src/lib/first-figure.mjs);
+// ogImage is its og:image, usually the same file. `dek` is the subtitle under the title; `description` is the
+// meta description and the text of the case's row. Tags are keys from CASE_STUDY_TAGS; each language names them
+// in src/i18n.mjs (ui.tags).
+const caseStudies = defineCollection({
+  loader: glob({ pattern: '*.{md,mdx}', base: './src/content/case-studies' }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      dek: z.string(),
+      description: z.string(),
+      // The first item of the head's spec list, such as "Materia UNAHUR" over "Planificación de negocios".
+      context: z.object({ label: z.string(), value: z.string() }),
+      tags: z.array(z.enum(CASE_STUDY_TAGS)).min(1),
+      year: z.number(),
+      pubDate: z.coerce.date(),
+      updatedDate: z.coerce.date().optional(),
+      ogImage: image(),
+      credits: z.string().optional(),
+      // The game a case is about, for the fact sheet in the head's right column, as in the game UX analyses.
+      game: z
+        .object({
+          name: z.string(),
+          genre: z.string(),
+          platform: z.string(),
+          engine: z.string(),
+          image: image(),
+          imageAlt: z.string(),
+        })
+        .optional(),
+    }),
+});
+
+// Translations of each case study: src/content/case-studies/<lang>/<same file name>, published at
+// /<lang>/case-studies/<file name>/. They only hold the text. Tags, dates and images come from the original.
+const caseStudiesTranslations = defineCollection({
+  loader: glob({ pattern: '*/*.{md,mdx}', base: './src/content/case-studies' }),
+  schema: z.object({
+    title: z.string(),
+    dek: z.string(),
+    description: z.string(),
+    context: z.object({ label: z.string(), value: z.string() }),
+    credits: z.string().optional(),
+    game: z
+      .object({
+        genre: z.string(),
+        imageAlt: z.string(),
+      })
+      .optional(),
+  }),
+});
+
+export const collections = { writing, writingTranslations, games, gamesTranslations, caseStudies, caseStudiesTranslations };

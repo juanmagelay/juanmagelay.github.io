@@ -1,0 +1,33 @@
+---
+// A highlighted quote in the body of an article, in the accent color and larger than the text, after a 1px line in
+// the accent like any quote of the site. Made for the game's pitch in a case study. It is a <blockquote>, so Medium's
+// import keeps it as a quote. Issue #21.
+interface Props {
+  quote: string;
+}
+
+const { quote } = Astro.props;
+---
+
+<blockquote class="pull-quote"><p>{quote}</p></blockquote>
+
+<style>
+  .pull-quote {
+    margin-block: var(--space-10);
+    padding-left: var(--space-6);
+    border-left: 1px solid var(--color-accent);
+  }
+
+  :global(.prose) > .pull-quote + :global(*) {
+    margin-top: 0;
+  }
+
+  .pull-quote p {
+    color: var(--color-accent);
+    font-family: var(--font-voice);
+    font-size: var(--type-size-h3);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: var(--tracking-card);
+  }
+</style>

@@ -185,7 +185,8 @@ for (const { path, html } of pages) {
 
   test(`${path}: links to pages stay in the page's language, unless they say they don't`, () => {
     const leaks = anchors(html)
-      .filter((link) => link.href.startsWith('/') && !link.href.startsWith('//') && !link.href.startsWith('/cv/'))
+      // Files of the build, such as an image's large version (#21), are not pages and have no language.
+      .filter((link) => link.href.startsWith('/') && !link.href.startsWith('//') && !link.href.startsWith('/cv/') && !link.href.startsWith('/_astro/'))
       .filter((link) => link.hreflang === undefined && langFromPath(link.href) !== lang)
       .map((link) => `${link.label}: ${link.href}`);
     assert.deepEqual(leaks, []);

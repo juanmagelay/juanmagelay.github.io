@@ -4,7 +4,7 @@ Source code of my portfolio site: https://juanmagelay.github.io
 
 ## Status
 
-Pre-launch. A game UX analysis of Warcraft III: Reign of Chaos, in three parts, is live in English, Spanish and Portuguese. Hurlinstein3D, a game from my degree, is playable at /games/hurlinstein3d/. Escape de la Naranja, my horror game on Roblox, has its page at /games/escape-de-la-naranja/. Product case studies are in progress.
+Pre-launch. A game UX analysis of Warcraft III: Reign of Chaos, in three parts, is live in English, Spanish and Portuguese. Hurlinstein3D, a game from my degree, is playable at /games/hurlinstein3d/. Escape de la Naranja, my horror game on Roblox, has its page at /games/escape-de-la-naranja/. The first case study, the business plan for El Diablo y Florentino, is at /case-studies/el-diablo-y-florentino/.
 
 ## My role
 
@@ -45,12 +45,14 @@ src/i18n.mjs               languages (en, es, pt), interface copy and path helpe
 src/content/writing/       posts, one MDX file each, published at /writing/<file name>/
 src/content/writing/es/    Spanish translations, published at /es/writing/<file name>/ (pt/ for Portuguese)
 src/content/games/         game pages, one MDX file each, published at /games/<file name>/ (es/ and pt/ for translations)
-src/pages/[...lang]/       the /writing and /games lists and each post and game page, per language
-src/lib/                   first-figure.mjs: each post's first image for its thumbnail; posts.ts and games.ts: posts and games per language
+src/content/case-studies/  case studies, one MDX file each, published at /case-studies/<file name>/ (es/ and pt/ for translations)
+src/pages/[...lang]/       the /case-studies, /writing and /games lists and each case, post and game page, per language
+src/lib/                   first-figure.mjs: each post's or case's first image for its thumbnail; case-studies.ts, posts.ts and games.ts: cases, posts and games per language
 public/games/<slug>/game/  the copy of each game that runs in the browser, published as it is (see Update a game)
 src/assets/games/          images, optimized at build time
+src/assets/case-studies/   images of each case study, one folder per case, optimized at build time
 src/assets/icons/          icons from Material Symbols Rounded and their license
-src/components/            header, footer, button, page head, spec list, fact sheet, figure, copy email, row list
+src/components/            header, footer, button, page head, spec list, fact sheet, figure, copy email, row list, tag, YouTube video, pull quote, data table, link buttons, image viewer
 src/styles/                design tokens (tokens.css) and global styles
 src/assets/fonts/          font files and their licenses
 design/templates/          design system reference: tokens, components and page templates
@@ -82,5 +84,6 @@ Each game that runs in the browser is a copy of its own repo, made from this rep
 - Code: MIT, see `LICENSE`.
 - Content is not covered by the MIT license: texts, images and the CV are all rights reserved.
 - Warcraft III screenshots and box art belong to Blizzard Entertainment and are shown for analysis.
+- El Diablo y Florentino: the game, its character renders and captures belong to Jonathan Puyol. The deck's icons come from game-icons.net, under CC BY 3.0.
 - Fonts: SIL Open Font License 1.1, see the `OFL.txt` file in each folder of `src/assets/fonts/`.
 - Icons: Material Symbols by Google, Apache License 2.0, see `src/assets/icons/LICENSE.txt`.

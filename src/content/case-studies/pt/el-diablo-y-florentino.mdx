@@ -1,0 +1,261 @@
+---
+# Brazilian Portuguese translation of ../el-diablo-y-florentino.mdx,
+# published at /pt/case-studies/el-diablo-y-florentino/.
+# Only the text goes here: tags, dates and images come from the original. Keep the file name.
+# The campaign names stay in Spanish, as the game uses them, with their translation the first time.
+
+title: 'Você vai investir ou não? O business case de um jogo indie'
+dek: 'Um deck para investidores que contém a pesquisa sobre o jogador, a proposta de valor, o modelo de negócio e o plano de go-to-market de El Diablo y Florentino.'
+description: 'Transformei o conceito de um jogo em um plano pronto para investidores, começando pela pesquisa sobre o jogador e chegando ao ponto de equilíbrio.'
+context:
+  label: 'Disciplina UNAHUR'
+  value: 'Planejamento de Negócios'
+credits: 'Slides recriados com o Gemini a partir do deck original, e a capa a partir de uma captura do protótipo de Jonathan Puyol. Retrato da persona gerado com o Gemini Pro a partir da descrição dela. Ícones do game-icons.net, sob licença CC BY 3.0.'
+game:
+  genre: 'Shooter soulslike de survival horror em terceira pessoa'
+  imageAlt: 'Render de corpo inteiro do personagem do jogo: chapéu de aba larga, um lenço vermelho cobrindo o rosto, ombreiras de couro e metal e um casaco longo bordado, sobre um fundo escuro.'
+---
+
+import Figure from '../../../components/Figure.astro';
+import YouTube from '../../../components/YouTube.astro';
+import PullQuote from '../../../components/PullQuote.astro';
+import DataTable from '../../../components/DataTable.astro';
+import LinkButtons from '../../../components/LinkButtons.astro';
+import cover from '../../../assets/case-studies/el-diablo-y-florentino/cover.jpg';
+import trailerPoster from '../../../assets/case-studies/el-diablo-y-florentino/trailer-poster.jpg';
+import swot from '../../../assets/case-studies/el-diablo-y-florentino/swot.jpg';
+import segment from '../../../assets/case-studies/el-diablo-y-florentino/segment-in-numbers.jpg';
+import persona from '../../../assets/case-studies/el-diablo-y-florentino/persona.jpg';
+import vpc from '../../../assets/case-studies/el-diablo-y-florentino/value-proposition-canvas.jpg';
+import canvas from '../../../assets/case-studies/el-diablo-y-florentino/business-model-canvas.jpg';
+import roadmap from '../../../assets/case-studies/el-diablo-y-florentino/marketing-roadmap.jpg';
+import campaign from '../../../assets/case-studies/el-diablo-y-florentino/campaign-concept.jpg';
+import palette from '../../../assets/case-studies/el-diablo-y-florentino/palette.png';
+import typography from '../../../assets/case-studies/el-diablo-y-florentino/typography.png';
+import components from '../../../assets/case-studies/el-diablo-y-florentino/hud-components-grid.jpg';
+import question from '../../../assets/case-studies/el-diablo-y-florentino/investor-question.jpg';
+
+<Figure
+  src={cover}
+  loading="eager"
+  alt="O título El Diablo y Florentino em grandes maiúsculas com serifa sobre um fundo escuro e desgastado. À direita, o personagem mascarado, de olhos vermelhos brilhantes e chapéu de aba larga, ao lado de um lampião aceso diante de uma catedral gótica à noite."
+/>
+
+## Visão geral
+
+El Diablo y Florentino é um **shooter soulslike de survival horror em terceira pessoa para PC, feito na Unreal Engine**. Ele se inspira na lenda venezuelana de Florentino e o Diabo e na música “Es épico”, de Canserbero.
+
+<PullQuote quote="Você caiu no inferno, e o Diabo quer te convencer de que não há saída. Um shooter soulslike de survival horror em que escapar depende só da sua habilidade e dos seus recursos." />
+
+<YouTube
+  id="FdFRlcLWDwI"
+  title="Trailer de El Diablo y Florentino no YouTube"
+  playLabel="Reproduzir o trailer"
+  poster={trailerPoster}
+  posterAlt="Frame do trailer: o personagem luta contra uma criatura em uma sacada de pedra, com a barra de vida e a munição do HUD nos cantos."
+  caption="Progresso do gameplay do protótipo do jogo na Unreal Engine."
+/>
+
+Na disciplina de Planejamento de Negócios do curso de Desenvolvimento de Jogos e Simulação, na UNAHUR, tínhamos que **transformar o conceito inicial do jogo em um plano que um investidor pudesse avaliar**.
+
+**O cenário é hipotético.** A disciplina pedia que apresentássemos o negócio como se nós três fôssemos um estúdio indie em busca de investimento. Na realidade, o jogo é um projeto pessoal de Jonathan Puyol, que ele está construindo na Unreal. Eu não sou desenvolvedor do jogo.
+
+- **Meu papel:** ideação, pesquisa secundária, persona do jogador, análise de concorrentes, SWOT, framework MDA, Value Proposition Canvas, planos de negócio e de marketing com custos, Gantt e roadmap, além do design completo do deck e do sistema visual.
+- **Equipe:** Jonathan Puyol, Damián Bruque e eu.
+- **Disciplina:** Planejamento de Negócios, curso de Desenvolvimento de Jogos e Simulação, UNAHUR, 2026. Professora: Nahir Acuña.
+- **Duração:** 2 meses, em duas avaliações parciais.
+- **Ferramentas:** FigJam, Claude Desktop, Claude Design, Google Slides, Google Sheets, Google Gemini.
+
+## O desafio
+
+Transformar o conceito de um jogo em **um plano de negócios que se sustente diante de um investidor**, para um estúdio sem orçamento e sem publisher.
+
+**Consegui aplicar meu mindset de Product Design por completo a um jogo indie**: definir o usuário, provar o fit, dimensionar o investimento e definir cenários prováveis.
+
+A entrega foi dividida em duas avaliações parciais:
+
+- **Primeira avaliação:** produto, mercado e jogador.
+- **Segunda avaliação:** modelo de negócio, plano de marketing, custos e roadmap.
+
+## Pesquisa de mercado e do jogador
+
+Os concorrentes mais próximos, Resident Evil Veronica, Silent Hill Townfall e Gears of War: E-Day, são todos lançamentos de 2026 ou 2027. A SWOT colocou na mesa os pontos fracos do estúdio: sem orçamento, uma equipe pequena, funções em aberto e sem publisher. Também encontrou a oportunidade: **jogos de terror se espalham rápido na Twitch e no YouTube**.
+
+<Figure
+  src={swot}
+  alt="Slide da SWOT: quatro painéis, cada um com uma placa gravada com sua letra. Forças e oportunidades em cima, em dourado; fraquezas e ameaças embaixo, em vermelho, com sem financiamento, equipe pequena, funções em aberto, sem publisher, GTA VI, lançamentos próximos e saturação indie."
+  caption="SWOT: sem orçamento e sem publisher, em um gênero que se espalha no streaming."
+/>
+
+Para o jogador, **trabalhei com pesquisa secundária**: o Gamer Motivation Model da Quantic Foundry (mais de 1,25 milhão de jogadores), o Gamer Demographics 2026 da inStreamly e threads do Reddit de comunidades de soulslike.
+
+<Figure
+  src={segment}
+  alt="Slide com sete números em dourado sobre cartões escuros: mediana de idade de 23 anos, 38% do mercado global, 74% de homens na amostra da Quantic Foundry, mais de 420 milhões de jogadores na América Latina, 80% de adultos que estudam ou trabalham, 69% de core gamers e 908 milhões de jogadores de PC no mundo."
+  caption="O segmento em números, segundo a Quantic Foundry e a inStreamly."
+/>
+
+Essa pesquisa virou Diego Ramírez: 23 anos, estudante universitário em Buenos Aires que joga no PC pela Steam. Ele joga sessões de 2 a 5 horas quase todos os dias, compra DLCs e aprende com canais de lore e speedrunners no YouTube. Seu perfil de Bartle é Explorer e Achiever: **ele quer mergulhar no mundo e depois vencê-lo**.
+
+<Figure
+  src={persona}
+  alt="Slide da persona Diego Ramírez: um retrato circular de um homem de cabelo escuro e barba por fazer diante de um PC gamer, seu perfil de Bartle Explorer e Achiever, uma frase sobre dominar o que é difícil, etiquetas demográficas (23 anos, homem, Buenos Aires, estudante universitário, renda média, PC e Steam) e dois segmentos de mercado."
+  caption="Diego Ramírez, construído com evidências da Quantic Foundry, da inStreamly e do Reddit."
+/>
+
+**As dores dele vinham com evidências**, a maioria ligada a uma thread do Reddit:
+
+- Lutas decididas pela sorte, e não pela habilidade.
+- Input lag.
+- Ataques atrasados e grupos de inimigos hiperagressivos.
+- Perder almas ou runas por bugs de física ou plataformas imprecisas.
+
+## Proposta de valor
+
+<Figure
+  src={vpc}
+  alt="Slide do Value Proposition Canvas desenhado como uma moldura e um círculo ornamentados sobre pergaminho. Na moldura, produtos e serviços, aliviadores de dores e criadores de ganhos; no círculo, ganhos, dores e tarefas do cliente. Cada bloco tem rótulos curtos e um selo dourado com quantos tem."
+  caption="Value Proposition Canvas resumido."
+/>
+
+**Para cada dor do jogador, encontramos um aliviador**:
+
+<DataTable
+  caption="Dores do jogador e seus aliviadores"
+  columns={[{ label: 'Dor do jogador' }, { label: 'Aliviador' }]}
+  rows={[
+    ['Lutas decididas pela sorte', 'Padrões de ataque inimigos totalmente legíveis e determinísticos'],
+    ['Input lag', 'Zero input lag e hitboxes precisas, como prioridade de desempenho'],
+    ['Repetir trechos longos para chegar a um chefe', 'Checkpoints e atalhos logo antes de cada arena'],
+  ]}
+/>
+
+A regra por trás: **o jogo pode ser brutal, mas tem que ser justo**. Toda dor que Diego descreveu era sobre perder para o jogo, não para o desafio. O plano de marketing transformou essa regra em um KPI: 85% de avaliações positivas na Steam.
+
+## Modelo de negócio
+
+O Business Model Canvas **contém o segmento do Diego e a proposta de valor**. Os canais e o orçamento saem do plano de marketing que montamos.
+
+<Figure
+  src={canvas}
+  alt="Slide do Business Model Canvas com seus nove blocos numerados: parcerias, atividades e recursos principais, proposta de valor, relacionamento com clientes, canais e segmentos de clientes, com o retrato de Diego Ramírez, e embaixo a estrutura de custos e as fontes de receita com números em dourado."
+  caption="Business Model Canvas: os nove blocos em uma só visão."
+/>
+
+Os números vêm de uma [planilha de 5 abas](https://docs.google.com/spreadsheets/d/1tt_jnGyQ55GKvG5vBzZHoiVbqujkNIk7/edit?usp=sharing&rtpof=true&sd=true) **construída com fórmulas, com verificações cruzadas entre abas**.
+
+<DataTable
+  caption="Os números do plano"
+  columns={[{ label: 'Item' }, { label: 'Valor', align: 'right' }, { label: 'Detalhe', muted: true }]}
+  rows={[
+    ['Desenvolvimento', 'USD 108.592', 'USD 98.720 mais 10% de contingência'],
+    ['Marketing', 'USD 16.317', '15% do desenvolvimento, o piso da faixa de 15 a 30% que a disciplina sugere para um indie médio'],
+    ['Investimento total', 'USD 124.909', 'Desenvolvimento mais marketing'],
+    ['Meta de lançamento', '30.000', 'Wishlists na Steam que, com conversão de 10%, viram 3.000 jogadores'],
+    ['Custo de aquisição de cliente', 'USD 5,44', 'Por jogador'],
+    ['Preço de referência', 'USD 15,50', 'Preço de lista arredondado; o exato é USD 15,54'],
+    ['Líquido por cópia', 'USD 10,88', 'Depois dos 30% da Steam'],
+    ['Receita líquida da primeira leva', 'USD 32.635', 'O que as primeiras 3.000 cópias rendem: o dobro do marketing, um ROI de 100%'],
+  ]}
+/>
+
+<PullQuote quote="O ponto de equilíbrio vem da venda de 11.483 cópias a USD 10,88 líquidos cada uma." />
+
+## Go-to-market
+
+O desenvolvimento vai de janeiro a agosto de 2027, com uma demo no Steam Next Fest de junho. **O lançamento chega no fim de outubro de 2027, junto com o Halloween**, o Steam Scream Fest e a EVA, a feira da indústria de games da Argentina, em Buenos Aires.
+
+<Figure
+  src={roadmap}
+  alt="Slide do roadmap de marketing: uma linha do tempo de janeiro de 2027 a março de 2028 com marcos como a landing page em janeiro, a página na Steam em fevereiro, o Steam Next Fest em junho e o lançamento com a EVA e o Scream Fest em outubro, acima de quatro caixas de custos para o pré-lançamento, o lançamento, o pós-lançamento e o community manager."
+  caption="Do Steam Next Fest em junho a um lançamento no fim de outubro."
+/>
+
+A campanha se chama “No hay salida” (não há saída) porque **é isso que o Diabo quer fazer você acreditar no jogo**, e leva essa promessa às suas três fases:
+
+1. **“Firmá el pacto” (assine o pacto):** uma newsletter que libera o acesso antecipado à demo.
+2. **“El contrapunteo”:** um duelo de speedrun contra o chefe da demo. O nome vem da lenda, em que Florentino e o Diabo se enfrentam em um *contrapunteo*: um duelo de versos improvisados e cantados. Os 10 melhores jogadores aparecem nos créditos do jogo.
+3. **Trailer de lançamento:** com trilha de heavy metal, a música do Diego.
+
+<Figure
+  src={campaign}
+  alt="Slide do público e do conceito da campanha. À esquerda, o público-alvo com o retrato de Diego Ramírez e etiquetas de idade, gênero, plataforma e região. À direita, o conceito “No hay salida” e três estandartes com suas fases: Firmá el pacto, El contrapunteo e No hay salida."
+  caption="“No hay salida”, o conceito da campanha, em suas três fases."
+/>
+
+O primeiro plano de marketing custava USD 26.183. **Eu o reduzi ao piso de 15% do custo de desenvolvimento**, para nos alinharmos ao que um estúdio indie médio está disposto a destinar a esse item. Cortamos uma viagem à Gamescom Latam em São Paulo, anúncios no TikTok e previews pagas com YouTubers.
+
+**Os canais seguem a persona.** A mídia paga vai para o YouTube e o Reddit, onde Diego assiste a gameplays e participa de discussões em fóruns. O apoio dos fãs passa pelo Cafecito e pelo Ko-fi, mas não o incluímos no orçamento: seria um extra.
+
+## Sistema visual
+
+Criei **uma estética de HUD de fantasia sombria a partir das referências da própria equipe**.
+
+Parti do inferno do jogo: **uma base escura e quente que deixa brilhar os olhos vermelhos do personagem**. O texto vai em pergaminho, com alto contraste sobre a fuligem. Os metais marcam a hierarquia: o ouro velho fica para os números que um investidor olha. O vermelho-sangue não passa de 5%, para sempre significar perigo ou vida, como em um HUD.
+
+<Figure
+  src={palette}
+  alt="Folha da paleta do deck: dez quadrados de cor com código, nome e uso, de Hollín #1B1718 a Niebla #6F8594, e abaixo uma barra com as proporções: fuligem e cinza 65%, pergaminho e cinza-claro 20%, metais 10% e vermelho-sangue 5%."
+  caption="Paleta: dez tons, cada um com seu papel e sua proporção de uso."
+/>
+
+<Figure
+  src={typography}
+  alt="Folha tipográfica em duas metades: à esquerda, em positivo, texto claro sobre fuligem; à direita, em negativo, texto escuro sobre pergaminho. Cada uma mostra El Diablo y Florentino em Cinzel Bold grande, um sobretítulo, o valor USD 124.909, uma citação em Crimson Pro Italic e um parágrafo em Crimson Pro Regular, cada um com seu uso."
+  caption="Tipografia: Cinzel e Crimson Pro, em positivo e em negativo."
+/>
+
+**Componentes:** estandartes com ponta, placas gravadas da SWOT, relicários com código de cor, uma mira como marcador, um contador de slides em forma de munição, uma barra de vida para o avanço pelos atos, névoa para fundir as imagens com o fundo e uma caixa de “Objetivo atual” como chamada para ação.
+
+<Figure
+  src={components}
+  alt="Nove cartões de componentes do deck, com nomes em espanhol: estandarte, placa, relicários, retícula, contador HUD, barra de vida, halo, névoa e objetivo atual, cada um com seu desenho e uma linha sobre seu uso."
+  caption="Componentes do HUD."
+/>
+
+**Documentei o sistema em um arquivo markdown e em uma apresentação de exemplo** com vários layouts de slides. Depois, ele nos permitiu escalar para o deck inteiro e para outros assets que precisamos criar na montagem.
+
+## Storytelling do deck
+
+**O deck se divide em quatro atos**: o jogo, o mercado, o jogador e o negócio, com o plano de marketing dentro do Ato IV. Uma barra de vida mostra o avanço.
+
+A primeira avaliação terminou com um teaser. O personagem encara quem assiste, com os olhos vermelhos brilhando, sobre uma única pergunta: “Você vai investir ou não?”. A segunda avaliação abre o Ato IV com a mesma pergunta e **fecha respondendo com os números**. O último slide termina em “Firmá el pacto”, a chamada para ação da campanha.
+
+<Figure
+  src={question}
+  alt="Dois slides lado a lado com uma seta entre eles. Os dois perguntam “¿Vas a invertir o no?” ao lado do personagem mascarado iluminado em vermelho. O primeiro promete os números; o segundo responde com USD 124.909 de investimento, USD 32.635 líquidos das primeiras 3.000 cópias e 11.483 cópias para recuperar tudo, e fecha com Firmá el pacto."
+  caption="A pergunta que abre o Ato IV e o slide que a responde."
+/>
+
+## Como trabalhei com IA
+
+Montei um projeto no Claude Desktop como base de contexto: instruções gerais, decks anteriores, capturas do jogo, o FigJam de ideação e a pesquisa secundária. **Cada rascunho partiu desse contexto, e não de um prompt em branco.**
+
+Com o Claude Desktop e o Claude Design, gerei os primeiros rascunhos dos decks e da planilha de orçamento, incluindo slides feitos com código. **Depois terminei tudo à mão**: mudei o design, editei as planilhas e os números e verifiquei cada valor.
+
+Defini o sistema, o contexto e os critérios. A IA acelerou a produção. **Os retoques manuais finais foram necessários.**
+
+## Resultado
+
+**Tiramos 10 de 10 nas duas avaliações**, a nota máxima.
+
+O que foi entregue: **um deck de 41 slides com fontes e guia de estilo**, e um modelo financeiro de 5 abas com verificações cruzadas.
+
+<LinkButtons
+  primary={{ label: 'Ver o deck', href: 'https://docs.google.com/presentation/d/1WTQvPVHII-DF_kmZJftede-lear4T0SC/edit?usp=sharing&rtpof=true&sd=true', event: 'case-study-deck' }}
+  secondary={{ label: 'Ver o modelo financeiro', href: 'https://docs.google.com/spreadsheets/d/1tt_jnGyQ55GKvG5vBzZHoiVbqujkNIk7/edit?usp=sharing&rtpof=true&sd=true', event: 'case-study-model' }}
+/>
+
+## O que aprendi
+
+- **Os números fazem parte do design.** Um número que não bate com a fonte enfraquece todos os slides ao redor.
+- **Mostre o número que dói.** O slide do ponto de equilíbrio deixou o plano mais crível.
+- **Um sistema permite que vários autores entreguem uma peça só.** Sem ele, a segunda avaliação teria sido três decks grampeados.
+- **Justifique cada decisão sobre o usuário, o mercado e o negócio com a fonte original** (mesmo que secundária). Isso nos fez gerar credibilidade constantemente ao longo da disciplina.
+
+## Créditos
+
+- **Jogo, renders do personagem e capturas de gameplay:** Jonathan Puyol, do protótipo dele na Unreal Engine.
+- **Business Model Canvas:** Damián Bruque.
+- **Disciplina e briefing:** Nahir Acuña, Planejamento de Negócios, UNAHUR.
+- **Pesquisa, estratégia, planos de negócio e de marketing, modelo financeiro, design do deck e sistema visual:** Juan Manuel Gelay.

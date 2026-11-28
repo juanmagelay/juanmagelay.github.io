@@ -1,0 +1,33 @@
+---
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { t } from '../i18n.mjs';
+
+// Wraps an image in a link to its large version, so it can open enlarged. With JavaScript, Lightbox.astro shows it
+// in a dialog over the page, with the caption under it; without it, the link opens the image on its own. The note
+// after the image names the action for screen readers; the image's alt text names the link. Issue #21.
+interface Props {
+  /** The same image the slot shows. */
+  src: ImageMetadata;
+  /** Shown under the enlarged image. */
+  caption?: string;
+  class?: string;
+}
+
+const { src, caption, class: className } = Astro.props;
+// Up to 2400px wide, never upscaled.
+const large = await getImage({ src, width: Math.min(src.width, 2400), format: 'webp', quality: 85 });
+const { enlargeImage } = t(Astro.url.pathname);
+---
+
+<a class:list={['zoomable', className]} href={large.src} data-lightbox data-lightbox-caption={caption}>
+  <slot />
+  <span class="visually-hidden">{enlargeImage}</span>
+</a>
+
+<style>
+  .zoomable {
+    display: block;
+    text-decoration: none;
+  }
+</style>

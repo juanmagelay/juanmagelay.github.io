@@ -1,0 +1,148 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Button from './Button.astro';
+import PlayIcon from '../assets/icons/play_arrow.svg';
+
+// A YouTube video in the body of a page, as a figure with its caption. Before it plays it shows our own poster
+// and a Button, so the page loads nothing from YouTube and the frame looks clean: the embedded player can no
+// longer hide the video's title or the channel's photo. Pressing play swaps in the player from
+// youtube-nocookie.com, which starts on its own and only suggests videos from the same channel. Without
+// JavaScript, the plain player shows instead. Issue #21.
+interface Props {
+  /** The video's ID: the part after youtu.be/ or watch?v=. */
+  id: string;
+  /** Names the player for screen readers, in the page's language. */
+  title: string;
+  /** The label of the play button, in the page's language. */
+  playLabel: string;
+  poster: ImageMetadata;
+  posterAlt: string;
+  caption?: string;
+}
+
+const { id, title, playLabel, poster, posterAlt, caption } = Astro.props;
+const src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`;
+// Up to the width of a large figure (52rem, 832px), at 1x and 2x. Never upscale.
+const widths = [...new Set([480, 832, 1664].map((width) => Math.min(width, poster.width)))];
+---
+
+<figure class="video">
+  <div class="video-frame" data-video={src} data-video-title={title}>
+    <Image class="video-poster" src={poster} alt={posterAlt} widths={widths} sizes="(min-width: 56rem) 832px, 100vw" loading="lazy" />
+    <Button class="video-play" data-video-play>
+      <PlayIcon class="video-play-icon" width="24" height="24" fill="currentColor" aria-hidden="true" />
+      {playLabel}
+    </Button>
+    <noscript>
+      <iframe
+        src={src}
+        title={title}
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </noscript>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<script>
+  // Swap the poster for the player on the first press, and move focus into it.
+  for (const frame of document.querySelectorAll<HTMLElement>('[data-video]')) {
+    frame.querySelector('[data-video-play]')?.addEventListener(
+      'click',
+      () => {
+        const player = document.createElement('iframe');
+        player.src = `${frame.dataset.video}?autoplay=1&rel=0&iv_load_policy=3&playsinline=1`;
+        player.title = frame.dataset.videoTitle ?? '';
+        player.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        player.allowFullscreen = true;
+        player.referrerPolicy = 'strict-origin-when-cross-origin';
+        frame.replaceChildren(player);
+        player.focus();
+      },
+      { once: true }
+    );
+  }
+</script>
+
+<style>
+  /* As wide as a large Figure, in 16:9, with the same border, corners and caption. */
+  .video {
+    width: min(100%, var(--layout-figure));
+    margin-block: var(--space-12);
+  }
+
+  :global(.prose) > .video {
+    max-width: none;
+  }
+
+  :global(.prose) > .video + :global(*) {
+    margin-top: 0;
+  }
+
+  /* Its own stacking context: the poster sits under the button, and the button's ::after covers the frame. */
+  .video-frame {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-media);
+    background: var(--color-surface-dark);
+  }
+
+  .video-frame :global(.video-poster) {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* The play button sits on a dark frame in both themes, so it keeps light on dark. The whole poster presses it. */
+  .video-frame :global(.video-play) {
+    gap: var(--space-1);
+    padding-inline: var(--space-4) var(--space-5);
+    border-color: var(--color-text-on-dark);
+    background: var(--color-text-on-dark);
+    color: var(--color-surface-dark);
+    font-size: var(--type-size-base);
+  }
+
+  .video-frame :global(.video-play::after) {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .video-frame :global(.video-play:hover) {
+    border-color: var(--color-text-on-dark);
+    background: var(--color-text-on-dark);
+    color: var(--color-surface-dark);
+    outline: 2px solid var(--color-text-on-dark);
+    outline-offset: 3px;
+  }
+
+  /* Global: the player that the script adds has no scope attribute, so a scoped rule would never reach it. */
+  .video-frame :global(iframe) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  figcaption {
+    max-width: var(--layout-prose);
+    margin-top: var(--space-3);
+    color: var(--color-text-secondary);
+    font-size: var(--type-size-sm);
+    line-height: 1.5;
+  }
+</style>

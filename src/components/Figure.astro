@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import Zoomable from './Zoomable.astro';
 import { t } from '../i18n.mjs';
 
 interface Props {
@@ -14,10 +15,13 @@ interface Props {
   loading?: 'lazy' | 'eager';
   /** false: no border and no rounded corners, for an image with a transparent background, like a logo. */
   frame?: boolean;
+  /** Opens enlarged when pressed (Zoomable.astro). Off by default for a frameless image: a logo stays as it is. */
+  zoomable?: boolean;
 }
 
-const { src, alt, caption, credit, maxWidth, loading = 'lazy', frame = true } = Astro.props;
+const { src, alt, caption, credit, maxWidth, loading = 'lazy', frame = true, zoomable = frame } = Astro.props;
 const { source } = t(Astro.url.pathname);
+const enlargedCaption = [caption, credit && `${source} ${credit}`].filter(Boolean).join(' ');
 
 // Never upscale: small screenshots stay at their real size.
 const maxDisplay = 832; // matches --layout-figure (52rem)
@@ -28,7 +32,15 @@ const widths = [...new Set([480, displayWidth, Math.min(src.width, displayWidth 
 ---
 
 <figure class:list={['figure', !frame && 'figure-frameless']} style={`--figure-width: ${displayWidth}px`}>
-  <Image src={src} alt={alt} loading={loading} quality={80} widths={widths} sizes={`(min-width: 56rem) ${displayWidth}px, 100vw`} />
+  {
+    zoomable ? (
+      <Zoomable src={src} caption={enlargedCaption || undefined}>
+        <Image src={src} alt={alt} loading={loading} quality={80} widths={widths} sizes={`(min-width: 56rem) ${displayWidth}px, 100vw`} />
+      </Zoomable>
+    ) : (
+      <Image src={src} alt={alt} loading={loading} quality={80} widths={widths} sizes={`(min-width: 56rem) ${displayWidth}px, 100vw`} />
+    )
+  }
   {
     (caption || credit) && (
       <figcaption>

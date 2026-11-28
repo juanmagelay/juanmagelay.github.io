@@ -1,0 +1,136 @@
+---
+import Button from './Button.astro';
+import CloseIcon from '../assets/icons/close.svg';
+import { t } from '../i18n.mjs';
+
+// The image viewer: one dialog per page that shows the image a Zoomable link points to, enlarged over a dark
+// backdrop, with its caption under it. It only opens and closes: no zoom inside and no arrows, it is not a
+// gallery. It closes with the Close button, with Esc and with a press anywhere but the image, and focus goes back
+// to the image that opened it. The image is added when it opens, so the page holds no empty <img>. Issue #21.
+const { closeImage, enlargedImage } = t(Astro.url.pathname);
+---
+
+<dialog class="lightbox" aria-label={enlargedImage} data-lightbox-dialog data-label={enlargedImage}>
+  <Button class="lightbox-close" variant="quiet" data-lightbox-close>
+    <CloseIcon class="lightbox-close-icon" width="24" height="24" fill="currentColor" aria-hidden="true" />
+    {closeImage}
+  </Button>
+  <figure class="lightbox-figure" data-lightbox-figure></figure>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox-dialog]');
+  const figure = dialog?.querySelector('[data-lightbox-figure]');
+  let opener: HTMLElement | null = null;
+
+  if (dialog && figure) {
+    // Open from any Zoomable link, unless the visitor asked for a new tab or window.
+    document.addEventListener('click', (event) => {
+      const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('a[data-lightbox]');
+      if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      const image = document.createElement('img');
+      image.className = 'lightbox-image';
+      image.src = link.href;
+      image.alt = link.querySelector('img')?.alt ?? '';
+      figure.replaceChildren(image);
+      const text = link.dataset.lightboxCaption;
+      if (text) {
+        const caption = document.createElement('figcaption');
+        caption.className = 'lightbox-caption';
+        caption.textContent = text;
+        figure.append(caption);
+      }
+      dialog.setAttribute('aria-label', image.alt || dialog.dataset.label || '');
+      opener = link;
+      dialog.showModal();
+    });
+
+    // Close with the button or a press anywhere but the image and its caption. Esc closes it natively.
+    dialog.addEventListener('click', (event) => {
+      if (!(event.target as Element).closest('.lightbox-image, .lightbox-caption')) dialog.close();
+    });
+
+    dialog.addEventListener('close', () => {
+      figure.replaceChildren();
+      opener?.focus();
+      opener = null;
+    });
+  }
+</script>
+
+<style>
+  /* Full screen over a dark backdrop in both themes, like the video frame: the page's own colors stay behind. */
+  .lightbox {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: var(--space-4) var(--layout-gutter);
+    border: 0;
+    background: transparent;
+    color: var(--color-text-on-dark);
+  }
+
+  .lightbox[open] {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  /* Solid, so the page's text never shows through behind the image. */
+  .lightbox::backdrop {
+    background: var(--color-surface-dark);
+  }
+
+  :global(html:has(.lightbox[open])) {
+    overflow: hidden;
+  }
+
+  .lightbox :global(.lightbox-close) {
+    justify-self: end;
+    gap: var(--space-1);
+    padding-inline: var(--space-3) var(--space-5);
+    border-color: var(--color-border-on-dark);
+    color: var(--color-text-on-dark);
+  }
+
+  .lightbox :global(.lightbox-close:hover) {
+    border-color: var(--color-text-on-dark);
+    color: var(--color-text-on-dark);
+  }
+
+  .lightbox-figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    margin: 0;
+  }
+
+  /* Global: the script adds the image and the caption, so they carry no scope attribute. */
+  /* It shrinks to leave room for the caption; object-fit keeps its proportions. */
+  .lightbox :global(.lightbox-image) {
+    display: block;
+    flex: 0 1 auto;
+    min-height: 0;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: var(--radius-media);
+  }
+
+  .lightbox :global(.lightbox-caption) {
+    flex: none;
+    max-width: var(--layout-prose);
+    margin-top: var(--space-3);
+    color: var(--color-text-secondary-on-dark);
+    font-size: var(--type-size-sm);
+    line-height: 1.5;
+    text-align: center;
+  }
+</style>

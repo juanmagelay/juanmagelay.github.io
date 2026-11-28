@@ -1,0 +1,153 @@
+---
+// A table of figures in the body of an article, from the design system's table (.ai-log in
+// design/templates/styles.css): header in the data font, 1px rules, figures right-aligned and words left-aligned. The first cell of each row names the row. On a narrow screen it scrolls sideways inside a
+// region that takes keyboard focus. Medium's import does not keep tables. Issue #21.
+interface Column {
+  label: string;
+  /** "right" for a column of figures. */
+  align?: 'left' | 'right';
+  /** true for a column that only adds detail, such as notes after a figure: it reads one step back. */
+  muted?: boolean;
+}
+
+interface Props {
+  /** Names the table for screen readers. */
+  caption: string;
+  columns: Column[];
+  rows: string[][];
+}
+
+const { caption, columns, rows } = Astro.props;
+const id = `table-${caption
+  .toLowerCase()
+  .normalize('NFD')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-|-$/g, '')}`;
+const isNumber = (index: number) => columns[index]?.align === 'right';
+const isMuted = (index: number) => columns[index]?.muted === true;
+---
+
+<!-- The explicit roles keep the table a table for screen readers when the layout changes below 640px. -->
+<div class="table-wrap" role="region" aria-labelledby={id} tabindex="0">
+  <table class="data-table" role="table">
+    <caption id={id} class="visually-hidden">{caption}</caption>
+    <thead role="rowgroup">
+      <tr role="row">
+        {
+          columns.map((column, index) => (
+            <th scope="col" role="columnheader" class:list={[isNumber(index) && 'is-number']}>
+              {column.label}
+            </th>
+          ))
+        }
+      </tr>
+    </thead>
+    <tbody role="rowgroup">
+      {
+        rows.map((row) => (
+          <tr role="row">
+            {row.map((cell, index) =>
+              index === 0 ? (
+                <th scope="row" role="rowheader">
+                  {cell}
+                </th>
+              ) : (
+                <td role="cell" class:list={[isNumber(index) && 'is-number', isMuted(index) && 'is-muted']}>
+                  {cell}
+                </td>
+              )
+            )}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  .data-table {
+    width: 100%;
+    min-width: 30rem;
+    border-collapse: collapse;
+    font-size: var(--type-size-sm);
+    line-height: 1.45;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: var(--space-3) var(--space-4) var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .data-table th:last-child,
+  .data-table td:last-child {
+    padding-right: 0;
+  }
+
+  .data-table thead th {
+    color: var(--color-text-secondary);
+    font-family: var(--font-data);
+    font-size: var(--type-size-meta);
+    font-weight: 400;
+  }
+
+  .data-table tbody th {
+    font-weight: 600;
+  }
+
+  /* A column of details reads after the figure, one step back. */
+  .data-table tbody td.is-muted {
+    color: var(--color-text-secondary);
+  }
+
+  /* Right-aligned, so figures line up by their last digit. No tabular figures: in Schibsted Grotesk they widen the
+     thousands separator too ("108 . 592"). */
+  .data-table .is-number {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* Below 640px each row takes two lines: the name and the figure, then the details under them across the width.
+     The column headers stay for screen readers only. */
+  @media (width < 40rem) {
+    .data-table,
+    .data-table tbody {
+      display: block;
+      min-width: 0;
+    }
+
+    .data-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .data-table tbody tr {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: var(--space-4);
+      padding-block: var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .data-table tbody th,
+    .data-table tbody td {
+      padding: 0;
+      border-bottom: 0;
+    }
+
+    .data-table tbody td:not(.is-number) {
+      grid-column: 1 / -1;
+      margin-top: var(--space-1);
+    }
+  }
+</style>

@@ -1,0 +1,49 @@
+---
+import type { ImageMetadata } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHead from '../../../components/PageHead.astro';
+import RowList from '../../../components/RowList.astro';
+import { firstFigure, importPath } from '../../../lib/first-figure.mjs';
+import { getCaseStudies } from '../../../lib/case-studies';
+import { LANGS, langParam, langFromPath, localizePath, ui } from '../../../i18n.mjs';
+
+// /case-studies/, /es/case-studies/ and /pt/case-studies/: every case, newest first, with the same rows as Writing.
+// The thumbnail is the case's first <Figure>, its hero; the label is the year of the project. Issue #21.
+export function getStaticPaths() {
+  return LANGS.map((lang) => ({ params: { lang: langParam(lang) } }));
+}
+
+const lang = langFromPath(Astro.url.pathname);
+const t = ui[lang];
+
+// Every image a case can import, by project path, to turn its first <Figure> into the thumbnail.
+const images = import.meta.glob<ImageMetadata>('/src/assets/**/*.{jpg,jpeg,png,webp,avif,gif}', {
+  eager: true,
+  import: 'default',
+});
+
+const rows = (await getCaseStudies(lang)).map((study) => {
+  const figure = firstFigure(study.entry.body ?? '');
+  return {
+    title: study.data.title,
+    href: localizePath(`/case-studies/${study.slug}/`, lang),
+    text: study.data.description,
+    meta: String(study.data.year),
+    image: figure && study.entry.filePath ? images[importPath(study.entry.filePath, figure.source)] : undefined,
+    imageAlt: figure?.alt,
+  };
+});
+---
+
+<BaseLayout title={t.caseStudiesTitle} description={t.caseStudiesIntro}>
+  <PageHead title={t.caseStudiesTitle} dek={t.caseStudiesIntro} />
+  <div class="container case-studies-list">
+    <RowList items={rows} headingLevel={2} />
+  </div>
+</BaseLayout>
+
+<style>
+  .case-studies-list {
+    padding-bottom: var(--space-16);
+  }
+</style>

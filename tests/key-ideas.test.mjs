@@ -1,4 +1,5 @@
-// Every post shows the short idea of each paragraph in bold, the same way in the three languages. Issue #13.
+// Every post and case study shows the short idea of each paragraph in bold, the same way in the three languages.
+// Issue #13; case studies since #21.
 // Which phrase goes in bold is the PO's call; these checks cover the rules around it. Run npm run build first.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -10,7 +11,18 @@ import { LANGS, localizePath } from '../src/i18n.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const dist = join(root, 'dist');
-const originals = readdirSync(join(root, 'src/content/writing')).filter((name) => /\.mdx?$/.test(name));
+// Posts and case studies (#21) follow the same rules. The site path of each English original.
+const SECTIONS = [
+  ['writing', 'src/content/writing'],
+  ['case-studies', 'src/content/case-studies'],
+];
+const originals = SECTIONS.flatMap(([section, dir]) =>
+  existsSync(join(root, dir))
+    ? readdirSync(join(root, dir))
+        .filter((name) => /\.mdx?$/.test(name))
+        .map((name) => `/${section}/${name.replace(/\.mdx?$/, '')}/`)
+    : []
+);
 
 const MAX_WORDS = 15;
 
@@ -71,8 +83,7 @@ test('the bold rules catch what they are meant to catch', () => {
   assert.equal(stuckBolds('<p>word <strong>bold</strong>, text</p>').length, 0);
 });
 
-for (const name of originals) {
-  const originalPath = `/writing/${name.replace(/\.mdx?$/, '')}/`;
+for (const originalPath of originals) {
   const counts = {};
 
   for (const lang of LANGS) {

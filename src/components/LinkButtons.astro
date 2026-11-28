@@ -1,0 +1,53 @@
+---
+import Button from './Button.astro';
+import OpenInNewIcon from '../assets/icons/open_in_new.svg';
+import { t } from '../i18n.mjs';
+
+// One or two buttons to open outside documents, such as a deck and a spreadsheet, in the body of an article: the
+// first one primary, the second one quiet. They open in a new tab, with the open_in_new icon after the label and a
+// note for screen readers, like the Play button of a game that runs on Roblox. Medium's import keeps them as links.
+// Issue #21.
+interface Link {
+  label: string;
+  href: string;
+  /** The Umami event the click sends. */
+  event?: string;
+}
+
+interface Props {
+  primary: Link;
+  secondary?: Link;
+}
+
+const { primary, secondary } = Astro.props;
+const { opensInNewTab } = t(Astro.url.pathname);
+const links = [
+  { ...primary, variant: 'primary' as const },
+  ...(secondary ? [{ ...secondary, variant: 'quiet' as const }] : []),
+];
+---
+
+<p class="link-buttons">
+  {
+    links.map((link) => (
+      <Button class="link-button" variant={link.variant} href={link.href} target="_blank" rel="noopener noreferrer" data-umami-event={link.event}>
+        {link.label}
+        <OpenInNewIcon class="link-button-icon" width="24" height="24" fill="currentColor" aria-hidden="true" />
+        <span class="visually-hidden">{opensInNewTab}</span>
+      </Button>
+    ))
+  }
+</p>
+
+<style>
+  .link-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .link-buttons :global(.link-button) {
+    gap: var(--space-1);
+    padding-inline: var(--space-5) var(--space-4);
+  }
+</style>

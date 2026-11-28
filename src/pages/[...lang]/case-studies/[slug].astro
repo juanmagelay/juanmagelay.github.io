@@ -1,0 +1,98 @@
+---
+import { render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHead from '../../../components/PageHead.astro';
+import Tag from '../../../components/Tag.astro';
+import FactSheet from '../../../components/FactSheet.astro';
+import Lightbox from '../../../components/Lightbox.astro';
+import { getCaseStudies, type CaseStudy } from '../../../lib/case-studies';
+import { LANGS, langParam, languages, ui } from '../../../i18n.mjs';
+
+// /case-studies/<slug>/ for the original, /es/case-studies/<slug>/ and /pt/case-studies/<slug>/ for each translation.
+// The head shows the title, the subtitle, the context and the tags; the body reads like an article: one centered
+// column, the hero as its first figure, h2 sections, paragraphs, lists and figures with captions, so Medium's import
+// keeps the structure. Each page's canonical points to itself (BaseLayout). Issue #21.
+export async function getStaticPaths() {
+  const paths = await Promise.all(
+    LANGS.map(async (lang) =>
+      (await getCaseStudies(lang)).map((study) => ({
+        params: { lang: langParam(lang), slug: study.slug },
+        props: { study, lang },
+      }))
+    )
+  );
+  return paths.flat();
+}
+
+const { study, lang } = Astro.props as { study: CaseStudy; lang: keyof typeof ui };
+const { Content } = await render(study.entry);
+const data = study.data;
+const t = ui[lang];
+
+const words = (study.entry.body ?? '')
+  .replace(/^import .*$/gm, ' ')
+  .replace(/\{\/\*[\s\S]*?\*\/\}/g, ' ')
+  .replace(/<[^>]+>/g, ' ')
+  .split(/\s+/)
+  .filter(Boolean).length;
+const readingMinutes = Math.max(1, Math.round(words / 230));
+
+const dateFormat = new Intl.DateTimeFormat(languages[lang].locale, { dateStyle: 'long', timeZone: 'UTC' });
+
+const og = await getImage({ src: data.ogImage, width: 1200, format: 'jpeg' });
+
+// The game's facts, in the head's right column like the game UX analyses: its image in the 2:3 frame and a list.
+const gameFacts = data.game && [
+  { label: t.game.name, value: data.game.name },
+  { label: t.game.genre, value: data.game.genre },
+  { label: t.game.platform, value: data.game.platform },
+  { label: t.game.engine, value: data.game.engine },
+];
+
+const meta = [
+  { label: data.context.label, value: data.context.value },
+  { label: t.meta.published, value: dateFormat.format(data.pubDate), datetime: data.pubDate.toISOString() },
+  { label: t.meta.readingTime, value: `${readingMinutes} min` },
+];
+---
+
+<BaseLayout title={data.title} description={data.description} ogImage={og.src} ogType="article" publishedTime={data.pubDate}>
+  <article>
+    <PageHead title={data.title} dek={data.dek} meta={meta}>
+      <Tag class="case-tags" label={t.tagsLabel} items={data.tags.map((tag) => t.tags[tag])} />
+      {gameFacts && <FactSheet slot="aside" label={t.aboutGame} items={gameFacts} image={data.game?.image} imageAlt={data.game?.imageAlt} />}
+    </PageHead>
+
+    <div class="container container-reading article-body">
+      <div class="prose">
+        <Content />
+      </div>
+      {data.credits && <p class="article-credits">{data.credits}</p>}
+    </div>
+  </article>
+  <Lightbox />
+</BaseLayout>
+
+<style>
+  /* Optical alignment: the list moves left by a tag's inner padding and border (0.625rem + 1px, see Tag.astro), so
+     the text of the tags lines up with the spec list above instead of their outline. */
+  :global(.page-head-text) > :global(.case-tags) {
+    max-width: var(--layout-prose);
+    margin-top: var(--space-6);
+    margin-left: calc(-0.625rem - 1px);
+  }
+
+  .article-body {
+    padding-bottom: var(--space-16);
+  }
+
+  .article-credits {
+    max-width: var(--layout-prose);
+    margin: var(--space-16) auto 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: var(--type-size-sm);
+  }
+</style>
